@@ -1,0 +1,72 @@
+hero-badge: Enterprise Software & AI Solutions
+hero-h1: Empowering businesses with <span
+  class="highlight-blue">next-generation</span> <span
+  class="highlight-purple">technology</span>
+hero-description: From AI-powered operations to zero-trust cybersecurity, we
+  deliver cutting-edge software solutions that transforms organizations.
+hero-button-primary: Explore Products
+hero-button-secondary: Learn More
+stat-items:
+  - head: 10+
+    text: Core Products
+  - head: 100+
+    text: Enterprise Clients
+  - head: "6"
+    text: Industry Verticals
+  - head: 24/7
+    text: Support Available
+featured-products-label: Featured Products
+featured-products-title: Built for Tomorrow's Challenges
+featured-products-subtitle: Industry-leading software solutions designed to give
+  your organization a competitive edge in the digital age
+product-cards:
+  - icon: 💼
+    title: Teleworkr
+    description: All-in-one digital office for the booming trend of remote work
+      around the world. Seamless collaboration, communication, and productivity
+      tools.
+  - icon: 🔒
+    title: Reflection Network
+    description: >
+      "Listenless servers" accessible via the network are attack-proof by
+      reflections Revolutionary architecture for maximum security.
+  - icon: 🛡️
+    title: Logincat
+    description: World's first comprehensive Zero Trust based cybersecurity suite
+      powered by AI. Complete protection with intelligent threat detection.
+  - icon: 🚀
+    title: ASB - AI Service Bus
+    description: First and only integration bus for modern API based applications
+      and economy. Seamless connectivity across your ecosystem.
+  - icon: ⚡
+    title: API400
+    description: Fountain of youth for legacy systems particularly for those running
+      on AS/400. Modernize without the pain of full migration.
+  - icon: 🤖
+    title: Monboss
+    description: Monitor and fix AI-Ops issues with the Boss of the next revolution
+      for enterprises. Intelligent automation that learns and adapts.
+about-title: A Bit About Us
+about-description: Founded to address the disparity of software access between
+  small businesses and conglomerates, Tekmonks' vision has been to provide
+  superior software to any size organization. Our focus and dedication has been
+  poured into developing software in every category—from enterprise integration
+  and robotic process automation to AIOPs, unparalleled cybersecurity, and even
+  plug-and-play chatbots. This unwavering passion for development has led to the
+  creation of the amazing products of tomorrow, today.
+verticals-label: Industries We Serve
+verticals-title: Our Verticals
+verticals-subtitle: Transforming industries with tailored technology solutions
+verticals-cards:
+  - icon: 🏛️
+    title: Government
+  - icon: 💰
+    title: Finance
+  - icon: 📡
+    title: Telecom
+  - icon: 🛒
+    title: Retail
+  - icon: ✈️
+    title: Aerospace
+  - icon: 🏥
+    title: Health

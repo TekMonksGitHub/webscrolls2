@@ -1,0 +1,25 @@
+{
+    "hero-badge": "input",
+    "hero-h1": "input",
+    "hero-description": "textarea",
+    "hero-button-primary": "input",
+    "hero-button-secondary": "input",
+
+    "stat-items": "array",
+    "stat-items-schema": {"head": "input", "text": "input"},
+
+    "featured-products-label": "input",
+    "featured-products-title": "input",
+    "featured-products-subtitle": "textarea",
+    "product-cards": "array",
+    "product-cards-schema": {"icon": "input", "title": "input", "description": "textarea"},
+
+    "about-title": "input",
+    "about-description": "textarea",
+
+    "verticals-label": "input",
+    "verticals-title": "input",
+    "verticals-subtitle": "input",
+    "verticals-cards": "array",
+    "verticals-cards-schema": {"icon": "input", "title": "input"}
+}

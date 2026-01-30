@@ -1,0 +1,4 @@
+{
+    "DEBUG_MODE": true,
+    "TEKMONKS_LOGIN_BACKEND": "https://login.tekmonks.com:8443"
+}

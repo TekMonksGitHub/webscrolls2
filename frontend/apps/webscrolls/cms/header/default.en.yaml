@@ -1,0 +1,90 @@
+menu: 
+  Products: 
+    Artificial Intelligence: |
+      |   |   |   |   |
+      |:----------:|:----------:|:----------:|:----------:|
+      |<a href="/products/ai-analytics"><h4>AI Analytics</h4></a> <p>Real-time automated data analysis with focused acuity.</p> | <a href="/products/aipa"><h4>AIPA</h4></a> <p>Complete Robotic Automation Platform for Enterprises.</p> | <a href="/products/monkruls"><h4>Monkruls</h4></a> <p>Powerful lightweight business rules engine.</p> | <a href="/products/neuranet"><h4>Neuranet</h4></a><p>Enterprise AI Neural Networks intelligent, integrated, and easy to use.</p> |
+      |<a href="/products/twinblue"><h4>Twinblue</h4></a> <p>Build AI Agents and Applications quickly with TwinBlue knowledge lake.</p>|
+    Cybersecurity: |
+      |   |   |   |   |
+      |:----------:|:----------:|:----------:|:----------:|
+      |<a href="/products/logincat-360"><h4>LoginCat 360</h4></a><p>World’s first comprehensive Cyber Security suite &AI that is Zero Trust based.</p>| <a href="/products/reflection-network"><h4>Reflection Network</h4></a> <p>“Listenless servers” accessible via the network are attack-proof by reflections.</p> | <a href="/products/cyberwarrior"><h4>Cyberwarrior</h4></a> <p>An AI expert security system for cyber defense designed to combat smart attacks.</p> | <a href="/products/citysafe"><h4>CitySafe</h4></a> <p> To serve and to cyber-protect, CitySafe, is a plug and play cybersecurity AI service.</p> |
+    Enterprise Application Integration and API: |
+      |   |   |   |    | 
+      |:----------:|:----------:|:----------:|:----------:|
+      |<a href="/products/asb"><h4>ASB - API Service Bus</h4></a><p>First & only Integration Bus for API based applications.</p>| <a href="/products/api-400"><h4>API400</h4></a> <p>Fountain of youth for legacy systems such as AS/400.</p> |  <a href="/products/api-boss"><h4>API Boss</h4></a> <p>The world's most powerful and complete API Manager.</p> | <a href="/products/db-magic"><h4>DBMagic</h4></a> <p>A REST Layer for DataBase</p>|
+      | <a href="/products/teleworkr"><h4>TeleWorkr</h4></a><p>All-in-one digital office to address the growth of remote work.</p> | <a href="/products/telescholr"><h4>TeleScholr</h4></a> <p>The only fully integrated digital school platform in the market.</p> | <a href="/products/teledoctr"><h4>TeleDoctr</h4></a> <p>Unified solutions scalable from big to small medical facilities.</p> | <a href="/products/telemeet"><h4>Telemeet</h4></a><p>Bundled videotelephony application built-in to Teleworkr</p> |
+    Monitoring and Response: |
+      |   |   |
+      |:----------:|:----------:|
+      |<a href="/products/monboss"><h4>MonBoss</h4></a><p>An AIOps or Artificial Intelligence for IT Operations is what MonBoss is all about</p>|<a href="/products/cronlord"><h4>Cronlord</h4></a><p>The Lord of automating workloads.</p>
+    Cloud: |
+      |           |          |        | 
+      |:----------:|:----------:|:----------:|
+      | <a href="/products/corby"><h4>Corby</h4></a> <p>3 AI Business Platforms for minimal investment yet zero risk.</p> | <a href="/products/kloudust"><h4>Kloudust</h4></a> <p>Multiple cloud solution providers into one enterprise software. </p> | <a href="/products/xbin"><h4>XBin</h4></a><p>Sharing and management of enterprise content platform.</p> |
+
+  Solutions: 
+    Enterprise Solutions: |
+      Tekmonks is trusted by some of the world's largest companies for building and managing their solutions. 
+      [**Click here to see what we can do for you.**]({{#makeLink}}./article.html?article_path=./solutions/enterprise.md&menu_path=.menus/en{{/makeLink}})
+      |   |   |   |   |   |
+      |:----------:|:----------:|:----------:|:----------:|:----------:|
+      | <a href="/solutions/ibm"><h4>IBM</h4></a><p>Proud of our consultants who are the best in the business of IBM solutions & support.</p>| <a href="/solutions/oracle"><h4>Oracle</h4></a> <p>Glad to assist enterprises requiring DB upgrades or Oracle solution integration.</p> | <a href="/solutions/redhat"><h4>Redhat</h4></a> <p>Our Linux server management services have value to varying servers & environments.</p> | <a href="/solutions/cloud-solutions"><h4>Cloud<br/>Solutions</h4></a> <p>With a wide IT subsections, our solutions are worthy to those serious to be in business.</p> | <a href="/solutions/custom-services"><h4>Custom Services</h4></a> <p>Challenges to your evolving business can be covered by our made-to-measure services.</p> |
+    Artificial Intelligence: |
+      Technological advancements in Artificial Intelligence have kicked off an era which is bringing disruption and ingenuity to every industry.  Tekmonks brings AI services to every organization with products ranging from Cybersecurity to AI Ops and even chatbots. 
+
+      [**Click here to see what we can do for you.**]({{#makeLink}}./article.html?article_path=./solutions/ai.md&menu_path=.menus/en{{/makeLink}})
+    Cybersecurity: |
+      Consistent in bringing innovative software solutions that are the technology foundation of the future, Tekmonks designed and developed smarter cybersecurity solutions to counter smart cyber attacks. 
+
+      [**Click here to see what we can do for you.**]({{#makeLink}}./article.html?article_path=./solutions/cybersecurity.md&menu_path=.menus/en{{/makeLink}})
+
+  Tekmonks Social:
+    Blog: |
+      #Check out our latest blogs
+
+      |   |   |   |   |
+      |:----------:|:----------:|:----------:|:----------:|
+      |<h4 style="color:#444">Unfolding Events</h4> <br/> <a href="/blogs/cloudflare-outage"><p class="blogdescription">Cloudflare Outage</p></a> <a href="/blogs/another-round-of-ransomware"><p class="blogdescription">Another Round of Ransomware</p></a><a href="/blogs/president-bidens-vision-for-more-secure-government-infrastructure"><p class="blogdescription">President Biden’s Vision For More Secure Government Infrastructure</p></a>| <h4 style="color:#444">Innovation</h4> <br/> <a href="/blogs/the-first-complete-virtual-office"><p class="blogdescription">The First Complete Virtual Office</p></a><a href="/blogs/securely-working-from-home"><p class="blogdescription">Securely Working From Home</p></a> | <h4 style="color:#444">Fortify</h4> <br/> <a href="/blogs/logincat-tekmonks-solution-to-emerging-cyber-threats"><p class="blogdescription">LoginCat: Tekmonks’ Solution to Emerging Cyber Threats</p></a> <a href="/blogs/who-phishing-emails-about-covid-19"><p class="blogdescription">WHO Phishing Emails About COVID-19</p></a> <a href="/blogs/covid-19-live-maps-could-download-malware"><p class="blogdescription">COVID-19 Live Maps Could Download Malware</p></a> | <h4 style="color:#444">Breakdown</h4> <br/> <a href="/blogs/what-is-legacy-software"><p class="blogdescription">What is Legacy Software?</p></a><a href="/blogs/top-five-2020-predictions"><p class="blogdescription">Top Five 2020 Predictions</p></a><a href="/blogs/the-impact-of-the-iranian-crisis-on-cybersecurity"><p class="blogdescription">The Impact of The Iranian Crisis on Cybersecurity</p></a>|
+
+      [**See All Blogs**]({{#makeLink}}./mainblog.html?blogs_path=blogpages/mainblog&menu_path=/{{/makeLink}})
+
+  Company: 
+    About Us: |
+      **Tekmonks** is a multinational software company. We are a truly global tech company with offices and clients across the planet, in India, USA, Canada, Japan, UK, Singapore, and Thailand among others.
+
+      <a href="/company/about-us"><b>Click here to learn more About Us</b></a>
+    Patents: |
+      **Tekmonks** is a global innovation leader with a strong focus on cutting-edge technology and original research. Our patented solutions reflect our commitment to engineering excellence and the creation of truly groundbreaking intellectual property that powers real-world impact across industries worldwide.
+
+      <a href="./index.html?.=L2FwcHMvdGVrbW9ua3MvcGF0ZW50cy5odG1sP21lbnVfcGF0aD0ubWVudXMvZW4="><b>Click here to explore our Patent portfolio</b></a>      
+    Join Our Team: |
+      Do you want to work for an organization that is well established in the Asian markets and is currently working on expanding our footprint in North America?
+
+      Are you excited to work with an organization you can grow with? Are you interested in being part of a company that is ACTUALLY ahead of the curve?
+
+      <a href="/company/join-our-team"><b>Explore Our Openings</b></a>
+    Product Library: |
+      # Product Library
+
+      Learn more about our products by checking out our product library.
+
+      <a href="/company/resources"><b>See Product Library</b></a>
+    Licenses: |
+      # Licenses
+
+      Check out our licenses
+
+      <a href="/company/licenses"><b>View Licenses</b></a>
+    Contact Us: |
+      #Contact Us
+
+      [I want to speak to Sales.](mailto:sales@tekmonks.com)
+
+      [I would like to take advantage of the Teleworkr trial period.](mailto:trials@tekmonks.com)
+
+      [I'd like to partner with Tekmonks.](mailto:partners@tekmonks.com)
+
+      [I have a general question.](mailto:info@tekmonks.com)
+
+      <a href="/company/contact-us"><b>See where we're located (and our phone numbers.)</b></a>

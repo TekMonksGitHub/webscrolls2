@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script type="text/javascript" src="./../../js/index.mjs"></script>
+
+<title>{{meta-title}}</title>
+<meta name="description" content="{{meta-description}}">
+<meta name="keywords" content="{{meta-keywords}}">
+<link rel="canonical" href="{{org-url}}">
+<meta name="robots" content="index,follow">
+<meta property="og:type" content="website">
+<meta property="og:title" content="{{og-title}}">
+<meta property="og:description" content="{{og-description}}">
+<meta property="og:url" content="{{org-url}}">
+<meta property="og:site_name" content="{{org-name}}">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "{{org-name}}",
+  "url": "{{org-url}}",
+  "email": "{{org-email}}",
+  "telephone": "{{org-phone}}",
+  "logo": "{{org-logo}}",
+  "description": "{{meta-description}}",
+  "sameAs": {{#org-social}} "{{.}}"{{/org-social}}
+}
+</script>
+
+<style>
+:root{
+  --bg:#0f1724;
+  --card:#0b1220;
+  --muted:#94a3b8;
+  --accent:#00d4ff;
+  --accent-2:#6bffb8;
+  --glass: rgba(255,255,255,0.04);
+  --radius:14px;
+  --max-width:1200px;
+  --gap:24px;
+  --nav-height:72px;
+}
+
+/* Reset & layout */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background:linear-gradient(180deg,var(--bg) 0%, #07101a 100%);
+  color:#E6EEF6;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  overflow-x:hidden;
+  line-height:1.35;
+}
+.container{
+  max-width:var(--max-width);
+  margin:0 auto;
+  padding:40px 28px;
+}
+
+/* Top nav */
+.header{
+  height:var(--nav-height);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  margin-bottom:12px;
+}
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  text-decoration:none;
+  color:inherit;
+}
+.logo{
+  width:44px;height:44px;
+  display:inline-grid;
+  place-items:center;
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  border-radius:10px;
+  flex:0 0 44px;
+  box-shadow:0 6px 20px rgba(3,8,15,.6);
+}
+.brand h4{margin:0;font-size:16px;letter-spacing:0.2px}
+.nav-links{display:flex;gap:18px;align-items:center}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:14px;padding:8px;border-radius:8px}
+.nav-links a.cta{background:linear-gradient(90deg,var(--accent),#7af2d9);color:#032; font-weight:600;padding:10px 14px}
+
+/* Hero */
+.hero{
+  background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border-radius:var(--radius);
+  padding:36px;
+  display:grid;
+  grid-template-columns:1fr 420px;
+  gap:var(--gap);
+  align-items:stretch;
+  box-shadow:0 8px 30px rgba(2,8,20,0.6);
+  overflow:hidden;
+}
+@media (max-width:980px){
+  .hero{grid-template-columns:1fr; padding:28px}
+}
+.hero-left{padding-right:10px}
+.badge{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  background:linear-gradient(90deg, rgba(0,212,255,0.06), rgba(107,255,184,0.04));
+  color:var(--accent-2);
+  padding:8px 12px;border-radius:999px;
+  font-size:13px;font-weight:600;margin-bottom:12px;
+  border:1px solid rgba(255,255,255,0.03)
+}
+h1{
+  margin:0 0 14px 0;
+  font-size:40px;
+  line-height:1.03;
+  letter-spacing:-0.4px;
+  color:linear-gradient(90deg,var(--accent),var(--accent-2));
+}
+h1 .muted{color:var(--accent-2); opacity:0.95}
+.lead{color:var(--muted); margin:0 0 18px; font-size:16px}
+.cta-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px}
+.btn{
+  background:linear-gradient(90deg,var(--accent),#36f6c2);
+  padding:12px 18px;border-radius:12px;color:#032;font-weight:700;border:none;
+  cursor:pointer; font-size:15px;box-shadow:0 8px 30px rgba(6,20,30,0.45)
+}
+.btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--accent-2);font-weight:600}
+
+/* Right card: visual + quick points */
+.hero-right{
+  background:linear-gradient(180deg, rgba(255,255,255,0.015), transparent);
+  border-radius:12px;
+  padding:18px;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  min-height:220px;
+  align-items:stretch;
+  border:1px solid rgba(255,255,255,0.02);
+}
+.visual{
+  flex:1;
+  background:linear-gradient(180deg,#04111b 50%, #02232a 100%);
+  border-radius:10px;
+  padding:14px;
+  display:flex;
+  gap:12px;
+  align-items:center;
+  overflow:hidden;
+  position:relative;
+}
+.visual .svg-art{flex:1; min-height:120px}
+.visual .meta{width:150px; display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+.meta .pill{background:var(--glass); padding:8px 10px;border-radius:10px;color:var(--muted);font-size:13px}
+
+/* Features grid */
+.features{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:16px;
+  margin-top:22px;
+}
+@media (max-width:980px){
+  .features{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:560px){
+  .features{grid-template-columns:1fr}
+}
+.feature{
+  background:linear-gradient(180deg, rgba(255,255,255,0.012), transparent);
+  border-radius:12px;padding:14px;border:1px solid rgba(255,255,255,0.02);
+  display:flex;gap:12px;align-items:flex-start;
+}
+.feature .ic{width:44px;height:44px;flex:0 0 44px;border-radius:10px;display:grid;place-items:center;background:rgba(255,255,255,0.02)}
+.feature h4{margin:0 0 6px 0;font-size:15px}
+.feature p{margin:0;color:var(--muted);font-size:13px}
+
+/* Stats & testimonials */
+.stats-row{display:flex;gap:14px;margin-top:22px}
+@media (max-width:720px){.stats-row{flex-direction:column}}
+.stat{
+  background:linear-gradient(180deg, rgba(255,255,255,0.015), transparent);
+  padding:14px;border-radius:12px;flex:1;border:1px solid rgba(255,255,255,0.02)
+}
+.stat h3{margin:0;font-size:20px;color:var(--accent-2)}
+.stat p{margin:6px 0 0;color:var(--muted);font-size:13px}
+
+/* Testimonials */
+.testimonials{margin-top:22px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:720px){.testimonials{grid-template-columns:1fr}}
+.testimonial{background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.02)}
+.testimonial p{margin:0;color:var(--muted)}
+.testimonial .who{margin-top:10px;font-weight:700;font-size:13px;color:#dbeeff}
+
+/* Footer */
+.footer{
+  margin-top:34px;
+  padding:18px;border-radius:12px;background:transparent;border-top:1px solid rgba(255,255,255,0.02);
+  display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+}
+.contact{color:var(--muted);font-size:14px}
+.small{font-size:13px;color:var(--muted)}
+
+/* Decorative SVG background */
+.hero svg.deco{
+  position:absolute; right:-10%; top:-8%; width:80%; height:180%;
+  opacity:0.12; filter:blur(18px); transform:rotate(-8deg)
+}
+@media (max-width:980px){ .hero svg.deco{display:none} }
+
+/* Prevent horizontal overflow on mobile */
+img,svg{max-width:100%;height:auto}
+
+/* Accessibility focus */
+a:focus, button:focus, input:focus{outline:2px dashed var(--accent-2); outline-offset:3px}
+</style>
+</head>
+<body>
+  <div class="container">
+    <header class="header" role="banner">
+      <a class="brand" href="{{org-url}}">
+        <div class="logo" aria-hidden="true">
+          <!-- compact shield + play icon -->
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+            <defs>
+              <linearGradient id="g1" x1="0" x2="1">
+                <stop offset="0" stop-color="#00d4ff"/>
+                <stop offset="1" stop-color="#6bffb8"/>
+              </linearGradient>
+            </defs>
+            <path d="M12 2c3.6 2 6 1.6 8 2v6c0 6-4 9.5-8 11-4-1.5-8-5-8-11V4c2-.4 4.4 0 8-2z" fill="url(#g1)"/>
+            <path d="M10 9l6 3-6 3V9z" fill="#05232a"/>
+          </svg>
+        </div>
+        <div>
+          <h4>{{org-name}}</h4>
+          <div class="small">{{org-tagline}}</div>
+        </div>
+      </a>
+
+      <nav class="nav-links" role="navigation" aria-label="Primary">
+        <a href="#solutions">Solutions</a>
+        <a href="#security">Security</a>
+        <a href="#accessibility">Accessibility</a>
+        <a class="cta" href="#contact">{{nav-cta}}</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero" aria-label="Hero: {{hero-badge}}">
+        <svg class="deco" viewBox="0 0 800 600" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <linearGradient id="dg" x1="0" x2="1">
+              <stop offset="0" stop-color="#00d4ff"/>
+              <stop offset="1" stop-color="#6bffb8"/>
+            </linearGradient>
+          </defs>
+          <path d="M0 200 C160 100 300 260 480 150 C660 40 820 220 1000 150 L1000 0 L0 0 Z" fill="url(#dg)"/>
+        </svg>
+
+        <div class="hero-left">
+          <div class="badge" aria-hidden="true">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="transform:translateY(1px)"><path d="M12 2L3 7v6c0 5 3.7 9.7 9 11 5.3-1.3 9-6 9-11V7l-9-5z" fill="#00d4ff"/></svg>
+            {{hero-badge}}
+          </div>
+
+          <h1 aria-live="polite">{{{hero-h1}}}</h1>
+
+          <p class="lead">{{hero-sub}}</p>
+
+          <div class="cta-row" role="group" aria-label="Primary actions">
+            <a class="btn" href="{{hero-cta-url}}">{{hero-cta}}</a>
+            <a class="btn ghost" href="{{hero-cta-2-url}}">{{hero-cta-2}}</a>
+          </div>
+
+          <div class="features" id="solutions" aria-label="Core capabilities">
+            {{#feature-items}}
+            <div class="feature">
+              <div class="ic" aria-hidden="true">{{{icon}}}</div>
+              <div>
+                <h4>{{title}}</h4>
+                <p>{{description}}</p>
+              </div>
+            </div>
+            {{/feature-items}}
+          </div>
+
+        </div>
+
+        <aside class="hero-right" aria-label="Demo & highlights">
+          <div class="visual" role="img" aria-label="Secure, accessible video architecture">
+            <div class="svg-art">
+              <!-- Abstract system SVG: nodes + waveform -->
+              <svg viewBox="0 0 400 220" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+                <defs>
+                  <linearGradient id="lg2" x1="0" x2="1">
+                    <stop offset="0" stop-color="#00d4ff"/>
+                    <stop offset="1" stop-color="#6bffb8"/>
+                  </linearGradient>
+                </defs>
+
+                <!-- grid nodes -->
+                <g transform="translate(10,10)" opacity="0.95">
+                  <rect x="0" y="10" rx="8" ry="8" width="110" height="60" fill="#061726"/>
+                  <rect x="140" y="6" rx="8" ry="8" width="110" height="60" fill="#062230"/>
+                  <rect x="70" y="100" rx="8" ry="8" width="140" height="60" fill="#04202a"/>
+                  <g fill="url(#lg2)">
+                    <circle cx="26" cy="40" r="6"/>
+                    <circle cx="260" cy="36" r="6"/>
+                    <circle cx="140" cy="130" r="6"/>
+                  </g>
+
+                  <!-- secure shield -->
+                  <g transform="translate(280,130) scale(0.9)">
+                    <path d="M12 2c2.6 1.4 4.6 1.2 6 1.6v5c0 4.3-2.7 7.3-6 8.4-3.3-1.1-6-4.1-6-8.4V4.6c1.4-.4 3.4-.2 6-2.6z" fill="url(#lg2)"/>
+                    <path d="M10 8l4 2-4 2V8z" fill="#02121a"/>
+                  </g>
+
+                  <!-- waveform -->
+                  <path d="M0 190 C60 150 120 210 180 170 C240 130 300 180 360 160" stroke="url(#lg2)" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.95"/>
+                </g>
+              </svg>
+            </div>
+
+            <div class="meta" aria-hidden="true">
+              <div class="pill">{{meta-highlight-1}}</div>
+              <div class="pill">{{meta-highlight-2}}</div>
+              <div class="pill">{{meta-highlight-3}}</div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:12px;align-items:center;justify-content:space-between">
+            <div>
+              <div class="small">Compliance</div>
+              <strong style="color:var(--accent-2)">{{compliance-brief}}</strong>
+            </div>
+            <div>
+              <a class="btn" href="#contact">{{demo-cta}}</a>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <section class="stats-row" aria-label="Results and impact">
+        {{#stat-items}}
+        <div class="stat">
+          <h3>{{head}}</h3>
+          <p>{{text}}</p>
+        </div>
+        {{/stat-items}}
+      </section>
+
+      <section class="testimonials" aria-label="Customer testimonials">
+        {{#testimonial-items}}
+        <article class="testimonial" role="article">
+          <p>“{{quote}}”</p>
+          <div class="who">{{person}} — <span class="small">{{role}}</span></div>
+        </article>
+        {{/testimonial-items}}
+      </section>
+
+      <section id="contact" style="margin-top:28px;">
+        <div style="display:flex;gap:18px;flex-wrap:wrap;">
+          <form style="flex:1;min-width:280px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.02)" aria-label="Contact form">
+            <h3 style="margin-top:0">{{contact-form-title}}</h3>
+            <label class="small" for="name">{{contact-label-name}}</label><br>
+            <input id="name" name="name" type="text" placeholder="{{contact-placeholder-name}}" style="width:100%;padding:10px;margin:8px 0;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit">
+            <label class="small" for="email">{{contact-label-email}}</label><br>
+            <input id="email" name="email" type="email" placeholder="{{contact-placeholder-email}}" style="width:100%;padding:10px;margin:8px 0;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit">
+            <label class="small" for="message">{{contact-label-message}}</label><br>
+            <textarea id="message" name="message" rows="4" placeholder="{{contact-placeholder-message}}" style="width:100%;padding:10px;margin:8px 0;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit"></textarea>
+            <div style="display:flex;gap:10px;align-items:center">
+              <button class="btn" type="submit">{{contact-submit}}</button>
+              <div class="small">{{contact-privacy}}</div>
+            </div>
+          </form>
+
+          <div style="flex:0 0 320px;min-width:260px;">
+            <div style="background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.02)">
+              <h4 style="margin:0 0 6px 0">Contact</h4>
+              <p class="contact">{{org-email}}<br>{{org-phone}}</p>
+              <p class="small">{{org-address}}</p>
+              <hr style="border:none;border-top:1px solid rgba(255,255,255,0.02);margin:12px 0">
+              <div>
+                <strong>Focused on federal & public sector</strong>
+                <p class="small" style="margin:6px 0 0">{{gov-brief}}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="footer" role="contentinfo">
+      <div>
+        <div style="font-weight:700">{{org-name}}</div>
+        <div class="small">{{footer-tagline}}</div>
+      </div>
+      <div class="small">© {{copyright-year}} {{org-name}} — {{org-disclaimer}}</div>
+    </footer>
+
+  </div>
+</body>
+</html>

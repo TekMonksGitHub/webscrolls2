@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Run inside the monkshu framework -->
+<script type="text/javascript" src="./../js/index.mjs" defer></script>
+<script type="module">if (window.WEBSCROLLS_CONSTANTS) window.post = (await import ("./post.mjs")).post;</script>
+<title>{{i18n.Admin_CreatePost}}</title>
+
+<style>
+body {
+    padding: 1rem 1.5rem;
+    background-color: #424242; 
+    color: #FFFFFF; 
+    font-size: 0.9rem; 
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    font-weight: 200;
+    min-width: 75rem;
+}
+
+div#selectorheaderdiv {
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid #D9D9D9;
+    flex-grow: 1;
+    margin-right: 4rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    min-width: fit-content;
+}
+
+div#buttonsheaderdiv {
+    padding: 0.6rem;
+    border-radius: 0.5rem;
+    border: 1px solid #D9D9D9;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    min-width: fit-content;
+    align-items: center;
+}
+
+div#postselector {
+    padding: 0rem 1.5rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    box-sizing: border-box;
+}
+
+select.header {
+    padding: 0.5rem;
+    border-radius: 0.8rem;
+    width: 7rem;
+    margin: 0rem 0.5em;
+    outline: none;
+    background-color: #D9D9D9;
+}
+
+span.headerinputspan {
+    display: flex;
+    align-items: center;
+}
+input.header {
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    outline: none;
+    border: none;
+    background-color: #D9D9D9;
+    width: 7rem;
+    margin-left: 0.5rem;
+}
+input.headerinputdisabled {
+    background-color: #8F8F8F;
+    pointer-events: none;
+    color: #565656;
+}
+label#postlabel.disabled {color: #8F8F8F;}
+
+span.headerbutton {
+    padding: 0.5rem 2rem;
+    background: #ffffff;
+    border-radius: 0.8rem;
+    color: #424242;
+    font-size: 0.8rem;
+    pointer-events: all;
+    cursor: pointer;
+    background-color: #D9D9D9;
+    font-weight: 400;
+}
+span.headerbuttondelete {
+    background: #de5959;
+    margin-right: 1rem;
+    color: #FFFFFF;
+}
+span.headerbuttondisabledpublish {
+    color: #a5a5a5;
+    pointer-events: none;
+}
+span.headerbuttondisableddelete {
+    color: #a5a5a5;
+    pointer-events: none;
+}
+span#logout {
+    width: 1.5rem; 
+    height: 1.5rem; 
+    margin-left: 0.8rem;
+}
+
+div#postcreator {padding: 1em 1.5em;}
+div.postfields {
+    display: flex;
+    flex-direction: row;
+    padding: 1em 0em;
+    align-items: center;
+}
+span.postfieldname {width: 20em;}
+span.postfieldvalue {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+input.postfieldinput, textarea.postfieldinput {
+    width: calc(100% - 0.9rem);
+    padding: 0.5em;
+    border-radius: 0.5em;
+    border: 0;
+    outline: none;
+    resize: none;
+    background-color: #D9D9D9;
+    font-family: inherit;
+}
+textarea.postfieldinput {height: 8em;}
+div.arrayfields {
+    width: calc(100% - 2px);
+    border: 1px solid #D9D9D9;
+    padding: 0.5rem 1.5rem 1.5rem 1.5rem;
+    box-sizing: border-box;
+    border-radius: 0.8em;
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+span.arrayopbutton {
+    padding: 0.5rem 1.2rem;
+    background-color: #DFDFDF;
+    border-radius: 0.5rem;
+    color: #424242;
+    margin-right: 1rem;
+    cursor: pointer;
+}
+span.arrayopbuttonlabel {margin-right: 2rem;}
+span.arraycarddelete {
+    background-color: #DE5959;
+    padding: 0.3rem 0.5rem;
+    width: fit-content;
+    border-radius: 0.5rem;
+    margin-left: calc(100% - 0.5rem);
+    cursor: pointer;
+}
+
+.displaynone {display: none}
+</style>
+
+</head>
+
+<body>
+<div id="postselector">
+    <div id="selectorheaderdiv">
+        <span>
+        <label for="themeselector">Theme</label>
+        <select name="theme" id="themeselector" class="header" onchange="post.themeselected(this, this.value)">
+            {{#themes}}
+            <option value="{{.}}">{{.}}</option>
+            {{/themes}}
+        </select>
+        </span>
+
+        <span>
+        <label for="posttypes">Post type</label>
+        <select name="posttype" id="posttypes" class="header" onchange="post.posttypeselected(this, this.value)">
+            {{#posttypes}}
+            <option value="{{.}}">{{.}}</option>
+            {{/posttypes}}
+        </select>
+        </span>
+
+        <span>
+        <label for="posts">Create or Edit</label>
+        <select name="posts" id="posts" class="header" onchange="post.postselected(this, this.value)">
+            {{#posts}}
+            <option value="{{.}}">{{.}}</option>
+            {{/posts}}
+        </select>
+        </span>
+
+        <span class="headerinputspan">
+        <label for="postname" id="postlabel">Name</label>
+        <input name="postname" id="postname" class="header"/>
+        </span>
+    </div>
+
+    <div id="buttonsheaderdiv">
+        <span id="deletebutton" class="headerbutton headerbuttondelete headerbuttondisableddelete" onclick="post.deletePost(this)">Delete</span>
+        <span id="publishbutton" class="headerbutton headerbuttondisabledpublish" onclick="post.publishPost(this)">Publish</span>
+        <span id="logout" class="headericon" onclick="post.logout(this)"><img src="./img/logout.svg"/></span>
+    </div>
+</div>
+
+<div id="postcreator">
+    <!-- Post schema based form goes here using the template below -->
+</div>
+
+<!-- Templates follow -->
+<template id="postschemaform">
+    {{=<% %>=}}
+    {{#schema}}
+    <div class="postfields" id="div{{{id}}}">
+        <span class="postfieldname" id="spanname{{{id}}}" data-type="{{{type}}}">{{name}}</span>
+
+        <span class="postfieldvalue" id="spanvalue{{{id}}}">
+        {{^array}}
+        {{^textarea}}<input id="value{{{id}}}" class="postfieldinput"/>{{/textarea}}
+        {{#textarea}}<textarea id="value{{{id}}}" class="postfieldinput"></textarea>{{/textarea}}
+        {{/array}}
+        
+        {{#array}}
+        <span>
+            <span class="arrayopbutton" id="addbutton{{{id}}}" onclick="post.addToArray(this.parentNode.nextElementSibling)">+</span>
+            <span class="arrayopbuttonlabel">Add</span>
+        </span>
+        <div class="arrayfields" id="arrayfields{{{id}}}">
+            <span class="arraycarddelete displaynone" id="deletebutton{{{id}}}" onclick="post.deleteFromArray(this.parentNode)">X</span>
+            {{#schema}}
+            <div class="arraypostfields">
+            <span class="postfieldname" id="spanname{{{id}}}" data-type="{{{type}}}">{{name}}</span>
+
+            <span class="postfieldvalue" id="spanvalue{{{id}}}">
+            {{^textarea}}<input id="value{{{id}}}" class="postfieldinput"/>{{/textarea}}
+            {{#textarea}}<textarea id="value{{{id}}}" class="postfieldinput"></textarea>{{/textarea}}
+            </span>
+            </div>
+            {{/schema}}
+        </div>
+        {{/array}}
+        </span>
+    </div>
+    {{/schema}}
+    <%={{ }}=%>
+</template>
+</body>
+</html>

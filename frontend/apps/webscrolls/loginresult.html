@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Run inside the monkshu framework -->
+<script type="text/javascript" src="./js/index.mjs" defer></script>
+<script type="module"> if (window.WEBSCROLLS_CONSTANTS) {
+	const {tkmlogin} = (await import ("./3p/tkmlogin.mjs"));
+	const {router} = (await import ("/framework/js/router.mjs"));
+	const {loginmanager} = (await import ("./js/loginmanager.mjs")); 
+ 
+    const verifyResponse = await tkmlogin.verify("{{{WEBSCROLLS_CONSTANTS.API_LOGIN}}}?op=verify&x-api-key={{{LOGIN_API_KEY}}}", 
+		router.decodeURL(window.location.href));
+	loginmanager.handleLoginResult(verifyResponse);
+}
+</script>
+<title>{{i18n.Admin_Login}}</title>
+</head>
+</html>

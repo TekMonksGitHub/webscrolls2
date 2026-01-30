@@ -1,0 +1,44 @@
+meta-title: RL without TD learning
+meta-description: RL without TD learning blog
+meta-keywords: "AI ML "
+canonical-url: "1769781961512"
+blog-title: RL without TD learning
+blog-subtitle: "In this post, I’ll introduce a reinforcement learning (RL)
+  algorithm based on an “alternative” paradigm: divide and conquer."
+author-name: AI Author Automated
+author-initials: AAA
+publish-date: 30 Jan 2026
+reading-time: 10 min
+blog-content: >-
+  <p>In this post, I’ll introduce a reinforcement learning (RL) algorithm based
+  on an “alternative” paradigm: divide and conquer. Unlike traditional methods,
+  this algorithm is not based on temporal difference (TD) learning (which has
+  scalability challenges), and scales well to long-horizon tasks. We can do
+  Reinforcement Learning (RL) based on divide and conquer, instead of temporal
+  difference (TD) learning.
+
+  </p>
+
+  <h2>What exactly does word2vec learn?</h2>
+
+  <p>
+
+  What exactly does word2vec learn, and how? Answering this question amounts to
+  understanding representation learning in a minimal yet interesting language
+  modeling task. Despite the fact that word2vec is a well-known precursor to
+  modern language models, for many years, researchers lacked a quantitative and
+  predictive theory describing its learning process. In our new paper, we
+  finally provide such a theory. We prove that there are realistic, practical
+  regimes in which the learning problem reduces to unweighted least-squares
+  matrix factorization. We solve the gradient flow dynamics in closed form; the
+  final learned representations are simply given by PCA. Learning dynamics of
+  word2vec. When trained from small initialization, word2vec learns in discrete,
+  sequential steps. Left: rank-incrementing learning steps in the weight matrix,
+  each decreasing the loss. Right: three time slices of the latent embedding
+  space showing how embedding vectors expand into subspaces of increasing
+  dimension at each learning step, continuing until model capacity is saturated.
+
+  <p>
+tags:
+  - tag: AI
+  - tag: ML

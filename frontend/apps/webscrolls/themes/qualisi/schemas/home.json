@@ -1,0 +1,62 @@
+
+{
+  "meta-title": "input",
+  "meta-description": "textarea",
+  "meta-keywords": "input",
+  "og-title": "input",
+  "og-description": "textarea",
+  "org-name": "input",
+  "org-url": "input",
+  "org-email": "input",
+  "org-phone": "input",
+  "org-logo": "input",
+  "org-tagline": "input",
+  "org-address": "textarea",
+  "org-disclaimer": "input",
+  "org-social": "array",
+  "org-social-schema": {
+    "0": "input"
+  },
+  "nav-cta": "input",
+  "hero-badge": "input",
+  "hero-h1": "textarea",
+  "hero-sub": "textarea",
+  "hero-cta": "input",
+  "hero-cta-url": "input",
+  "hero-cta-2": "input",
+  "hero-cta-2-url": "input",
+  "feature-items": "array",
+  "feature-items-schema": {
+    "icon": "input",
+    "title": "input",
+    "description": "textarea"
+  },
+  "meta-highlight-1": "input",
+  "meta-highlight-2": "input",
+  "meta-highlight-3": "input",
+  "compliance-brief": "input",
+  "demo-cta": "input",
+  "stat-items": "array",
+  "stat-items-schema": {
+    "head": "input",
+    "text": "textarea"
+  },
+  "testimonial-items": "array",
+  "testimonial-items-schema": {
+    "quote": "textarea",
+    "person": "input",
+    "role": "input"
+  },
+  "contact-form-title": "input",
+  "contact-label-name": "input",
+  "contact-placeholder-name": "input",
+  "contact-label-email": "input",
+  "contact-placeholder-email": "input",
+  "contact-label-message": "input",
+  "contact-placeholder-message": "input",
+  "contact-submit": "input",
+  "contact-privacy": "input",
+  "gov-brief": "textarea",
+  "footer-tagline": "input",
+  "copyright-year": "input"
+}

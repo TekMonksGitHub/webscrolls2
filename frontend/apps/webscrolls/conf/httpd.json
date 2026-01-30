@@ -1,0 +1,37 @@
+{
+    "extensions": [
+        "redirect",
+        "httpverbs"
+    ],
+    "redirects": [
+        {
+            "^http(.*)://([^/]+?)/index.html$": "http{{{$1}}}://{{{$2}}}/apps/{{{app}}}/index.html"
+        },
+        {
+            "^http(.*)://([^/]+?)/$": "http{{{$1}}}://{{{$2}}}/apps/{{{app}}}/index.html"
+        },
+        {
+            "^http(.*)://([^/]+?)$": "http{{{$1}}}://{{{$2}}}/apps/{{{app}}}/index.html"
+        }
+    ],
+    "diskCache": {
+        "refresh": 10000,
+        "dontCache": [
+            ".*\\.pdf"
+        ],
+        "maxSizeInMB": "1024",
+        "ignoreAfterMaxHits": 10
+    },
+    "httpdHeaders": {
+        "Cache-Control": "no-cache",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Headers": "*",
+        "Access-Control-Allow-Methods": "HEAD,GET",
+        "Service-Worker-Allowed": "/"
+    },
+    "host": "{{{hostname}}}",
+    "ssl": true,
+    "sslKeyFile": "/Users/rvkapoor/Documents/Programs/source/etc/dnsip_privkey.pem",
+    "sslCertFile": "/Users/rvkapoor/Documents/Programs/source/etc/dnsip_fullchain.pem",
+    "port": 443
+}

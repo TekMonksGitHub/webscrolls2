@@ -1,0 +1,18 @@
+
+{
+  "meta-title": "input",
+  "meta-description": "textarea",
+  "meta-keywords": "input",
+  "canonical-url": "input",
+  "blog-title": "input",
+  "blog-subtitle": "input",
+  "author-name": "input",
+  "author-initials": "input",
+  "publish-date": "input",
+  "reading-time": "input",
+  "blog-content": "textarea",
+  "tags": "array",
+  "tags-schema": {
+    "tag": "input"
+  }
+}

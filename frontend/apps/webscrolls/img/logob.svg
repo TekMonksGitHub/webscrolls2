@@ -1,0 +1,133 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300">
+  <defs>
+    <linearGradient id="websiteGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#f0f9ff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#dbeafe;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="aiGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#06b6d4;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="codeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#22d3ee;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#a78bfa;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- AI Brain/Neural Network -->
+  <g transform="translate(80, 150)">
+    <!-- Outer glow -->
+    <circle cx="0" cy="0" r="70" fill="url(#aiGradient)" opacity="0.1">
+      <animate attributeName="r" values="70;75;70" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    
+    <!-- Neural network structure -->
+    <!-- Input layer -->
+    <circle cx="-40" cy="-25" r="6" fill="#06b6d4"/>
+    <circle cx="-40" cy="0" r="6" fill="#06b6d4"/>
+    <circle cx="-40" cy="25" r="6" fill="#06b6d4"/>
+    
+    <!-- Hidden layer 1 -->
+    <circle cx="-10" cy="-30" r="7" fill="#3b82f6"/>
+    <circle cx="-10" cy="-10" r="7" fill="#3b82f6"/>
+    <circle cx="-10" cy="10" r="7" fill="#3b82f6"/>
+    <circle cx="-10" cy="30" r="7" fill="#3b82f6"/>
+    
+    <!-- Hidden layer 2 -->
+    <circle cx="20" cy="-20" r="7" fill="#6366f1"/>
+    <circle cx="20" cy="0" r="7" fill="#6366f1"/>
+    <circle cx="20" cy="20" r="7" fill="#6366f1"/>
+    
+    <!-- Output layer -->
+    <circle cx="45" cy="-10" r="6" fill="#8b5cf6"/>
+    <circle cx="45" cy="10" r="6" fill="#8b5cf6"/>
+    
+    <!-- Connections -->
+    <line x1="-40" y1="-25" x2="-10" y2="-30" stroke="#06b6d4" stroke-width="1.5" opacity="0.3"/>
+    <line x1="-40" y1="-25" x2="-10" y2="-10" stroke="#06b6d4" stroke-width="1.5" opacity="0.3"/>
+    <line x1="-40" y1="0" x2="-10" y2="-10" stroke="#06b6d4" stroke-width="1.5" opacity="0.3"/>
+    <line x1="-40" y1="0" x2="-10" y2="10" stroke="#06b6d4" stroke-width="1.5" opacity="0.3"/>
+    <line x1="-40" y1="25" x2="-10" y2="10" stroke="#06b6d4" stroke-width="1.5" opacity="0.3"/>
+    <line x1="-40" y1="25" x2="-10" y2="30" stroke="#06b6d4" stroke-width="1.5" opacity="0.3"/>
+    
+    <line x1="-10" y1="-30" x2="20" y2="-20" stroke="#3b82f6" stroke-width="1.5" opacity="0.3"/>
+    <line x1="-10" y1="-10" x2="20" y2="-20" stroke="#3b82f6" stroke-width="1.5" opacity="0.3"/>
+    <line x1="-10" y1="-10" x2="20" y2="0" stroke="#3b82f6" stroke-width="1.5" opacity="0.3"/>
+    <line x1="-10" y1="10" x2="20" y2="0" stroke="#3b82f6" stroke-width="1.5" opacity="0.3"/>
+    <line x1="-10" y1="10" x2="20" y2="20" stroke="#3b82f6" stroke-width="1.5" opacity="0.3"/>
+    <line x1="-10" y1="30" x2="20" y2="20" stroke="#3b82f6" stroke-width="1.5" opacity="0.3"/>
+    
+    <line x1="20" y1="-20" x2="45" y2="-10" stroke="#6366f1" stroke-width="1.5" opacity="0.3"/>
+    <line x1="20" y1="0" x2="45" y2="-10" stroke="#6366f1" stroke-width="1.5" opacity="0.3"/>
+    <line x1="20" y1="0" x2="45" y2="10" stroke="#6366f1" stroke-width="1.5" opacity="0.3"/>
+    <line x1="20" y1="20" x2="45" y2="10" stroke="#6366f1" stroke-width="1.5" opacity="0.3"/>
+    
+    <!-- Pulsing core -->
+    <circle cx="0" cy="0" r="12" fill="#3b82f6" opacity="0.4">
+      <animate attributeName="r" values="12;16;12" dur="2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.4;0.2;0.4" dur="2s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  
+  <!-- Code/Data Stream -->
+  <g transform="translate(200, 150)">
+    <!-- Flowing code particles -->
+    <circle cx="-20" cy="-15" r="3" fill="#22d3ee" opacity="0.8">
+      <animate attributeName="cx" values="-20;60;60" dur="2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;0.8;0" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="-30" cy="0" r="3" fill="#3b82f6" opacity="0.8">
+      <animate attributeName="cx" values="-30;60;60" dur="2.5s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;0.8;0" dur="2.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="-25" cy="15" r="3" fill="#a78bfa" opacity="0.8">
+      <animate attributeName="cx" values="-25;60;60" dur="2.2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;0.8;0" dur="2.2s" repeatCount="indefinite"/>
+    </circle>
+    
+    <!-- Code brackets -->
+    <text x="-30" y="-20" font-family="monospace" font-size="24" fill="url(#codeGradient)" opacity="0.6">&lt;/&gt;</text>
+    <text x="-30" y="25" font-family="monospace" font-size="18" fill="url(#codeGradient)" opacity="0.5">{ }</text>
+  </g>
+  
+  <!-- Website/Browser Being Built -->
+  <g transform="translate(250, 90)">
+    <!-- Browser window -->
+    <rect x="0" y="0" width="140" height="120" rx="8" fill="url(#websiteGradient)" stroke="#38bdf8" stroke-width="3"/>
+    
+    <!-- Browser chrome -->
+    <rect x="0" y="0" width="140" height="22" rx="8" fill="#0ea5e9" opacity="0.25"/>
+    <circle cx="12" cy="11" r="3.5" fill="#f87171"/>
+    <circle cx="25" cy="11" r="3.5" fill="#fbbf24"/>
+    <circle cx="38" cy="11" r="3.5" fill="#4ade80"/>
+    
+    <!-- Website elements being constructed -->
+    <g opacity="0">
+      <rect x="12" y="35" width="80" height="7" rx="2" fill="#0ea5e9" opacity="0.5"/>
+      <animate attributeName="opacity" values="0;1;1" dur="3s" repeatCount="indefinite"/>
+    </g>
+    <g opacity="0">
+      <rect x="12" y="48" width="115" height="5" rx="2" fill="#0ea5e9" opacity="0.3"/>
+      <rect x="12" y="57" width="100" height="5" rx="2" fill="#0ea5e9" opacity="0.3"/>
+      <animate attributeName="opacity" values="0;0;1;1" dur="3s" repeatCount="indefinite"/>
+    </g>
+    <g opacity="0">
+      <rect x="12" y="70" width="55" height="35" rx="4" fill="#0ea5e9" opacity="0.25"/>
+      <rect x="72" y="70" width="55" height="35" rx="4" fill="#0ea5e9" opacity="0.25"/>
+      <animate attributeName="opacity" values="0;0;0;1" dur="3s" repeatCount="indefinite"/>
+    </g>
+    
+    <!-- Building indicator -->
+    <circle cx="70" cy="60" r="15" fill="none" stroke="#22d3ee" stroke-width="2" opacity="0.6">
+      <animate attributeName="stroke-dasharray" values="0,94;94,0;94,0" dur="3s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  
+  <!-- Connection arrow/flow -->
+  <g opacity="0.7">
+    <path d="M 180,150 Q 220,150 245,120" stroke="url(#codeGradient)" stroke-width="3" fill="none" stroke-dasharray="5,5">
+      <animate attributeName="stroke-dashoffset" from="0" to="-100" dur="1.5s" repeatCount="indefinite"/>
+    </path>
+  </g>
+</svg>

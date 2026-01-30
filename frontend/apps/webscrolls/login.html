@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Run inside the monkshu framework -->
+<script type="text/javascript" src="./js/index.mjs" defer></script>
+<script type="module"> if (window.WEBSCROLLS_CONSTANTS) window.tkmlogin = (await import ("./3p/tkmlogin.mjs")).tkmlogin;</script>
+<title>{{i18n.Admin_Login}}</title>
+
+<style>
+body {
+	margin: 0em; padding: 0;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+	background-color: #2b2d2f;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+	min-height: 640px;
+}
+
+a:link {text-decoration:none; color:black;}    /* unvisited link */
+a:visited {text-decoration:none;} /* visited link */
+a:hover {text-decoration:underline;}   /* mouse over link */
+a:active {text-decoration:underline;}  /* selected link */
+
+div#advtextbox{
+    margin-left: 4em;
+    color: #ffffff;
+    text-align: center;
+    width: 40%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+	max-width: 25em;
+}
+div#advtextbox img#logo {width: 100%;}
+div#advtextbox h1 {font-weight: 250;}
+div#advtextbox h2 {font-weight: 250; font-size: medium;}
+div#advtextbox span.button {
+	background-color: #ffffff;
+	border-radius: 1em;
+	padding: 1em;
+	font-size: smaller;
+	margin-top: 3em;
+	cursor: default;
+	width: 8em;
+    color: #4c4c4c;
+}
+
+div#lgbox {
+	background-color: #ffffff;
+	border-radius: 2em;
+	padding: 2em 4em;
+	margin-right: 6em;
+	cursor: default;
+	transition: all 0.3s ease-out;
+}
+div#lgbox:hover {transform: scale(1.02); cursor: pointer;}
+div#lgbox span {
+	width: 100%;
+    display: block;
+    margin-top: 0.5em;
+	text-align: center;
+}
+div#lgbox span.error {color: #b54646}
+div#lgbox img {height: 4em; width: 100%;}
+
+.langbox {
+	position: absolute;
+	top: max(560px, calc(100vh - 40px));
+	right: 40px;
+	color: white;
+	text-align: center;
+	cursor: default;
+}
+.langsel {
+	cursor: pointer;
+	font-size: 11px;
+}
+</style>
+</head>
+
+<body>
+<div id="advtextbox">
+	<img id="logo" src="./img/logob.svg">
+	<h1>{{i18n.logintagline}}</h1>
+	<h2>{{i18n.loginsubtag}}</h2>
+	<span class="button" onclick="window.open('http://tekmonks.com', '_blank')">{{i18n.learn}}</span>
+</div>
+
+<div id="lgbox" onclick='tkmlogin.login("{{{i18n.Title}}}",
+		"{{{WEBSCROLLS_CONSTANTS.LOGINRESULT_HTML}}}", 
+		"{{{WEBSCROLLS_CONSTANTS.API_LOGIN}}}?op=getotk&x-api-key={{{LOGIN_API_KEY}}}", "#2b2d2f", 
+		"{{{WEBSCROLLS_CONSTANTS.TKMLOGINAPP_URL}}}",)'>
+	<img src="./img/tkmlogodark.svg">
+	{{#url._error}}<span class="error">{{i18n.LoginFailed}}</span>{{/url._error}}
+	<span>{{i18n.LoginMsg}}</span>
+</div>
+</body>
+
+</html>

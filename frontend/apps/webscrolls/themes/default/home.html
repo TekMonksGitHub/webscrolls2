@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Run inside the monkshu framework -->
+<script type="text/javascript" src="./../../js/index.mjs"></script>
+<title>Tekmonks - Enterprise AI & Software Solutions</title>
+<style>
+:root {
+	--primary: #1A1A2E;
+	--accent-blue: #4A90E2;
+	--accent-purple: #9B59B6;
+	--accent-pink: #FF6B9D;
+	--accent-orange: #FF8C42;
+	--accent-green: #2ECC71;
+	--accent-cyan: #00D4FF;
+	--text-primary: #1A1A2E;
+	--text-secondary: #6B7280;
+	--background: #F8F9FA;
+	--surface: #FFFFFF;
+	--border: #E5E7EB;
+}
+
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+html {overflow-x: hidden;}
+body {
+	font-family: sans-serif;
+	background: var(--background);
+	color: var(--text-primary);
+	line-height: 1.6;
+	-webkit-font-smoothing: antialiased;
+	max-width: 100vw;
+	overflow-x: hidden
+}
+
+
+/* Hero Section */
+.hero {
+	min-height: 100vh;
+	display: flex;
+	padding: 4rem 2.5rem 4rem;
+	background: linear-gradient(135deg, #F0F4FF 0%, #FFF5F7 50%, #F0FFF4 100%);
+	align-items: top;
+	overflow: hidden;
+}
+
+.hero::before {
+	content: '';
+	position: absolute;
+	width: 37.5rem;
+	height: 37.5rem;
+	background: var(--accent-blue);
+	opacity: 0.05;
+	border-radius: 50%;
+	top: -12.5rem;
+	right: -6.25rem;
+}
+
+.hero::after {
+	content: '';
+	position: absolute;
+	width: 31.25rem;
+	height: 31.25rem;
+	background: var(--accent-pink);
+	opacity: 0.05;
+	border-radius: 50%;
+	bottom: -9.375rem;
+	left: -6.25rem;
+}
+
+.hero-content {
+	max-width: 87.5rem;
+	margin: 0 auto;
+	width: 100%;
+	position: relative;
+	z-index: 1;
+}
+
+.hero-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.625rem 1.25rem;
+	background: var(--surface);
+	border-radius: 6.25rem;
+	font-size: 0.875rem;
+	font-weight: 600;
+	color: var(--accent-blue);
+	margin-bottom: 2rem;
+	box-shadow: 0 0.25rem 1.25rem rgba(74, 144, 226, 0.15);
+}
+
+.badge-dot {
+	width: 0.5rem;
+	height: 0.5rem;
+	background: var(--accent-blue);
+	border-radius: 50%;
+	animation: pulse 2s infinite;
+}
+
+.hero h1 {
+	font-size: clamp(2.5rem, 7vw, 5rem);
+	font-weight: 800;
+	line-height: 1.15;
+	margin-bottom: 1.5rem;
+	letter-spacing: -0.03em;
+	max-width: 56.25rem;
+}
+
+
+.highlight-blue {
+	color: var(--accent-blue);
+}
+
+.highlight-purple {
+	color: var(--accent-purple);
+}
+
+.hero-description {
+	font-size: 1.25rem;
+	color: var(--text-secondary);
+	max-width: 40.6rem;
+	margin-bottom: 2.5rem;
+	line-height: 1.7;
+}
+
+.cta-group {
+	display: flex;
+	gap: 1rem;
+	flex-wrap: wrap;
+}
+
+.btn {
+	padding: 1rem 2rem;
+	font-size: 1rem;
+	font-weight: 600;
+	border: none;
+	border-radius: 0.75rem;
+	cursor: pointer;
+	transition: all 0.3s ease;
+	text-decoration: none;
+	display: inline-block;
+	font-family: sans-serif;
+}
+
+.btn-primary {
+	background: var(--accent-blue);
+	color: white;
+}
+
+.btn-primary:hover {
+	background: #3A7BC8;
+	transform: translateY(-0.125rem);
+	box-shadow: 0 0.625rem 1.563rem rgba(74, 144, 226, 0.25);
+}
+
+.btn-secondary {
+	background: var(--surface);
+	color: var(--text-primary);
+	border: 0.125rem solid var(--border);
+}
+
+.btn-secondary:hover {
+	border-color: var(--accent-blue);
+	color: var(--accent-blue);
+	transform: translateY(-0.125rem);
+}
+
+/* Stats Section */
+.stats {
+	background: var(--surface);
+	padding: 4rem 2.5rem;
+	border-top: 1px solid var(--border);
+	border-bottom: 1px solid var(--border);
+}
+
+.stats-container {
+	max-width: 87.5rem;
+	margin: 0 auto;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(9.375rem, 1fr));
+	gap: 3rem;
+	text-align: center;
+}
+
+.stat-item h3 {
+	font-size: 3rem;
+	font-weight: 800;
+	color: var(--accent-blue);
+	margin-bottom: 0.5rem;
+}
+
+.stat-item p {
+	color: var(--text-secondary);
+	font-weight: 500;
+}
+
+/* Section */
+.section {
+	padding: 6rem 2.5rem;
+	max-width: 87.5rem;
+	margin: 0 auto;
+}
+
+.section-header {
+	text-align: center;
+	margin-bottom: 4rem;
+}
+
+.section-label {
+	display: inline-block;
+	padding: 0.5rem 1rem;
+	background: var(--accent-blue);
+	color: white;
+	font-size: 0.75rem;
+	font-weight: 700;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	border-radius: 0.375rem;
+	margin-bottom: 1.5rem;
+}
+
+.section-title {
+	font-size: clamp(2rem, 5vw, 3.5rem);
+	font-weight: 800;
+	margin-bottom: 1rem;
+	letter-spacing: -0.02em;
+}
+
+.section-subtitle {
+	font-size: 1.25rem;
+	color: var(--text-secondary);
+	max-width: 43.75rem;
+	margin: 0 auto;
+	line-height: 1.7;
+}
+
+/* Products Grid */
+.products-grid {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 2rem;
+}
+
+.product-card {
+	background: var(--surface);
+	border-radius: 1.25rem;
+	padding: 2.5rem;
+	transition: all 0.3s ease;
+	border: 0.125rem solid transparent;
+}
+
+.product-card:hover {
+	transform: translateY(-0.313rem);
+	box-shadow: 0 1.25rem 2.50rem rgba(0, 0, 0, 0.08);
+}
+
+.product-card:nth-child(1) { border-color: var(--accent-blue); }
+.product-card:nth-child(1):hover { box-shadow: 0 1.25rem 2.50rem rgba(74, 144, 226, 0.2); }
+
+.product-card:nth-child(2) { border-color: var(--accent-purple); }
+.product-card:nth-child(2):hover { box-shadow: 0 1.25rem 2.50rem rgba(155, 89, 182, 0.2); }
+
+.product-card:nth-child(3) { border-color: var(--accent-pink); }
+.product-card:nth-child(3):hover { box-shadow: 0 1.25rem 2.50rem rgba(255, 107, 157, 0.2); }
+
+.product-card:nth-child(4) { border-color: var(--accent-orange); }
+.product-card:nth-child(4):hover { box-shadow: 0 1.25rem 2.50rem rgba(255, 140, 66, 0.2); }
+
+.product-card:nth-child(5) { border-color: var(--accent-green); }
+.product-card:nth-child(5):hover { box-shadow: 0 1.25rem 2.50rem rgba(46, 204, 113, 0.2); }
+
+.product-card:nth-child(6) { border-color: var(--accent-cyan); }
+.product-card:nth-child(6):hover { box-shadow: 0 1.25rem 2.50rem rgba(0, 212, 255, 0.2); }
+
+.product-icon {
+	width: 4.375rem;
+	height: 4.375rem;
+	border-radius: 1rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 2rem;
+	margin-bottom: 1.5rem;
+}
+
+.product-card:nth-child(1) .product-icon { background: rgba(74, 144, 226, 0.1); }
+.product-card:nth-child(2) .product-icon { background: rgba(155, 89, 182, 0.1); }
+.product-card:nth-child(3) .product-icon { background: rgba(255, 107, 157, 0.1); }
+.product-card:nth-child(4) .product-icon { background: rgba(255, 140, 66, 0.1); }
+.product-card:nth-child(5) .product-icon { background: rgba(46, 204, 113, 0.1); }
+.product-card:nth-child(6) .product-icon { background: rgba(0, 212, 255, 0.1); }
+
+.product-title {
+	font-size: 1.5rem;
+	font-weight: 700;
+	margin-bottom: 1rem;
+	color: var(--text-primary);
+}
+
+.product-description {
+	color: var(--text-secondary);
+	line-height: 1.7;
+	font-size: 1rem;
+}
+
+/* About Section */
+.about {
+	background: linear-gradient(135deg, #4A90E2 0%, #9B59B6 100%);
+	border-radius: 1.875rem;
+	padding: 5rem;
+	color: white;
+	position: relative;
+	overflow: hidden;
+}
+
+.about::before {
+	content: '';
+	position: absolute;
+	width: 25rem;
+	height: 25rem;
+	background: rgba(255, 255, 255, 0.1);
+	border-radius: 50%;
+	top: -9.375rem;
+	right: -6.25rem;
+}
+
+.about-content {
+	position: relative;
+	z-index: 1;
+	max-width: 56.25rem;
+}
+
+.about h2 {
+	font-size: clamp(2rem, 5vw, 3rem);
+	font-weight: 800;
+	margin-bottom: 1.5rem;
+	letter-spacing: -0.02em;
+}
+
+.about p {
+	font-size: 1.25rem;
+	line-height: 1.8;
+	opacity: 0.95;
+}
+
+/* Verticals Section */
+.verticals-grid {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 1.5rem;
+	margin-top: 3rem;
+}
+
+.vertical-card {
+	background: var(--surface);
+	border-radius: 1rem;
+	padding: 2.5rem 2rem;
+	text-align: center;
+	transition: all 0.3s ease;
+	border: 2px solid var(--border);
+}
+
+.vertical-card:hover {
+	transform: translateY(-0.313rem);
+	border-color: var(--accent-blue);
+	box-shadow: 0 0.938rem 1.875rem rgba(74, 144, 226, 0.15);
+}
+
+.vertical-icon {
+	font-size: 2.5rem;
+	margin-bottom: 1rem;
+}
+
+.vertical-name {
+	font-weight: 600;
+	font-size: 1.1rem;
+	color: var(--text-primary);
+}
+
+/* Footer */
+footer {
+	background: var(--primary);
+	color: rgba(255, 255, 255, 0.8);
+	padding: 5rem 2.5rem 2rem;
+}
+
+.footer-content {
+	max-width: 87.5rem;
+	margin: 0 auto;
+	display: grid;
+	grid-template-columns: 2fr 1fr 1fr 1fr;
+	gap: 3rem;
+	margin-bottom: 3rem;
+}
+
+.footer-brand {
+	grid-column: 1;
+}
+
+.footer-links-container {
+	grid-column: 2 / 5;
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 3rem;
+}
+
+.footer-section h3 {
+	font-size: 1.1rem;
+	font-weight: 700;
+	margin-bottom: 1.5rem;
+	color: white;
+}
+
+.footer-brand p {
+	font-size: 1rem;
+	line-height: 1.7;
+	margin-bottom: 1.5rem;
+}
+
+.footer-section ul {
+	list-style: none;
+}
+
+.footer-section ul li {
+	margin-bottom: 0.75rem;
+}
+
+.footer-section a {
+	color: rgba(255, 255, 255, 0.7);
+	text-decoration: none;
+	font-size: 0.95rem;
+	transition: color 0.3s ease;
+}
+
+.footer-section a:hover {
+	color: var(--accent-cyan);
+}
+
+.social-links {
+	display: flex;
+	gap: 1rem;
+}
+
+.social-link {
+	width: 2.75rem;
+	height: 2.75rem;
+	background: rgba(255, 255, 255, 0.1);
+	border-radius: 0.75rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.3s ease;
+	color: white;
+	text-decoration: none;
+	font-weight: 600;
+	font-size: 0.9rem;
+}
+
+.social-link:hover {
+	background: var(--accent-blue);
+	transform: translateY(-0.188rem);
+}
+
+.footer-bottom {
+	text-align: center;
+	padding-top: 2rem;
+	border-top: 1px solid rgba(255, 255, 255, 0.1);
+	font-size: 0.9rem;
+}
+
+@media (max-width: 900px) {
+.hero {
+	padding: 6rem 1rem 3rem;
+	align-items: center;
+}
+
+.section {padding: 4rem 1rem;}
+
+.about {
+	padding: 3rem 1.5rem;
+	margin: 4rem 1rem;
+}
+
+.stats {padding: 3rem 1rem;}
+
+.stats-container {
+	grid-template-columns: repeat(2, 1fr);
+	gap: 2rem;
+}
+
+.products-grid {
+	grid-template-columns: repeat(2, 1fr);
+	gap: 0.75rem;
+}
+
+.product-card {padding: 1.25rem;}
+
+.product-icon {
+	width: 3.125rem;
+	height: 3.125rem;
+	font-size: 1.5rem;
+	margin-bottom: 1rem;
+}
+
+.product-title {font-size: 1rem;}
+
+.product-description {font-size: 0.8rem;}
+
+.verticals-grid {gap: 0.75rem;}
+
+.vertical-card {padding: 1.5rem 1rem;}
+
+.vertical-icon {font-size: 2rem;}
+
+.vertical-name {font-size: 0.95rem;}
+
+.footer-content {
+	grid-template-columns: 1fr;
+	gap: 2.5rem;
+}
+
+.footer-brand {grid-column: 1;}
+
+.footer-links-container {
+	grid-column: 1;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 1.5rem;
+}
+
+.footer-section h3 {font-size: 0.75rem;}
+
+.footer-section a {font-size: 0.85rem;}
+
+.cta-group {
+	flex-direction: row;
+	justify-content: flex-start;
+	flex-wrap: wrap;
+}
+
+.btn {
+	padding: 0.875rem 1.5rem;
+	font-size: 0.9rem;
+}
+}
+
+</style>
+</head>
+<body>
+
+<!-- Hero Section -->
+<section class="hero">
+<div class="hero-content">
+	<div class="hero-badge">
+		<span class="badge-dot"></span>
+		{{hero-badge}}
+	</div>
+	<h1>
+		{{{hero-h1}}}
+	</h1>
+	<p class="hero-description">{{hero-description}}</p>
+	<div class="cta-group">
+		<a href="#products" class="btn btn-primary">{{hero-button-primary}}</a>
+		<a href="#about" class="btn btn-secondary">{{hero-button-secondary}}</a>
+	</div>
+</div>
+</section>
+
+<!-- Stats Section -->
+<section class="stats">
+<div class="stats-container">
+	{{#stat-items}}
+	<div class="stat-item">
+		<h3>{{head}}</h3>
+		<p>{{text}}</p>
+	</div>
+	{{/stat-items}}
+</div>
+</section>
+
+<!-- Featured Products -->
+<section class="section" id="products">
+<div class="section-header">
+	<div class="section-label">{{featured-products-label}}</div>
+	<h2 class="section-title">{{featured-products-title}}</h2>
+	<p class="section-subtitle">{{featured-products-subtitle}}</p>
+</div>
+
+<div class="products-grid">
+	{{#product-cards}}
+	<div class="product-card">
+		<div class="product-icon">{{icon}}</div>
+		<h3 class="product-title">{{title}}</h3>
+		<p class="product-description">{{description}}</p>
+	</div>
+	{{/product-cards}}
+</div>
+</section>
+
+<!-- About Section -->
+<section class="section" id="about">
+<div class="about">
+	<div class="about-content">
+		<h2>{{about-title}}</h2>
+		<p>{{about-description}}</p>
+	</div>
+</div>
+</section>
+
+<!-- Verticals Section -->
+<section class="section" id="verticals">
+<div class="section-header">
+	<div class="section-label">Industries We Serve</div>
+	<h2 class="section-title">Our Verticals</h2>
+	<p class="section-subtitle">Transforming industries with tailored technology solutions</p>
+</div>
+
+<div class="verticals-grid">
+	{{#verticals-cards}}
+	<div class="vertical-card">
+		<div class="vertical-icon">{{icon}}</div>
+		<div class="vertical-name">{{title}}</div>
+	</div>
+	{{/verticals-cards}}
+</div>
+</section>
+
+<!-- Footer -->
+<footer>
+<div class="footer-content">
+	<div class="footer-section footer-brand">
+		<h3>Tekmonks</h3>
+		<p>
+			Empowering organizations with superior software solutions for the modern age.
+		</p>
+		<div class="social-links">
+			<a href="#" class="social-link">Fb</a>
+			<a href="#" class="social-link">Tw</a>
+			<a href="#" class="social-link">Li</a>
+		</div>
+	</div>
+
+	<div class="footer-links-container">
+		<div class="footer-section">
+			<h3>Information</h3>
+			<ul>
+				<li><a href="#">About Us</a></li>
+				<li><a href="#">Join Our Team</a></li>
+				<li><a href="#">Privacy Policy</a></li>
+			</ul>
+		</div>
+
+		<div class="footer-section">
+			<h3>Discover</h3>
+			<ul>
+				<li><a href="#">Enterprise Software</a></li>
+				<li><a href="#">Enterprise Solutions</a></li>
+				<li><a href="#">Blogs</a></li>
+			</ul>
+		</div>
+
+		<div class="footer-section">
+			<h3>Support</h3>
+			<ul>
+				<li><a href="#">Documentation</a></li>
+				<li><a href="#">Contact Us</a></li>
+				<li><a href="#">Partners</a></li>
+			</ul>
+		</div>
+	</div>
+</div>
+
+<div class="footer-bottom">
+	<p>Copyright 2024, Tekmonks. All Rights Reserved</p>
+</div>
+</footer>
+
+</body>
+</html>
