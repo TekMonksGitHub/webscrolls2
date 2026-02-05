@@ -1,10 +1,11 @@
 {
     "/apps/webscrolls/login" : "/apis/login.js?get=true",
-    "/apps/webscrolls/ai" : "/apis/ai.js",
+    "/apps/webscrolls/ai" : "/apis/ai.js?respondviasse=true",
     "/apps/webscrolls/publish" : "/apis/publish.js",
     "/apps/webscrolls/delete" : "/apis/delete.js",
     "/apps/webscrolls/addasset" : "/apis/addasset.js",
     "/apps/webscrolls/deleteasset" : "/apis/deleteasset.js",
     "/apps/webscrolls/publishthemefile" : "/apis/publishthemefile.js",
-    "/apps/webscrolls/deletethemefile" : "/apis/deletethemefile.js"
+    "/apps/webscrolls/deletethemefile" : "/apis/deletethemefile.js",
+    "/apps/webscrolls/appevents" : "/{{server_apis}}/appevents.js?get=true&sse=true&sseint=2000"
 }

@@ -14,8 +14,10 @@ import {apimanager as apiman} from "/framework/js/apimanager.mjs";
 
 const CREATE_NEW = "--- create", MUSTACHE = await router.getMustache();
 const API_AI = `${WEBSCROLLS_CONSTANTS.API_PATH}/ai`;
+const SSE_URL_FOR_APIS = `${WEBSCROLLS_CONSTANTS.API_PATH}/appevents`;
 const API_DELETE_THEME_FILE = `${WEBSCROLLS_CONSTANTS.API_PATH}/deletethemefile`;
 const API_PUBLISH_THEME_FILE = `${WEBSCROLLS_CONSTANTS.API_PATH}/publishthemefile`;
+
 
 let old_posttype, dragging_to_resize=false, currentResizer, can_not_repaint;
 
@@ -183,7 +185,8 @@ function scaleIframe(type) {
 
 async function callai(prompt) {
     const divWorking = document.querySelector("div#working"); divWorking.classList.add("visible");
-    const html_schema_post_result = await apiman.rest(API_AI, "POST", {prompt}, true);
+    const html_schema_post_result = await apiman.rest(API_AI, "POST", {prompt}, true, undefined, undefined, 
+        undefined, undefined, undefined, undefined, undefined, undefined, SSE_URL_FOR_APIS);
     const {html, schema, post, _airesponse, result} = html_schema_post_result;
     if (result) {
         const htmlElement = document.querySelector("textarea#htmlitem");

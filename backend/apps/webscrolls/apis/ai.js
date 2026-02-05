@@ -1,5 +1,6 @@
 /**
- * Runs AI with the given prompt.
+ * Runs AI with the given prompt. This should be setup as a long
+ * running API.
  * 
  * Params
  * 	prompt: The prompt
@@ -23,9 +24,12 @@ async function _init() {
 }
 
 exports.doService = async jsonReq => {
+    if (!validateRequest(jsonReq)) {LOG.error(`Validation failure for AI call.`); return CONSTANTS.FALSE_RESULT;}
+
     if (!conf) await _init();
     
     let retry = 0, response;
+    LOG.info(`Servicing a new AI request`);
     while (retry < 3) {
         response = (await client.responses.create({
             model: conf.model, 
@@ -35,8 +39,11 @@ exports.doService = async jsonReq => {
         }))?.output_text;
         if (response?.split(conf.separator).length !== 3) retry++; else break;
     }
-    if (retry == 3) return CONSTANTS.FALSE_RESULT;  // ai failed
+    if (retry == 3) { LOG.info(`AI failed to process the request`); return CONSTANTS.FALSE_RESULT; }  // ai failed
 
     const [html, schema, post] = response.split(conf.separator);
+    LOG.info(`Returning the response`);
     return {airesponse: response.output_text, html, schema, post, ...CONSTANTS.TRUE_RESULT};
 }
+
+const validateRequest = jsonReq => (jsonReq && jsonReq.prompt);
