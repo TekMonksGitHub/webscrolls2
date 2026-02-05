@@ -9,6 +9,23 @@
 <title>{{i18n.Admin_CreateTheme}}</title>
 
 <style>
+::-webkit-scrollbar {
+    width: 0.5em !important;
+    height: 0.5em !important;
+    scroll-behavior: smooth !important;
+}
+::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3) !important;
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3) !important;
+    margin: 5em;
+    border-radius: 1em !important;
+}
+::-webkit-scrollbar-thumb {
+    background-color: darkgrey !important;
+    border-radius: 1em !important;
+    background-clip: padding-box;
+}
+
 body {
     padding: 1rem 1.5rem;
     background-color: #424242; 
@@ -189,6 +206,7 @@ div#preview span#buttoncontainer {
     display: flex;
     flex-direction: row;
     align-items: center;
+    user-select: none;
 }
 span.zoombutton {
     font-size: 1.5rem;

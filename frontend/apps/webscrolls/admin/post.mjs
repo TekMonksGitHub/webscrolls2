@@ -12,11 +12,11 @@ import {default as jsYaml} from "../3p/js-yaml.mjs";
 import {loginmanager} from "../js/loginmanager.mjs";
 import {apimanager as apiman} from "/framework/js/apimanager.mjs";
 
-const CREATE_NEW_POST = "--- create";
+const CREATE_NEW_POST = "--- create", MUSTACHE = await router.getMustache();
 const API_DELETE = `${WEBSCROLLS_CONSTANTS.API_PATH}/delete`;
 const API_PUBLISH = `${WEBSCROLLS_CONSTANTS.API_PATH}/publish`;
 
-let old_posttype, old_post; 
+let old_posttype, old_post, dragging_to_resize=false, currentResizer, active_panel_id; 
 
 async function createdata() {
     const themes = await $$.requireJSON(`${WEBSCROLLS_CONSTANTS.APP_PATH}/themes/themes.json`);
@@ -63,7 +63,7 @@ async function posttypeselected(_element, posttype) {
     divPostcreator.innerHTML = renderedHTML;
     if ((posttype == "---") || schemaError) {
         _disableDeleteButton(); _disablePublishButton(); _resetHeaderUI(false);
-    } else _enablePublishButton();
+    } else {_enablePublishButton(); rerender();}
 }
 
 async function postselected(_element, post) {
@@ -71,21 +71,11 @@ async function postselected(_element, post) {
 
     if (post !== CREATE_NEW_POST) {_enableDeleteButton(); _disablePostNameHeaderInput(); _setPostName(post);}
     else { _disableDeleteButton(); _enablePostNameHeaderInput(); _setPostName(Date.now()); 
-        _emptyFieldValues(document.querySelector("div#postcreator")); return; }
+        _emptyFieldValues(document.querySelector("div#postcreator")); rerender(); return; }
 
     const lang = session.get($$.MONKSHU_CONSTANTS.LANG_ID), posturl = `${WEBSCROLLS_CONSTANTS.APP_PATH}/cms/${old_posttype}/${post}.${lang}.yaml`;
     const postData = jsYaml.load(await $$.requireText(posturl));
-    for (const [key, value] of Object.entries(postData)) {
-        const isArray = Array.isArray(value);
-        if (isArray) for (let i = 0; i < value.length; i++) {
-            const divArrayFields = document.querySelector(`#arrayfields${key}`);
-            if (divArrayFields) addToArray(document.querySelector(`#arrayfields${key}`), value[i], i==0);
-            else WEBSCROLLS_LOG.error(`Missing div for array field ${key}`);
-        } else {
-            const input = document.querySelector(`#value${key}`);
-            if (input && (!isArray)) input.value = value; else WEBSCROLLS_LOG.error(`Missing input field ${key}`);
-        }
-    }
+    _renderPostItems(postData); rerender();
 }
 
 async function addToArray(divArrayFields, fieldValue, fillGivenDiv) {
@@ -109,11 +99,7 @@ async function deleteFromArray(divArrayFields) {
 async function publishPost(button) {
     if (button.classList.contains("headerbuttondisabledpublish")) return;  // disabled
 
-    const divPostFields = document.querySelectorAll("div.postfields"), post = {}; 
-    for (const divPostField of divPostFields) {
-        const postFieldObject = _extractFieldValue(divPostField), key = Object.keys(postFieldObject)[0];
-        post[key] = postFieldObject[key];
-    }
+    const post = _getPostObject();
 
     const postname = document.querySelector("input#postname").value;
     const lang = session.get($$.MONKSHU_CONSTANTS.LANG_ID);
@@ -140,8 +126,131 @@ async function deletePost(button) {
     } else alert("Deletion failed.");
 }
 
+function panelSelect(sender, panel) {
+    if (!_activePanelChanged(sender)) return;
+
+    const allTabs = document.querySelectorAll(`div#${panel} span.paneltab`);
+    const allPanels = document.querySelectorAll(`div#${panel} div.panelcontent`);
+
+    for (const tab of allTabs) {
+        if (tab.id == sender.id) tab.classList.remove("unselected");
+        else tab.classList.add("unselected");
+    }
+
+    for (const panel of allPanels) {
+        if (panel.id == sender.id) panel.classList.remove("displaynone");
+        else panel.classList.add("displaynone");
+    }
+}
+
+async function rerender() {
+    const selectThemes = document.querySelector("select#themeselector"), themeSelected = selectThemes.value;
+    const selectPostTypes = document.querySelector("select#posttypes"), posttype = selectPostTypes.value;
+    const htmlTemplateURL = `${WEBSCROLLS_CONSTANTS.APP_PATH}/themes/${themeSelected}/${posttype}${posttype.endsWith(".html")?"":".html"}`;
+    const htmlTemplate = await $$.requireText(htmlTemplateURL), 
+        post = _getPostObject(),
+        previewIframe = document.querySelector('iframe#previewitem'),
+        iframeDoc = previewIframe.contentDocument || previewIframe.contentWindow.document;
+    if (!htmlTemplate?.trim()) return; // can't render
+    try {
+        const finalHTML = MUSTACHE.render(htmlTemplate, post);
+        iframeDoc.open(); iframeDoc.write(finalHTML); iframeDoc.close();
+    } catch (err) {/* we can't preview some issue with html or json*/}
+}
+
+function scaleIframe(type) {
+    const iframe = document.querySelector('iframe#previewitem');
+    const zoomtextElement = document.querySelector('span#zoomtext');
+    const currentScale = parseFloat(iframe.dataset.scale) || 1.0;
+    const toScaleTo = type == "minus" ? currentScale - 0.1 : currentScale + 0.1;
+    iframe.contentWindow.document.body.style.zoom = `${Math.round(toScaleTo*100)}%`;
+    iframe.setAttribute("data-scale", toScaleTo);
+    const zoomtext = `Zoom: ${Math.round(toScaleTo*100)}%`;
+    zoomtextElement.innerHTML = zoomtext;
+}
+
+function dragstart(event, element) {
+    event.preventDefault();
+    dragging_to_resize = true; currentResizer = element;
+    window.addEventListener('mousemove', dragged);
+    window.addEventListener('mouseup', dragstop);
+};
+
+function dragstop(event) {
+    event.preventDefault();
+    dragging_to_resize = false; currentResizer = null;
+    window.removeEventListener('mousemove', dragged);
+    window.removeEventListener('mouseup', dragstop);
+};
+
+function dragged(event) {
+    if ((!dragging_to_resize) || (!currentResizer)) return;
+    event.preventDefault(); 
+
+    const updateUI = _ => {
+        if (!currentResizer) return;
+        const leftPanel = currentResizer.previousElementSibling;
+        const rightPanel = currentResizer.nextElementSibling;
+        const container = currentResizer.parentElement;
+        const containerRect = container.getBoundingClientRect();
+        
+        // Mouse X position relative to container
+        const mouseX = event.clientX - containerRect.left;
+        const resizerWidth = currentResizer.offsetWidth;
+        
+        const minWidth = 50; // minimum 50px for each panel
+        const maxWidth = containerRect.width - resizerWidth - minWidth; // Set minimum bounds
+        if (mouseX >= minWidth && mouseX <= maxWidth) {
+            leftPanel.style.width = mouseX + 'px'; // Left panel ends at mouse position
+            rightPanel.style.width = (containerRect.width - mouseX - resizerWidth) + 'px'; // Right panel starts after resizer
+        }
+    }
+    updateUI();
+}
+
 const logout = _ => loginmanager.logout();
 
+
+function _getPostObject() {
+    if (active_panel_id == "postraw") try{
+            return jsYaml.load(document.querySelector("textarea#postraw").value); } catch (err) {
+        alert(`Bad YAML: ${err}`); return {};
+    }
+    const divPostFields = document.querySelectorAll("div.postfields"), post = {}; 
+    for (const divPostField of divPostFields) {
+        const postFieldObject = _extractFieldValue(divPostField), key = Object.keys(postFieldObject)[0];
+        post[key] = postFieldObject[key];
+    }
+    return post;
+}
+
+function _activePanelChanged(sender) {
+    if (sender.id == "postitem") {
+        const yaml = document.querySelector("textarea#postraw").value; 
+        try {_renderPostItems(jsYaml.load(yaml));} catch (err) {alert(`Bad YAML: ${err}`); return false;}
+    }
+    if (sender.id == "postraw") {
+        const yaml = jsYaml.dump(_getPostObject());
+        document.querySelector("textarea#postraw").value = yaml;
+    }
+    active_panel_id = sender.id;
+
+    return true;
+}
+
+function _renderPostItems(postData) {
+    for (const [key, value] of Object.entries(postData)) {
+        const isArray = Array.isArray(value);
+        if (isArray) for (let i = 0; i < value.length; i++) {
+            const divArrayFields = document.querySelector(`#arrayfields${key}`);
+            if (divArrayFields) addToArray(document.querySelector(`#arrayfields${key}`), value[i], i==0);
+            else WEBSCROLLS_LOG.error(`Missing div for array field ${key}`);
+        } else {
+            const input = document.querySelector(`#value${key}`);
+            if (input && (!isArray)) input.value = value; else WEBSCROLLS_LOG.error(`Missing input field ${key}`);
+        }
+    }
+}
 
 function _extractFieldValue(divPostField) {
     const postfield = divPostField.querySelector("span.postfieldname");
@@ -207,5 +316,6 @@ function _parseSchemaIntoTemplateData(pageSchema) {
     return templatedata;
 }
 
-export const post = {createdata, themeselected, posttypeselected, postselected, 
-    addToArray, deleteFromArray, publishPost, deletePost, logout, publishPostExternalCall};
+export const post = {createdata, themeselected, posttypeselected, postselected, panelSelect, scaleIframe,
+    addToArray, deleteFromArray, publishPost, deletePost, logout, publishPostExternalCall, dragstart, 
+    dragged, dragstop, rerender};
