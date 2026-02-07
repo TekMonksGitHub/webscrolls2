@@ -13,10 +13,12 @@ import {loginmanager} from "../js/loginmanager.mjs";
 import {apimanager as apiman} from "/framework/js/apimanager.mjs";
 
 const CREATE_NEW_POST = "--- create", MUSTACHE = await router.getMustache();
+const API_AI = `${WEBSCROLLS_CONSTANTS.API_PATH}/ai`;
 const API_DELETE = `${WEBSCROLLS_CONSTANTS.API_PATH}/delete`;
 const API_PUBLISH = `${WEBSCROLLS_CONSTANTS.API_PATH}/publish`;
+const SSE_URL_FOR_APIS = `${WEBSCROLLS_CONSTANTS.API_PATH}/appevents`;
 
-let old_posttype, old_post, dragging_to_resize=false, currentResizer, active_panel_id; 
+let old_posttype, old_post, current_post_schema, dragging_to_resize=false, currentResizer, active_panel_id, current_post_type_rendered_html; 
 
 async function createdata() {
     const themes = await $$.requireJSON(`${WEBSCROLLS_CONSTANTS.APP_PATH}/themes/themes.json`);
@@ -39,7 +41,10 @@ async function posttypeselected(_element, posttype) {
     const selectThemes = document.querySelector("select#themeselector"), themeSelected = selectThemes.value;
     let pageSchema = {}, schemaError = false; 
     if (posttype !== "---") {   // this means no post is selected
-        try {pageSchema = await $$.requireJSON(`${WEBSCROLLS_CONSTANTS.APP_PATH}/themes/${themeSelected}/schemas/${posttype}.json`)} catch (err) {
+        try {
+            pageSchema = await $$.requireJSON(`${WEBSCROLLS_CONSTANTS.APP_PATH}/themes/${themeSelected}/schemas/${posttype}.json`);
+            current_post_schema = pageSchema;
+        } catch (err) {
             WEBSCROLLS_LOG.error(`Error fetching page schema for theme ${themeSelected} and post ${posttype}`);
             schemaError = true;
         }
@@ -58,9 +63,8 @@ async function posttypeselected(_element, posttype) {
     const templatedata = _parseSchemaIntoTemplateData(pageSchema);
     const templateHTMLElement = document.querySelector("template#postschemaform");
     const templateHTML = templateHTMLElement.innerHTML;
-    const renderedHTML = (await router.getMustache()).render(templateHTML, templatedata);
-    const divPostcreator = document.querySelector("div#postcreator");
-    divPostcreator.innerHTML = renderedHTML;
+    current_post_type_rendered_html = (await router.getMustache()).render(templateHTML, templatedata);
+    _reinitPostFields();
     if ((posttype == "---") || schemaError) {
         _disableDeleteButton(); _disablePublishButton(); _resetHeaderUI(false);
     } else {_enablePublishButton(); rerender();}
@@ -70,21 +74,21 @@ async function postselected(_element, post) {
     if (post == old_post) return; else old_post = post;
 
     if (post !== CREATE_NEW_POST) {_enableDeleteButton(); _disablePostNameHeaderInput(); _setPostName(post);}
-    else { _disableDeleteButton(); _enablePostNameHeaderInput(); _setPostName(Date.now()); 
-        _emptyFieldValues(document.querySelector("div#postcreator")); rerender(); return; }
+    else { _disableDeleteButton(); _enablePostNameHeaderInput(); _setPostName(Date.now()); _reinitPostFields(); rerender(); return; }
 
     const lang = session.get($$.MONKSHU_CONSTANTS.LANG_ID), posturl = `${WEBSCROLLS_CONSTANTS.APP_PATH}/cms/${old_posttype}/${post}.${lang}.yaml`;
-    const postData = jsYaml.load(await $$.requireText(posturl));
+    const postData = jsYaml.load(await $$.requireText(posturl)); 
     _renderPostItems(postData); rerender();
 }
 
-async function addToArray(divArrayFields, fieldValue, fillGivenDiv) {
-    const newDiv = fillGivenDiv ? divArrayFields : divArrayFields.cloneNode(true);
-    newDiv.id = fillGivenDiv ? newDiv.id : divArrayFields.id+Date.now(); _emptyFieldValues(newDiv); 
-    if (!fillGivenDiv) {
+async function addToArray(divArrayFields, fieldValue, isFirstFieldValue) {
+    const newDiv = isFirstFieldValue ? divArrayFields : divArrayFields.cloneNode(true);
+    newDiv.id = isFirstFieldValue ? newDiv.id : divArrayFields.id+Date.now(); _emptyFieldValues(newDiv); 
+    if (!isFirstFieldValue) {
         newDiv.querySelector("span.arraycarddelete").classList.remove("displaynone"); 
         divArrayFields.parentNode.appendChild(newDiv);
-    }
+    } else for (const childNode of divArrayFields.parentNode.querySelectorAll("div.arrayfields")) 
+        if (childNode !== newDiv) divArrayFields.parentNode.removeChild(childNode); // delete all other current nodes
     for (const [key,value] of Object.entries(fieldValue)) {
         const inputField = newDiv.querySelector(`#value${key}`);
         if (inputField) inputField.value = value; 
@@ -208,6 +212,21 @@ function dragged(event) {
     updateUI();
 }
 
+async function callai(prompt) {
+    if (!current_post_schema) {alert("Please select a post type first."); return;}
+    const divWorking = document.querySelector("div#working"); divWorking.classList.add("visible");
+    const post_result = await apiman.rest(API_AI, "POST", {prompt, postschema: current_post_schema}, true, 
+        undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, SSE_URL_FOR_APIS);
+    const {post: postYaml, result} = post_result;
+    if (result) {
+        document.querySelector("textarea#postraw").value = postYaml;    // load post text area
+        _renderPostItems(jsYaml.load(postYaml));                        // load post UI fields
+        panelSelect(document.querySelector("span#postitem"), "postwork");   // shift focus to the fields tab
+        rerender();                                                     // rerender the page
+    } else alert("AI call failed, please retry with a new or same prompt.")
+    divWorking.classList.remove("visible");
+}
+
 const logout = _ => loginmanager.logout();
 
 
@@ -222,6 +241,11 @@ function _getPostObject() {
         post[key] = postFieldObject[key];
     }
     return post;
+}
+
+function _reinitPostFields() {
+    const divPostcreator = document.querySelector("div#postcreator");
+    divPostcreator.innerHTML = current_post_type_rendered_html;
 }
 
 function _activePanelChanged(sender) {
@@ -243,7 +267,7 @@ function _renderPostItems(postData) {
         const isArray = Array.isArray(value);
         if (isArray) for (let i = 0; i < value.length; i++) {
             const divArrayFields = document.querySelector(`#arrayfields${key}`);
-            if (divArrayFields) addToArray(document.querySelector(`#arrayfields${key}`), value[i], i==0);
+            if (divArrayFields) addToArray(divArrayFields, value[i], i==0);
             else WEBSCROLLS_LOG.error(`Missing div for array field ${key}`);
         } else {
             const input = document.querySelector(`#value${key}`);
@@ -318,4 +342,4 @@ function _parseSchemaIntoTemplateData(pageSchema) {
 
 export const post = {createdata, themeselected, posttypeselected, postselected, panelSelect, scaleIframe,
     addToArray, deleteFromArray, publishPost, deletePost, logout, publishPostExternalCall, dragstart, 
-    dragged, dragstop, rerender};
+    dragged, dragstop, rerender, callai};
