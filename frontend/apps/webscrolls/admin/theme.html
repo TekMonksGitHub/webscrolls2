@@ -142,6 +142,7 @@ div#themecreator {
     align-items: center;
     height: 100%;
 }
+
 div#resizer {
     display: flex;
     flex-direction: column;
@@ -149,7 +150,17 @@ div#resizer {
     width: 1rem;
     cursor: ew-resize;
 }
-div.themepanel {
+div#resizerinternal {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+}
+span#resizermiddler {
+    display: flex;
+    flex-direction: column;
+}
+
+div.panel {
     flex-grow: 1;
     height: 100%;
     display: flex;
@@ -336,7 +347,7 @@ div.panelcontent iframe#previewitem {
 </div>
 
 <div id="themecreator">
-    <div id="themework" class="themepanel">
+    <div id="themework" class="panel">
         <div class="paneltabs">
             <span class="paneltab" id="aiitem" onclick="theme.panelSelect(this, 'themework')">AI ✧</span>
             <span class="paneltab unselected" id="htmlitem" onclick="theme.panelSelect(this, 'themework')">HTML</span>
@@ -379,12 +390,29 @@ div.panelcontent iframe#previewitem {
     </div>
 
     <div id="resizer" onmousedown="theme.dragstart(event, this)">
-    <span>::</span>
-    <span>::</span>
-    <span>::</span>
+    <div id="resizerinternal">
+        <span onclick="
+            document.querySelector('div#preview').style.width='70rem';
+            document.querySelector('div#themework').style.width='unset';
+        " style="cursor: default;"><</span>
+        <span>&nbsp;</span>
+        <span id="resizermiddler" onclick="
+            document.querySelector('div#preview').style.width='44%';
+            document.querySelector('div#themework').style.width='56%';
+        ">
+        <span>::</span>
+        <span>::</span>
+        <span>::</span>
+        </span>
+        <span>&nbsp;</span>
+        <span onclick="
+            document.querySelector('div#themework').style.width='70rem';
+            document.querySelector('div#preview').style.width='unset';
+        " style="cursor: default;">></span>
+    </div>
     </div>
 
-    <div id="preview" class="themepanel">
+    <div id="preview" class="panel">
         <div class="paneltabs previewpaneltabs">
             <span class="paneltab" id="previewitem" onclick="theme.rerender()">Click to preview 👀</span>
             <span id="buttoncontainer">

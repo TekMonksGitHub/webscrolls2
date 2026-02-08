@@ -149,6 +149,7 @@ div#resizer {
     flex-direction: column;
     align-items: center;
     width: 1rem;
+    min-width: 1rem;
     cursor: ew-resize;
     justify-content: center;
 }
@@ -157,6 +158,11 @@ div#resizerinternal {
     display: flex;
     flex-direction: column;
 }
+span#resizermiddler {
+    display: flex;
+    flex-direction: column;
+}
+
 div.themepanel {
     flex-grow: 1;
     height: 100%;
@@ -427,9 +433,24 @@ span.arraycarddelete {
 
     <div id="resizer" onmousedown="post.dragstart(event, this)">
     <div id="resizerinternal">
+        <span onclick="
+            document.querySelector('div#preview').style.width='75rem';
+            document.querySelector('div#postwork').style.width='25rem';
+        " style="cursor: default;"><</span>
+        <span>&nbsp;</span>
+        <span id="resizermiddler" onclick="
+            document.querySelector('div#preview').style.width='50%';
+            document.querySelector('div#postwork').style.width='50%';
+        ">
         <span>::</span>
         <span>::</span>
         <span>::</span>
+        </span>
+        <span>&nbsp;</span>
+        <span onclick="
+            document.querySelector('div#postwork').style.width='75rem';
+            document.querySelector('div#preview').style.width='25rem';
+        " style="cursor: default;">></span>
     </div>
     </div>
 
