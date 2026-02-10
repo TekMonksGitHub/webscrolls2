@@ -1,7 +1,13 @@
 {
     "extensions": [
+        "proxy",
         "redirect",
         "httpverbs"
+    ],
+    "proxies": [
+        {
+            "^http(.*)://([^:/]+)[:]?.*?/apps/xbin/proxiedapis/(.*)$": "http{{{$1}}}://{{{$2}}}:9090/apps/xbin/proxiedapis/{{{$3}}}"
+        }
     ],
     "redirects": [
         {

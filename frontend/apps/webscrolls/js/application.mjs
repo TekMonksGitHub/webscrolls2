@@ -12,6 +12,7 @@ import {router} from "/framework/js/router.mjs";
 import {session} from "/framework/js/session.mjs";
 import {default as jsYaml} from "../3p/js-yaml.mjs";
 import {securityguard} from "/framework/js/securityguard.mjs";
+import {apimanager as apiman} from "/framework/js/apimanager.mjs";
 
 const init = async _hostname => {
 	$$.MONKSHU_CONSTANTS.setDebugLevel($$.MONKSHU_CONSTANTS.DEBUG_LEVELS.refreshOnReload);	// remove for PROD
@@ -22,6 +23,7 @@ const init = async _hostname => {
 	if (!session.get($$.MONKSHU_CONSTANTS.LANG_ID)) session.set($$.MONKSHU_CONSTANTS.LANG_ID, "en");
 	securityguard.setPermissionsMap(WEBSCROLLS_CONSTANTS.PERMISSIONS_MAP);
 	securityguard.setCurrentRole(securityguard.getCurrentRole() || WEBSCROLLS_CONSTANTS.GUEST_ROLE);
+	apiman.registerAPIKeys(WEBSCROLLS_CONSTANTS.API_KEYS, WEBSCROLLS_CONSTANTS.API_KEY_HEADER); 
 }
 
 const main = async urlRequested => {

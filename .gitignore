@@ -1,1 +1,3 @@
 frontend/**/webbundle/*
+**/*._____________xbin__________ignore_stats
+**/*.DS_Store

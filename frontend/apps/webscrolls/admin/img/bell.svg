@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" class="bell-icon">
+  <style>
+    .bell-icon .bell-body { fill: #D9D9D9; }
+    .bell-icon .bell-clapper { fill: #D9D9D9; }
+  </style>
+  
+  <!-- Bell body -->
+  <path class="bell-body" d="M12 2C11.4477 2 11 2.44772 11 3V3.17071C8.16229 3.58254 6 6.02184 6 9V14L4 16V17H20V16L18 14V9C18 6.02184 15.8377 3.58254 13 3.17071V3C13 2.44772 12.5523 2 12 2Z"/>
+  
+  <!-- Clapper -->
+  <path class="bell-clapper" d="M10 20C10 21.1046 10.8954 22 12 22C13.1046 22 14 21.1046 14 20H10Z"/>
+</svg>

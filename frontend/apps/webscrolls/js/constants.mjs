@@ -31,6 +31,9 @@ export const WEBSCROLLS_CONSTANTS = {
 
     USER_ROLE: "user",
     GUEST_ROLE: "guest",
+
+    API_KEYS: {"*":"reeiwu83409oesnf9823ydwejidw492053ldmqogelr02479"},
+    API_KEY_HEADER: "X-API-Key"
 }
 
 WEBSCROLLS_CONSTANTS.PERMISSIONS_MAP = {
