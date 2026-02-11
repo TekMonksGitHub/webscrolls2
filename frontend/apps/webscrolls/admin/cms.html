@@ -16,7 +16,7 @@ if (window.WEBSCROLLS_CONSTANTS) {
     await import( "./../components/span-with-menu/span-with-menu.mjs");
     window.filemanager = (await import( "./../components/file-manager/file-manager.mjs")).file_manager;
     await import( "./../components/progress-bar/progress-bar.mjs");
-    window.cms = (await import ("./cms.mjs")).cms;
+    window.cms = (await import ("./js/cms.mjs")).cms;
 }
 </script>
 <title>{{i18n.Admin_CMS}}</title>
@@ -88,9 +88,12 @@ select#root {
     font-size: 0.8rem;
     height: 1.8rem;
     background-color: #D9D9D9;
+    box-sizing: border-box;
+    padding-left: 0.5rem;
 }
 img.headerimg {
     margin-left: 1rem;
+    cursor: pointer;
 }
 
 div#maincontent {

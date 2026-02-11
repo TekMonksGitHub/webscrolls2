@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <!-- Run inside the monkshu framework -->
 <script type="text/javascript" src="./../js/index.mjs" defer></script>
-<script type="module">if (window.WEBSCROLLS_CONSTANTS) window.theme = (await import ("./theme.mjs")).theme;</script>
+<script type="module">if (window.WEBSCROLLS_CONSTANTS) window.theme = (await import ("./js/theme.mjs")).theme;</script>
 <title>{{i18n.Admin_CreateTheme}}</title>
 
 <style>
@@ -133,6 +133,7 @@ span#logout {
     width: 1.5rem; 
     height: 1.5rem; 
     margin-left: 0.8rem;
+    cursor: pointer;
 }
 
 div#themecreator {

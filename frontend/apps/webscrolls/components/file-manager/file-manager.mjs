@@ -35,7 +35,7 @@ const COMPONENT_PATH = util.getModulePath(import.meta), DIALOGS_PATH = `${COMPON
 const API_CHECKFILEEXISTS = _ => API_PATH+"/checkfileexists";
 const API_DOWNLOADFILE_GETSECURID = _ => API_PATH+"/getsecurid";
 const API_DOWNLOADFILE_STATUS = _ => API_PATH+"/getdownloadstatus";
-const API_DOWNLOADFILE_DND = APP_PATH+"/proxiedapis/downloaddnd";
+const API_DOWNLOADFILE_DND = _ => APP_PATH+"/proxiedapis/downloaddnd";
 let PAGE_DOWNLOADFILE_SHARED = COMPONENT_PATH+"/downloadshared.html", ENCODE_URL = true;
 const LOG = $$.LOG;
 
@@ -200,7 +200,7 @@ async function create(element) {
    }
    const resp = await apiman.rest(API_CREATEFILE(), "GET", _addExtraInfo({path, isDirectory}, element), true), 
       hostID = file_manager.getHostElementID(element);
-   if (resp?.result) {dialog(element).hideDialog(FMDIALOG_ID); router.reload();}
+   if (resp?.result) {dialog(element).hideDialog(FMDIALOG_ID); router.reload(!ENCODE_URL, false);}
    else dialog(element).error(FMDIALOG_ID, await i18n.get("Error"));
 }
 
@@ -411,7 +411,7 @@ function showHideNotifications(hostID) {
 
 async function deleteFile(element) {
    let resp = await apiman.rest(API_DELETEFILE(), "GET", _addExtraInfo({path: selectedPath}, element), true);
-   if (resp.result) router.reload(); else _showErrorDialog();
+   if (resp.result) router.reload(!ENCODE_URL, false); else _showErrorDialog();
 }
 
 async function editFile(element) {
@@ -448,7 +448,7 @@ function editFileVisible() {
 
 function changeToPath(hostid, path) {
    const host = file_manager.getHostElementByID(hostid); host.setAttribute("path", path); 
-   (file_manager.getSessionMemory(hostid))["__lastPath"] = path; router.reload();   // ideally should be file-manager.reload but that for some reason breaks SVG with currentColor
+   (file_manager.getSessionMemory(hostid))["__lastPath"] = path; router.reload(!ENCODE_URL, false);   // ideally should be file-manager.reload but that for some reason breaks SVG with currentColor
 }
 
 const _getReqIDForDownloading = path => encodeURIComponent(path+Date.now()+Math.random());
@@ -482,7 +482,7 @@ async function paste(element) {
    const _copyRequestedToItsOwnSubdirectory = (from, to) => {const pathSplits = to.split("/");
       for (const [i, _val] of pathSplits.entries()) if (pathSplits.slice(0, i).join("/")==from) return true; return false;}
    const _nullOutSelectedCutCopyPathsAndElements = (reload=true) => { selectedCutPath = null; selectedCopyPath = null; 
-      selectedCutCopyElement = null; if (reload) router.reload(); }
+      selectedCutCopyElement = null; if (reload) router.reload(!ENCODE_URL, false); }
 
    const selectedPathToOperate = selectedCutPath?selectedCutPath:selectedCopyPath;
    const baseName = selectedPathToOperate.substring(selectedPathToOperate.lastIndexOf("/")+1);
@@ -557,7 +557,7 @@ async function _updateProgress(hostID, currentBlock, totalBlocks, fileName, icon
    const templateData = {files:[]}; for (const file of Object.keys(FILES_AND_PERCENTS)) templateData.files.unshift({...FILES_AND_PERCENTS[file]});
    
    await _showNotification(hostID, PROGRESS_TEMPLATE, templateData);
-   if (!justRerender && reloadFlag) router.reload();
+   if (!justRerender && reloadFlag) router.reload(!ENCODE_URL, false);
 }
 
 function renameFile(element) {
@@ -627,14 +627,14 @@ const cancelFile = (file, element) => _updateProgress(file_manager.getHostElemen
 
 async function _performRename(oldPath, newPath, element) {
    const resp = await apiman.rest(API_RENAMEFILE(), "GET", _addExtraInfo({old: oldPath, new: newPath}, element), true), hostID = file_manager.getHostElementID(element);
-   if (!resp || !resp.result) _showErrorDialog(_=>router.reload()); else router.reload();
+   if (!resp || !resp.result) _showErrorDialog(_=>router.reload(!ENCODE_URL, false)); else router.reload(!ENCODE_URL, false);
 }
 
 async function _performCopy(fromPath, toPath, element) {
    const sizeOfCopy = JSON.parse(selectedCutCopyElement.dataset.stats).size; 
    if (!(await _checkQuotaAndReportError(element, sizeOfCopy))) return;
    const resp = await apiman.rest(API_COPYFILE(), "GET", _addExtraInfo({from: fromPath, to: toPath}, element), true), hostID = file_manager.getHostElementID(element)
-   if (!resp || !resp.result) _showErrorDialog(_=>router.reload()); else router.reload();
+   if (!resp || !resp.result) _showErrorDialog(_=>router.reload(!ENCODE_URL, false)); else router.reload(!ENCODE_URL, false);
 }
 
 const _roundToTwo = number => Math.round(number * 100)/100;

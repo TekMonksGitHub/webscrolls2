@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Run inside the monkshu framework -->
+<script type="text/javascript" src="./../js/index.mjs" defer></script>
+<script type="module">if (window.WEBSCROLLS_CONSTANTS) window.settings = (await import ("./js/settings.mjs")).settings;</script>
+<title>{{i18n.Admin_Settings}}</title>
+
+<style>
+::-webkit-scrollbar {
+    width: 0.5em !important;
+    height: 0.5em !important;
+    scroll-behavior: smooth !important;
+}
+::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3) !important;
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3) !important;
+    margin: 5em;
+    border-radius: 1em !important;
+}
+::-webkit-scrollbar-thumb {
+    background-color: darkgrey !important;
+    border-radius: 1em !important;
+    background-clip: padding-box;
+}
+
+body {
+    padding: 1rem 1.5rem;
+    background-color: #424242;
+    color: #FFFFFF;
+    font-size: 0.9rem;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    font-weight: 200;
+    min-width: 75rem;
+    display: flex;
+    height: 100vh;
+    box-sizing: border-box;
+    flex-direction: column;
+    margin: 0;
+    user-select: none;
+}
+
+div#settingsheader {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+div#buttonsheaderdiv, div#logoutdiv {
+    padding: 0.6rem 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid #D9D9D9;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    min-width: fit-content;
+    align-items: center;
+}
+span.headerbutton {
+    padding: 0.5rem 2rem;
+    background: #ffffff;
+    border-radius: 0.8rem;
+    color: #424242;
+    font-size: 0.8rem;
+    pointer-events: all;
+    cursor: pointer;
+    background-color: #D9D9D9;
+    font-weight: 400;
+}
+span#headline {font-size: x-large;}
+span#logout {
+    width: 1.5rem; 
+    height: 1.5rem; 
+    cursor: pointer;
+}
+
+div#settings {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    padding: 2rem;
+}
+div.settingsfields {
+    display: flex;
+    flex-direction: row;
+    padding: 1em 0em;
+    align-items: self-start;
+}
+span.fieldname {width: 20em;}
+span.fieldvalue {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+input.fieldinput, textarea.fieldinput {
+    width: calc(100% - 0.9rem);
+    padding: 0.5em;
+    border-radius: 0.5em;
+    border: 0;
+    outline: none;
+    resize: none;
+    background-color: #D9D9D9;
+    font-family: inherit;
+}
+textarea.fieldinput {height: 8em;}
+
+</style>
+
+</head>
+
+<body>
+<div id="settingsheader">
+    <div id="buttonsheaderdiv">
+        <span id="publishbutton" class="headerbutton" onclick="settings.publish(this)">Publish</span>
+    </div>
+    <span id="headline">Everything on this page is DANGEROUS to modify</span>
+    <div id="logoutdiv">
+        <span id="logout" class="headericon" onclick="settings.logout(this)"><img src="./img/logout.svg"/></span>
+    </div>
+</div>
+
+<div id="settings">
+    <div class="settingsfields" id="divfields">
+        <span class="fieldname" id="spannameaikey">AI Key</span>
+        <span class="fieldvalue" id="spanvalueaikey">
+            <input id="valueaikey" class="fieldinput"/>
+        </span>
+    </div>
+    <div class="settingsfields" id="divfields">
+        <span class="fieldname" id="spannamemodel">AI Model</span>
+        <span class="fieldvalue" id="spanvaluemodel">
+            <input id="valuemodel" class="fieldinput"/>
+        </span>
+    </div>
+    <div class="settingsfields" id="divfields">
+        <span class="fieldname" id="spannamethemeprompt">System prompt for themes</span>
+        <span class="fieldvalue" id="spanvaluethemeprompt">
+            <textarea id="valuethemeprompt" class="fieldinput"></textarea>
+        </span>
+    </div>
+    <div class="settingsfields" id="divfields">
+        <span class="fieldname" id="spannamepostprompt">System prompt for posts</span>
+        <span class="fieldvalue" id="spanvaluepostprompt">
+            <textarea id="valuepostprompt" class="fieldinput"></textarea>
+        </span>
+    </div>
+</div>
+
+</body>
+</html>

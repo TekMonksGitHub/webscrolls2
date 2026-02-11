@@ -9,7 +9,7 @@
 import {util} from "/framework/js/util.mjs";
 import {router} from "/framework/js/router.mjs";
 import {session} from "/framework/js/session.mjs";
-import {loginmanager} from "../js/loginmanager.mjs";
+import {loginmanager} from "../../js/loginmanager.mjs";
 
 const CMSTYPE_KEY = "_org_webscrolls_cmstype_key_";
 const current_cms_type = session.get(CMSTYPE_KEY, "cms");

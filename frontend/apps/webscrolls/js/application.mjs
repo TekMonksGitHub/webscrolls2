@@ -27,16 +27,17 @@ const init = async _hostname => {
 }
 
 const main = async urlRequested => {
-	let {url, posturl, isadmin, module, theme} = _getURLAndPostToRouteTo(urlRequested), pushstate = url != window.location.href;
+	let {url, posturl, isadmin, module, theme} = _getURLAndPostToRouteTo(urlRequested);
+	let pushstate = new URL(url, window.location.href).href != window.location.href;
 
 	let postdata = {}; try {
 		if (posturl) postdata = jsYaml.load(await $$.requireText(posturl));
 		if (isadmin) {
 			if (!loginmanager.isUserLoggedIn()) {
 				session.set(WEBSCROLLS_CONSTANTS.POST_LOGIN_URL_KEY, url);
-				url = WEBSCROLLS_CONSTANTS.LOGIN_HTML; postdata = {};
+				url = WEBSCROLLS_CONSTANTS.LOGIN_HTML; postdata = {}; pushstate = true;
 			} else {
-				const pageModule = (await import(`./../${theme}/${module}.mjs`))[module];
+				const pageModule = (await import(`./../${theme}/js/${module}.mjs`))[module];
 				postdata = await pageModule.createdata();
 			}
 		}

@@ -8,8 +8,8 @@
 
 import {post} from "./post.mjs";
 import {router} from "/framework/js/router.mjs";
-import {default as jsYaml} from "../3p/js-yaml.mjs";
-import {loginmanager} from "../js/loginmanager.mjs";
+import {default as jsYaml} from "../../3p/js-yaml.mjs";
+import {loginmanager} from "../../js/loginmanager.mjs";
 import {apimanager as apiman} from "/framework/js/apimanager.mjs";
 
 const CREATE_NEW = "--- create", MUSTACHE = await router.getMustache();
