@@ -20,7 +20,7 @@ let conf, client;
 async function _init() {
     const rawConf = await fspromises.readFile(`${WEBSCROLLS_CONSTANTS.CONF_DIR}/ai.yaml`, "utf8");
     conf = yaml.parse(rawConf);
-    conf.real_aikey = await crypt.decrypt(conf.ai_key, conf.crypt_key);
+    conf.real_aikey = crypt.decrypt(conf.ai_key, conf.crypt_key);
     conf.separator = conf.separator.trim();
     client = new OpenAI({apiKey: conf.real_aikey});
 }
@@ -36,10 +36,10 @@ exports.doService = async jsonReq => {
 }
 
 async function returnThemeContent(jsonReq) {
-    let retry = 0; response, error;
+    let retry = 0, response, error;
     while (retry < 3) {
         retry++;
-        if (retry > 0) LOG.info(`Retrying AI request.`);
+        if (retry > 1) LOG.info(`Retrying AI request.`);
         try {
             const prompt = mustache.render(conf.contextprompt_theme_template, {prompt: jsonReq.prompt, error}).trim();
             response = (await client.responses.create({
@@ -70,7 +70,7 @@ async function returnPostContent(jsonReq) {
     let retry = 0, response, error;
     outerloop: while (retry < 3) {
         retry++;
-        if (retry > 0) LOG.info(`Retrying AI request.`);
+        if (retry > 1) LOG.info(`Retrying AI request.`);
         try { 
             const prompt = mustache.render(conf.contextprompt_post_template, {
                 prompt: jsonReq.prompt, postschema: JSON.stringify(jsonReq.postschema, null, 2), error}).trim();

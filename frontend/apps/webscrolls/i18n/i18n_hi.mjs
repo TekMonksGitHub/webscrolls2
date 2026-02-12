@@ -1,15 +1,16 @@
 export const i18n = {
 "Title" : "Webscrolls",
 
-"Admin_CreatePost": "Create post",
-"Admin_CreateTheme": "Create theme",
-"Admin_CMS": "File management",
-"Admin_Main": "Administration Home",
+"Admin_CreatePost": "पोस्ट बनाएं",
+"Admin_CreateTheme": "थीम बनाएं",
+"Admin_CMS": "फ़ाइल मैनेजमेंट",
+"Admin_Main": "एडमिनिस्ट्रेशन होम",
+"Admin_Settings": "सेटिंग्स",
 
-"logintagline": "Webscrolls by Tekmonks",
-"loginsubtag": "An AI first website framework.",
-"learn":"Learn More",
-"LoginMsg": "Sign in with Tekmonks Login",
-"LoginFailed": "Login failure",
-"InternalError": "Internal error",
+"logintagline": "Tekmonks का Webscrolls",
+"loginsubtag": "एक AI पहला वेबसाइट फ्रेमवर्क।",
+"learn":"और जानें",
+"LoginMsg": "Tekmonks लॉगिन से साइन इन करें",
+"LoginFailed": "लॉगिन फेलियर",
+"InternalError": "इंटरनल एरर",
 }

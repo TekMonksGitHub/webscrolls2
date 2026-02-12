@@ -115,6 +115,7 @@ file-manager#fm {height: 100%;}
 <body>
 <div id="header">
     <span class="headerspan" id="cmsselector">
+        <img class="headerimg" src="./img/home.svg" onclick="window.location='./main.html'"> 
         <span id="headertext">Root</span>
         <select id="root" onchange="cms.setcmstype(this.value)">
             {{#cmstypes}}

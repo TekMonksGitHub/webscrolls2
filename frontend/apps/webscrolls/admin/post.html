@@ -41,6 +41,8 @@ body {
     margin: 0;
 }
 
+img.headericon {width: 2rem; height: 2rem; margin-right: 0.5rem; cursor: pointer;;}
+
 div#selectorheaderdiv {
     padding: 0.5rem;
     border-radius: 0.5rem;
@@ -358,6 +360,8 @@ span.arraycarddelete {
 <body>
 <div id="postselector">
     <div id="selectorheaderdiv">
+        <span class="headericon" onclick="window.location='./main.html'"><img class="headericon" src="./img/home.svg"></span>
+
         <span>
         <label for="themeselector">Theme</label>
         <select name="theme" id="themeselector" class="header" onchange="post.themeselected(this, this.value)">

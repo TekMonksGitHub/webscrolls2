@@ -42,12 +42,14 @@ body {
     min-width: 80rem;
 }
 
+img.headericon {width: 2rem; height: 2rem; margin-right: 0.5rem; cursor: pointer;;}
+
 div.selectorheaderdiv {
     padding: 0.5rem;
     border-radius: 0.5rem;
     border: 1px solid #D9D9D9;
     flex-grow: 1;
-    margin-right: 4rem;
+    margin-right: 2rem;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -309,6 +311,8 @@ div.panelcontent iframe#previewitem {
 <body>
 <div id="themeselector">
     <div class="selectorheaderdiv">
+        <span class="headericon" onclick="window.location='./main.html'"><img class="headericon" src="./img/home.svg"></span>
+
         <span>
         <label for="themeselector">Theme</label>
         <select name="theme" id="themeselector" class="header" onchange="theme.themeselected(this, this.value)">

@@ -18,6 +18,12 @@
         },
         {
             "^http(.*)://([^/]+?)$": "http{{{$1}}}://{{{$2}}}/apps/{{{app}}}/index.html"
+        },
+        {
+            "^http(.*)://([^/]+?)/admin$": "http{{{$1}}}://{{{$2}}}/apps/{{{app}}}/admin/main.html"
+        },
+        {
+            "^http(.*)://([^/]+?)/admin/$": "http{{{$1}}}://{{{$2}}}/apps/{{{app}}}/admin/main.html"
         }
     ],
     "diskCache": {

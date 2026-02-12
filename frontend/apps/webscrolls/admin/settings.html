@@ -57,6 +57,7 @@ div#buttonsheaderdiv, div#logoutdiv {
     justify-content: space-between;
     min-width: fit-content;
     align-items: center;
+    height: 1.8rem;
 }
 span.headerbutton {
     padding: 0.5rem 2rem;
@@ -68,13 +69,15 @@ span.headerbutton {
     cursor: pointer;
     background-color: #D9D9D9;
     font-weight: 400;
+    margin-right: 1rem;
 }
 span#headline {font-size: x-large;}
-span#logout {
-    width: 1.5rem; 
-    height: 1.5rem; 
+span.headericon {
+    width: 1.5rem;
+    height: 100%;
     cursor: pointer;
 }
+span.headericon img {height: 100%; width: 100%;}
 
 div#settings {
     display: flex;
@@ -113,10 +116,11 @@ textarea.fieldinput {height: 8em;}
 <body>
 <div id="settingsheader">
     <div id="buttonsheaderdiv">
-        <span id="publishbutton" class="headerbutton" onclick="settings.publish(this)">Publish</span>
+        <span id="home" class="headericon" onclick="window.location='./main.html'"><img src="./img/home.svg"/></span>
     </div>
     <span id="headline">Everything on this page is DANGEROUS to modify</span>
     <div id="logoutdiv">
+        <span id="publishbutton" class="headerbutton" onclick="settings.update(this)">Publish</span>
         <span id="logout" class="headericon" onclick="settings.logout(this)"><img src="./img/logout.svg"/></span>
     </div>
 </div>
@@ -125,25 +129,25 @@ textarea.fieldinput {height: 8em;}
     <div class="settingsfields" id="divfields">
         <span class="fieldname" id="spannameaikey">AI Key</span>
         <span class="fieldvalue" id="spanvalueaikey">
-            <input id="valueaikey" class="fieldinput"/>
+            <textarea id="valueaikey" class="fieldinput" placeholder="AI access key"/>{{ai_key}}</textarea>
         </span>
     </div>
     <div class="settingsfields" id="divfields">
         <span class="fieldname" id="spannamemodel">AI Model</span>
         <span class="fieldvalue" id="spanvaluemodel">
-            <input id="valuemodel" class="fieldinput"/>
+            <input id="valuemodel" class="fieldinput" value="{{{model}}}" placeholder="AI model to use"/>
         </span>
     </div>
     <div class="settingsfields" id="divfields">
         <span class="fieldname" id="spannamethemeprompt">System prompt for themes</span>
         <span class="fieldvalue" id="spanvaluethemeprompt">
-            <textarea id="valuethemeprompt" class="fieldinput"></textarea>
+            <textarea id="valuethemeprompt" class="fieldinput" placeholder="Theme generation AI system prompt">{{systemprompt_theme}}</textarea>
         </span>
     </div>
     <div class="settingsfields" id="divfields">
         <span class="fieldname" id="spannamepostprompt">System prompt for posts</span>
         <span class="fieldvalue" id="spanvaluepostprompt">
-            <textarea id="valuepostprompt" class="fieldinput"></textarea>
+            <textarea id="valuepostprompt" class="fieldinput" placeholder="Post generation AI system prompt">{{systemprompt_post}}</textarea>
         </span>
     </div>
 </div>
