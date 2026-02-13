@@ -11,11 +11,11 @@ Raw CMS access page for Webscrolls. Uses XBin.
 <script type="text/javascript" src="./../js/index.mjs" defer></script>
 <script type="module">
 if (window.WEBSCROLLS_CONSTANTS) {
-    await import("./../components/dialog-box/dialog-box.mjs");
-    await import("./../components/bread-crumbs/bread-crumbs.mjs");
-    await import( "./../components/span-with-menu/span-with-menu.mjs");
-    window.filemanager = (await import( "./../components/file-manager/file-manager.mjs")).file_manager;
-    await import( "./../components/progress-bar/progress-bar.mjs");
+    await import("./components/dialog-box/dialog-box.mjs");
+    await import("./components/bread-crumbs/bread-crumbs.mjs");
+    await import( "./components/span-with-menu/span-with-menu.mjs");
+    window.filemanager = (await import( "./components/file-manager/file-manager.mjs")).file_manager;
+    await import( "./components/progress-bar/progress-bar.mjs");
     window.cms = (await import ("./js/cms.mjs")).cms;
 }
 </script>

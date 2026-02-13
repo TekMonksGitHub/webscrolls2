@@ -9,10 +9,10 @@ exports.initSync = function(_app, approot) {
     const APP_LIBDIR = `${approot}/lib`;
     global.WEBSCROLLS_CONSTANTS = require(`${APP_LIBDIR}/constants.js`);
 
-    const xbin = require(`${WEBSCROLLS_CONSTANTS.APP_ROOT}/xbin/lib/xbin_init.js`)
+    const xbin = require(`${WEBSCROLLS_CONSTANTS.APP_ROOT}/components/xbin/lib/xbin_init.js`)
     xbin.initSync();
 
-    const cms = require(`${WEBSCROLLS_CONSTANTS.APP_ROOT}/xbin/lib/cms.js`)
+    const cms = require(`${WEBSCROLLS_CONSTANTS.APP_ROOT}/components/xbin/lib/cms.js`)
     cms.addCMSPathModifier(async (_cmsroot, _id, _org, extraInfo) => { 
         let finalPath; 
         if (extraInfo.cmstype == "cms") finalPath = path.resolve(`${WEBSCROLLS_CONSTANTS.FRONTEND_ROOT}/${extraInfo.apppath}/cms`);

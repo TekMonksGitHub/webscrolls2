@@ -1,0 +1,44 @@
+
+{
+  "brand-name": "input",
+  "nav-links": "array",
+  "nav-links-schema": {
+    "label": "input",
+    "href": "input"
+  },
+  "hero-h1": "input",
+  "hero-sub": "textarea",
+  "visitor-industry": "input",
+  "traffic-source": "input",
+  "micro-demos": "array",
+  "micro-demos-schema": {
+    "title": "input",
+    "description": "textarea",
+    "duration": "input"
+  },
+  "client-logos": "array",
+  "client-logos-schema": {
+    "name": "input",
+    "svg": "textarea"
+  },
+  "metrics": "array",
+  "metrics-schema": {
+    "value": "input",
+    "label": "input"
+  },
+  "trust-badges": "array",
+  "trust-badges-schema": {
+    "badge": "input",
+    "detail": "input"
+  },
+  "comparison-rows": "array",
+  "comparison-rows-schema": {
+    "feature": "input",
+    "webscrolls": "input",
+    "competitor": "input"
+  },
+  "cta-text": "input",
+  "cta-subtext": "input",
+  "footer-text": "textarea",
+  "year": "input"
+}

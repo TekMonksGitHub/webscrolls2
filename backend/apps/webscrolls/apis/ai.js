@@ -22,7 +22,9 @@ async function _init() {
     conf = yaml.parse(rawConf);
     conf.real_aikey = crypt.decrypt(conf.ai_key, conf.crypt_key);
     conf.separator = conf.separator.trim();
-    client = new OpenAI({apiKey: conf.real_aikey});
+    const clientOptions = {apiKey: conf.real_aikey}; 
+    if (conf.base_url?.trim()) clientOptions.base_url = conf.base_url;  // allows using Claude etc
+    client = new OpenAI(clientOptions);
 }
 
 exports.doService = async jsonReq => {
@@ -42,12 +44,7 @@ async function returnThemeContent(jsonReq) {
         if (retry > 1) LOG.info(`Retrying AI request.`);
         try {
             const prompt = mustache.render(conf.contextprompt_theme_template, {prompt: jsonReq.prompt, error}).trim();
-            response = (await client.responses.create({
-                model: conf.model, 
-                instructions: conf.systemprompt_theme, 
-                input: prompt,
-                tools: [{"type": "web_search"}],
-            }));
+            response = await _runAIModel(conf.systemprompt_theme, prompt)
         } catch (err) {LOG.error(`Bad response from AI. OpenAI error ${err}`); continue;}
 
         // check response for correctness
@@ -74,12 +71,7 @@ async function returnPostContent(jsonReq) {
         try { 
             const prompt = mustache.render(conf.contextprompt_post_template, {
                 prompt: jsonReq.prompt, postschema: JSON.stringify(jsonReq.postschema, null, 2), error}).trim();
-            response = (await client.responses.create({
-                model: conf.model, 
-                instructions: conf.systemprompt_post, 
-                input: prompt,
-                tools: [{"type": "web_search"}],
-            }));
+            response = response = await _runAIModel(conf.systemprompt_post, prompt)
         } catch (err) {LOG.error(`Bad response from AI. OpenAI error ${err}`); continue;}
 
         // check response is good 
@@ -98,6 +90,17 @@ async function returnPostContent(jsonReq) {
 
     LOG.info(`Returning the response, good AI response.`);
     return {post: response.output_text, ...CONSTANTS.TRUE_RESULT};
+}
+
+function _runAIModel(instructions, prompt) {
+    return client.responses.create({
+        model: conf.model, 
+        messages: [
+            {"role": "system", "content": instructions},
+            {"role": "user", "content": prompt}
+        ],
+        tools: [{"type": "web_search"}],
+    });
 }
 
 const validateRequest = jsonReq => (jsonReq && jsonReq.prompt);

@@ -1,10 +1,9 @@
 crypt_key: 82577als2141rwq294938wasj3029ldwpz
-ai_key: be3252b9814003657416bd27574d9f64c6c376d9e3465a2ca67dd7c5892b3687cf769b7b9794dd6ac331bfa12c730c6a8ace0fce8309d30b8f84b2bb87d367c770d787bd3f65a49cb1f3b375bedb0f8a59f47bc888677466cd67ac948d0c0bf158a28dff99e91d641b4413eb53c5446f46e0eba340883ea8a6db7dc35fd81ca970869e33c8f4b483f926782f482ca4eeaadb8b47df08a993bdca98806d01287125323320267c3361394f5610
+base_url: https://api.openai.com
+ai_key: 50239586465817ae7271d6bd9e8e521317d1104b30cff516ef7e823bc3452d4875f50b7a4681766238f376c679deb935ccbc3bd5cbad739f0d655551e7a45c38e5911e7ad6bbfc333cbe0a3efed754272fceb22b80aca26d2713b2c064548945b0d9bd456f7efa75cbdb81ea4cbdd8d4785cc504d90fa0de24d1af325302eb9667b33e6ebd6ca13924745c26a68446511fdb03b182b74587c11b38808be107a51b4c51187b9cd88b9d29e94a
 model: gpt-5-mini
-separator: |
-  *&&&&*
-
-systemprompt_theme: |
+separator: "*&&&&*"
+systemprompt_theme: |-
   You are a UI designer + front-end engineer.
 
   Your role:
@@ -20,7 +19,7 @@ systemprompt_theme: |
   *&&&&*
   No extra commentary before or after. No explanations.
 
-  
+
   GENERAL RULES
   1. HTML RULES
   - Always output a full standalone HTML document:
@@ -117,14 +116,11 @@ systemprompt_theme: |
   - Replace example content with requested content.
   - Keep same structure and formatting discipline.
   - Never output explanations.
-
-contextprompt_theme_template: |
+contextprompt_theme_template: |-
   {{#error}}The previous response had an error: {{{.}}}.{{/error}}
-  
+
   {{{prompt}}}
-
-
-systemprompt_post: |
+systemprompt_post: |-
   You are Post Generator AI.
 
   Your responsibility:
@@ -286,8 +282,7 @@ systemprompt_post: |
   Extract the schema from the user prompt.
   Generate the POST YAML now.
   Output nothing except the YAML.
-
-contextprompt_post_template: |
+contextprompt_post_template: |-
   {{#error}}The previous response had an error: {{{.}}}.{{/error}}
 
   SCHEMA:

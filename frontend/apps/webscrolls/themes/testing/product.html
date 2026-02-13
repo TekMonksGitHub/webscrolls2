@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script type="text/javascript" src="./../../js/index.mjs"></script>
+<title>{{product-name}} – Product Landing</title>
+<style>
+:root{
+  --bg:#fbfdff;
+  --card:#ffffff;
+  --muted:#6b7280;
+  --accent:#0a84ff;
+  --accent-2:#6ec1ff;
+  --glass: rgba(255,255,255,0.6);
+  --radius:14px;
+  --shadow: 0 8px 30px rgba(15,23,42,0.06);
+  --max-width:1200px;
+  --page-pad:clamp(16px,4vw,40px);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background:linear-gradient(180deg,var(--bg),#ffffff 60%);
+  color:#0f172a;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  overflow-x:hidden;
+  padding:calc(var(--page-pad));
+}
+.container{
+  max-width:var(--max-width);
+  margin:0 auto;
+}
+
+/* Header */
+.header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  margin-bottom:28px;
+}
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  text-decoration:none;
+  color:inherit;
+}
+.logo{
+  width:44px;
+  height:44px;
+  border-radius:10px;
+  display:grid;
+  place-items:center;
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  color:white;
+  font-weight:700;
+  box-shadow: var(--shadow);
+}
+.nav{
+  display:flex;
+  gap:12px;
+  align-items:center;
+}
+.cta-inline{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+
+/* Hero */
+.hero{
+  display:grid;
+  grid-template-columns: 1fr 420px;
+  gap:clamp(20px,4vw,48px);
+  align-items:center;
+  padding:36px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.7), rgba(250,252,255,0.9));
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin-bottom:34px;
+}
+.hero-left{min-width:0}
+.badge{
+  display:inline-block;
+  background:rgba(10,132,255,0.08);
+  color:var(--accent);
+  font-weight:600;
+  padding:6px 10px;
+  border-radius:999px;
+  font-size:13px;
+}
+h1{
+  margin:14px 0 12px 0;
+  font-size:clamp(24px,4.2vw,40px);
+  line-height:1.06;
+  letter-spacing:-0.02em;
+}
+.hero-sub{
+  color:var(--muted);
+  font-size:16px;
+  margin:0 0 18px 0;
+}
+.hero-ctas{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.btn{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  padding:12px 16px;
+  border-radius:10px;
+  text-decoration:none;
+  font-weight:600;
+  cursor:pointer;
+  border:1px solid transparent;
+  transition:transform .12s ease, box-shadow .12s ease;
+}
+.btn-primary{
+  background:linear-gradient(90deg,var(--accent),var(--accent-2));
+  color:white;
+  box-shadow: 0 6px 20px rgba(10,132,255,0.18);
+}
+.btn-secondary{
+  background:transparent;
+  color:var(--accent);
+  border-color: rgba(10,132,255,0.12);
+}
+
+/* Hero artwork */
+.hero-right{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+.device{
+  width:100%;
+  max-width:380px;
+  height:260px;
+  border-radius:18px;
+  background:linear-gradient(180deg, #ffffff, rgba(235,245,255,0.9));
+  box-shadow: 0 10px 40px rgba(15,23,42,0.06);
+  border:1px solid rgba(10,132,255,0.06);
+  padding:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+/* Video */
+.video-section{
+  margin:28px 0;
+  display:grid;
+  gap:14px;
+}
+.video-wrap{
+  width:100%;
+  aspect-ratio:16/9;
+  border-radius:12px;
+  overflow:hidden;
+  background:#000;
+  box-shadow:var(--shadow);
+}
+.video-wrap iframe{
+  width:100%;
+  height:100%;
+  border:0;
+  display:block;
+}
+
+/* Features carousel */
+.section-title{
+  display:flex;
+  justify-content:space-between;
+  align-items:end;
+  gap:12px;
+  margin-bottom:12px;
+}
+.carousel-wrap{
+  position:relative;
+}
+.carousel{
+  display:flex;
+  gap:18px;
+  overflow-x:auto;
+  scroll-snap-type:x mandatory;
+  padding-bottom:8px;
+  -webkit-overflow-scrolling:touch;
+}
+.feature-card{
+  min-width:240px;
+  max-width:320px;
+  flex:0 0 300px;
+  background:var(--card);
+  border-radius:14px;
+  padding:18px;
+  box-shadow: var(--shadow);
+  scroll-snap-align:center;
+  border:1px solid rgba(15,23,42,0.03);
+}
+.feature-icon{
+  width:56px;
+  height:56px;
+  border-radius:12px;
+  background:linear-gradient(135deg, rgba(10,132,255,0.09), rgba(110,193,255,0.06));
+  display:grid;
+  place-items:center;
+  font-size:22px;
+  color:var(--accent);
+  margin-bottom:10px;
+}
+.feature-card h3{margin:0 0 6px 0;font-size:18px}
+.feature-card .subtitle{color:var(--muted);font-size:13px;margin:0 0 8px 0}
+.feature-card .desc{font-size:14px;color:#0f172a;margin:0}
+
+/* Carousel controls */
+.carousel-controls{
+  display:flex;
+  gap:10px;
+}
+.icon-btn{
+  width:40px;
+  height:40px;
+  border-radius:10px;
+  background:var(--card);
+  border:1px solid rgba(15,23,42,0.04);
+  display:grid;
+  place-items:center;
+  cursor:pointer;
+  box-shadow:var(--shadow);
+}
+
+/* Comparison */
+.comparison-grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap:14px;
+  margin-top:12px;
+}
+.comp-card{
+  background:var(--card);
+  padding:16px;
+  border-radius:12px;
+  border:1px solid rgba(15,23,42,0.03);
+  box-shadow:var(--shadow);
+}
+.comp-card h4{margin:0 0 8px 0}
+.comp-card p{margin:0 0 10px 0;color:var(--muted);font-size:14px}
+.comp-card a{font-size:13px;color:var(--accent);text-decoration:none;}
+
+/* Files */
+.files{
+  display:grid;
+  gap:10px;
+  margin-top:12px;
+}
+.file{
+  display:flex;
+  gap:12px;
+  text-decoration:none;
+  align-items:flex-start;
+  padding:12px;
+  border-radius:10px;
+  background:linear-gradient(180deg, #ffffff, rgba(250,252,255,0.8));
+  border:1px solid rgba(15,23,42,0.03);
+}
+.file-icon{
+  width:56px;
+  height:56px;
+  border-radius:10px;
+  background:rgba(10,132,255,0.06);
+  display:grid;
+  place-items:center;
+  font-size:20px;
+  color:var(--accent);
+}
+.file strong{display:block}
+.file small{color:var(--muted);display:block;margin-bottom:6px}
+
+/* Footer */
+.footer{
+  margin-top:34px;
+  color:var(--muted);
+  font-size:13px;
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+/* Responsive */
+@media (max-width:880px){
+  .hero{grid-template-columns:1fr; padding:20px}
+  .hero-right{order:-1}
+  .video-section{margin-top:18px}
+}
+@media (max-width:680px){
+  body{padding:16px}
+  .carousel{gap:12px}
+  .feature-card{min-width:220px;flex:0 0 240px}
+  .nav{display:none}
+  .header{align-items:flex-start;gap:10px}
+  h1{font-size:22px}
+}
+</style>
+</head>
+<body>
+  <div class="container">
+
+    <header class="header" role="banner">
+      <a class="brand" href="#">
+        <div class="logo" aria-hidden="true">{{product-name}}</div>
+        <div class="brand-text">
+          <div style="font-weight:700">{{product-name}}</div>
+          <div style="font-size:12px;color:var(--muted)">Product landing</div>
+        </div>
+      </a>
+      <nav class="nav" aria-label="Primary">
+        <div class="cta-inline">
+          <a class="btn btn-secondary" href="#features">Features</a>
+          <a class="btn btn-secondary" href="#compare">Compare</a>
+          <a class="btn btn-primary" href="{{hero-cta-primary-link}}">{{hero-cta-primary-text}}</a>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-left">
+          <div class="badge">{{hero-badge}}</div>
+          <h1 id="hero-title">{{{hero-h1}}}</h1>
+          <p class="hero-sub">{{hero-sub}}</p>
+          <div class="hero-ctas">
+            <a class="btn btn-primary" href="{{hero-cta-primary-link}}">{{hero-cta-primary-text}}</a>
+            <a class="btn btn-secondary" href="{{hero-cta-secondary-link}}">{{hero-cta-secondary-text}}</a>
+          </div>
+        </div>
+
+        <div class="hero-right" aria-hidden="true">
+          <div class="device" role="img" aria-label="Product preview">
+            <!-- simple inline UI mock -->
+            <svg width="100%" height="100%" viewBox="0 0 600 400" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <defs>
+                <linearGradient id="g1" x1="0" x2="1">
+                  <stop offset="0" stop-color="#f8fbff"/>
+                  <stop offset="1" stop-color="#eef9ff"/>
+                </linearGradient>
+              </defs>
+              <rect rx="14" ry="14" width="100%" height="100%" fill="url(#g1)"/>
+              <g transform="translate(28,28)">
+                <rect x="0" y="0" width="544" height="140" rx="10" fill="#fff" stroke="rgba(10,132,255,0.06)"/>
+                <rect x="12" y="14" width="420" height="28" rx="6" fill="#f1f7fb"/>
+                <rect x="12" y="56" width="520" height="8" rx="4" fill="#eaf6ff"/>
+                <rect x="12" y="76" width="420" height="44" rx="8" fill="#fff"/>
+                <rect x="12" y="130" width="520" height="8" rx="4" fill="#eaf6ff"/>
+                <circle cx="480" cy="46" r="28" fill="url(#g1)"/>
+                <text x="488" y="52" text-anchor="middle" font-size="12" fill="#0a84ff" font-weight="700">Web</text>
+              </g>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <section class="video-section" aria-labelledby="video-title">
+        <div class="section-title">
+          <h2 id="video-title" style="margin:0;font-size:18px">Watch the product demo</h2>
+          <div style="color:var(--muted);font-size:13px">{{video-caption}}</div>
+        </div>
+        <div class="video-wrap" role="region" aria-label="Product video">
+          <iframe src="{{youtube-url}}" title="Product demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+      </section>
+
+      <section id="features" style="margin-top:28px">
+        <div class="section-title">
+          <h2 style="margin:0;font-size:18px">Highlighted features</h2>
+          <div class="carousel-controls" aria-hidden="true">
+            <button class="icon-btn" id="feat-prev" aria-label="Previous feature">◀</button>
+            <button class="icon-btn" id="feat-next" aria-label="Next feature">▶</button>
+          </div>
+        </div>
+
+        <div class="carousel-wrap" role="list">
+          <div class="carousel" id="features-track">
+            {{#features}}
+            <article class="feature-card" role="listitem">
+              <div class="feature-icon">{{{icon}}}</div>
+              <h3>{{title}}</h3>
+              <p class="subtitle">{{subtitle}}</p>
+              <p class="desc">{{description}}</p>
+            </article>
+            {{/features}}
+          </div>
+        </div>
+      </section>
+
+      <section id="compare" style="margin-top:28px">
+        <div class="section-title">
+          <h2 style="margin:0;font-size:18px">Quick comparison</h2>
+          <div style="color:var(--muted);font-size:13px">How {{product-name}} stacks up against common alternatives</div>
+        </div>
+
+        <div class="comparison-grid" role="list">
+          {{#comparisons}}
+          <div class="comp-card" role="listitem">
+            <h4>{{competitor}}</h4>
+            <p>{{short-summary}}</p>
+            <a href="{{competitor-link}}" target="_blank" rel="noopener">{{competitor-link}}</a>
+          </div>
+          {{/comparisons}}
+        </div>
+      </section>
+
+      <section style="margin-top:28px">
+        <div class="section-title">
+          <h2 style="margin:0;font-size:18px">Files & resources</h2>
+          <div style="color:var(--muted);font-size:13px">Download datasheet, pitch deck, and whitepaper</div>
+        </div>
+
+        <div class="files" role="list">
+          {{#files}}
+          <a class="file" href="{{url}}" download role="listitem">
+            <div class="file-icon">{{{icon}}}</div>
+            <div>
+              <strong>{{name}}</strong>
+              <small>{{type}}</small>
+              <p style="margin:6px 0 0 0;color:var(--muted)">{{description}}</p>
+            </div>
+          </a>
+          {{/files}}
+        </div>
+      </section>
+
+      <footer class="footer">
+        <div>© {{product-name}}. All rights reserved.</div>
+        <div style="text-align:right;color:var(--muted)">Built for modern teams — lightweight, secure, and fast.</div>
+      </footer>
+    </main>
+  </div>
+
+<script>
+(function(){
+  // Carousel controls
+  const track = document.getElementById('features-track');
+  const prev = document.getElementById('feat-prev');
+  const next = document.getElementById('feat-next');
+  if(track && prev && next){
+    const cardWidth = () => {
+      const c = track.querySelector('.feature-card');
+      return c ? c.getBoundingClientRect().width + parseFloat(getComputedStyle(track).gap || 18) : 300;
+    };
+    prev.addEventListener('click', ()=> track.scrollBy({left: -cardWidth(), behavior:'smooth'}));
+    next.addEventListener('click', ()=> track.scrollBy({left: cardWidth(), behavior:'smooth'}));
+    // enable keyboard left/right
+    track.tabIndex = 0;
+    track.addEventListener('keydown', (e)=>{
+      if(e.key === 'ArrowRight') next.click();
+      if(e.key === 'ArrowLeft') prev.click();
+    });
+  }
+
+  // Prevent accidental horizontal overflow on small screens
+  const preventOverflow = () => {
+    document.documentElement.style.overflowX = 'hidden';
+    document.body.style.overflowX = 'hidden';
+  };
+  preventOverflow();
+})();
+</script>
+</body>
+</html>

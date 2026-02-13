@@ -1,0 +1,34 @@
+
+{
+  "product-name": "input",
+  "hero-badge": "input",
+  "hero-h1": "input",
+  "hero-sub": "textarea",
+  "hero-cta-primary-text": "input",
+  "hero-cta-primary-link": "input",
+  "hero-cta-secondary-text": "input",
+  "hero-cta-secondary-link": "input",
+  "youtube-url": "input",
+  "video-caption": "input",
+  "features": "array",
+  "features-schema": {
+    "icon": "input",
+    "title": "input",
+    "subtitle": "input",
+    "description": "textarea"
+  },
+  "comparisons": "array",
+  "comparisons-schema": {
+    "competitor": "input",
+    "short-summary": "textarea",
+    "competitor-link": "input"
+  },
+  "files": "array",
+  "files-schema": {
+    "name": "input",
+    "type": "input",
+    "description": "textarea",
+    "url": "input",
+    "icon": "input"
+  }
+}

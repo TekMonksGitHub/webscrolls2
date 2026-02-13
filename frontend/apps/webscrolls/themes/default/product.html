@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<script type="text/javascript" src="./../../js/index.mjs"></script>
+<title>{{brand-name}} — Product Landing</title>
+<style>
+:root{
+  --bg:#FAFBFF;
+  --card:#FFFFFF;
+  --muted:#6B7280;
+  --accent:#2563EB;
+  --accent-2:#06B6D4;
+  --glass: rgba(255,255,255,0.6);
+  --success:#10B981;
+  --danger:#EF4444;
+  --shadow: 0 6px 20px rgba(16,24,40,0.08);
+  --radius:14px;
+  --max-width:1100px;
+  --gap:16px;
+}
+
+/* Base */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background:linear-gradient(180deg, var(--bg) 0%, #FFFFFF 100%);
+  color:#0F172A;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  padding-bottom:84px; /* for sticky CTA on small */
+}
+
+/* Prevent horizontal overflow */
+img,svg,iframe,div{max-width:100%}
+
+/* Layout */
+.container{
+  width:clamp(320px,92%,1200px);
+  margin:32px auto;
+  max-width:var(--max-width);
+  gap:var(--gap);
+}
+
+/* Header */
+.header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:6px 4px;
+}
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  font-weight:700;
+  letter-spacing:-0.01em;
+}
+.brand svg{height:38px;width:38px;flex:0 0 38px}
+.nav{
+  display:none;
+  gap:18px;
+  align-items:center;
+}
+.nav a{color:var(--muted);text-decoration:none;font-weight:600}
+.header .cta{
+  background:linear-gradient(90deg,var(--accent),var(--accent-2));
+  color:white;
+  border:none;
+  padding:10px 14px;
+  border-radius:10px;
+  font-weight:700;
+  cursor:pointer;
+  box-shadow: var(--shadow);
+  display:none;
+}
+
+/* Mobile first hero */
+.hero{
+  background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.4));
+  padding:22px;
+  border-radius:18px;
+  box-shadow: var(--shadow);
+  overflow:hidden;
+}
+.hero-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+.hero-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  background:rgba(37,99,235,0.08);
+  color:var(--accent);
+  padding:8px 12px;
+  border-radius:999px;
+  font-weight:700;
+  font-size:13px;
+}
+.hero-title{
+  margin-top:14px;
+  font-size:20px;
+  line-height:1.07;
+  font-weight:800;
+  letter-spacing:-0.01em;
+}
+.hero-title .muted{display:block;font-weight:600;color:var(--muted);font-size:14px;margin-top:8px}
+.hero-sub{
+  margin-top:12px;
+  color:var(--muted);
+  font-size:15px;
+  line-height:1.5;
+}
+
+/* Proof strip above the fold */
+.proof{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  margin-top:18px;
+  flex-wrap:wrap;
+}
+.logos{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.logo-pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(15,23,42,0.03);border-radius:12px;font-weight:600;color:var(--muted);font-size:13px}
+.metrics{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-left:auto}
+.metric{background:linear-gradient(180deg,#fff,#FBFDFF);padding:10px 12px;border-radius:10px;box-shadow:0 4px 12px rgba(2,6,23,0.04);min-width:98px;text-align:center}
+.metric .val{font-weight:800;color:var(--accent);font-size:16px}
+.metric .lbl{color:var(--muted);font-size:13px}
+
+/* Sandbox / micro-demos */
+.sandbox{
+  margin-top:18px;
+  background:linear-gradient(180deg,#fff, #FBFDFF);
+  border-radius:12px;
+  overflow:hidden;
+  box-shadow: 0 10px 30px rgba(2,6,23,0.06);
+  border:1px solid rgba(15,23,42,0.04);
+}
+.sandbox-inner{
+  display:flex;
+  gap:0;
+  position:relative;
+  min-height:220px;
+}
+.demo-slide{
+  flex:1 0 100%;
+  padding:18px;
+  display:none;
+  flex-direction:column;
+  gap:12px;
+  align-items:flex-start;
+  justify-content:center;
+}
+.demo-slide.active{display:flex}
+.demo-frame{
+  width:100%;
+  border-radius:10px;
+  background:linear-gradient(180deg,#F8FAFF,#FFFFFF);
+  padding:10px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+  border:1px solid rgba(15,23,42,0.03);
+}
+.frame-ui{
+  height:160px;
+  border-radius:8px;
+  background:linear-gradient(180deg,#0F172A08, #fff);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--muted);
+  font-weight:700;
+  font-size:13px;
+}
+
+/* Sandbox controls */
+.sandbox-controls{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  justify-content:flex-end;
+  padding:12px;
+  border-top:1px dashed rgba(15,23,42,0.03);
+  background:rgba(255,255,255,0.6);
+}
+.control-btn{
+  background:transparent;border:1px solid rgba(15,23,42,0.06);padding:8px 10px;border-radius:9px;font-weight:700;cursor:pointer;color:var(--muted)
+}
+.control-btn.primary{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:white;border:none;box-shadow:var(--shadow)}
+
+/* Comparison table */
+.compare{
+  margin-top:22px;
+  border-radius:12px;
+  overflow:hidden;
+  border:1px solid rgba(15,23,42,0.04);
+  background:linear-gradient(180deg,#FFFFFF,#FBFDFF);
+}
+.compare table{width:100%;border-collapse:collapse;font-size:14px}
+.compare th, .compare td{padding:12px 14px;text-align:left;border-top:1px dashed rgba(15,23,42,0.04)}
+.compare th{background:rgba(15,23,42,0.02);font-weight:700;color:var(--muted)}
+.compare td.center{text-align:center}
+
+/* Trust badges */
+.trust{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  margin-top:14px;
+  flex-wrap:wrap;
+}
+.badge{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  padding:8px 10px;
+  background:rgba(255,255,255,0.6);
+  border-radius:10px;
+  border:1px solid rgba(15,23,42,0.03);
+  font-weight:700;
+  color:var(--muted);
+  font-size:13px;
+}
+
+/* Comparison CTA area */
+.cta-area{
+  margin-top:18px;
+  display:flex;
+  gap:12px;
+  align-items:center;
+  justify-content:space-between;
+}
+.cta-left{max-width:68%}
+.cta-btn{
+  background:linear-gradient(90deg,var(--accent),var(--accent-2));
+  color:white;padding:12px 16px;border-radius:12px;font-weight:800;border:none;cursor:pointer;box-shadow:var(--shadow)
+}
+.cta-sub{color:var(--muted);font-size:13px}
+
+/* Footer */
+.footer{margin-top:28px;color:var(--muted);font-size:13px;padding:20px 0}
+
+/* Sticky CTA - mobile */
+.sticky-cta{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  justify-content:space-between;
+  position:fixed;
+  right:16px;
+  left:16px;
+  bottom:16px;
+  background:rgba(255,255,255,0.98);
+  padding:12px 14px;border-radius:12px;border:1px solid rgba(15,23,42,0.05);
+  box-shadow:0 18px 40px rgba(2,6,23,0.12);
+  z-index:60;
+}
+
+/* Micro-animations and hover */
+a:hover, .control-btn:hover{transform:translateY(-2px);transition:transform 180ms ease}
+.demo-frame .frame-ui{transition:transform 320ms cubic-bezier(.2,.9,.2,1)}
+.demo-slide.active .frame-ui{transform:scale(1.02)}
+.logo-pill{transition:transform 200ms ease, box-shadow 200ms ease}
+.logo-pill:hover{transform:translateY(-6px);box-shadow:0 12px 30px rgba(2,6,23,0.08)}
+
+/* Responsive */
+@media (min-width:760px){
+  .container{margin:44px auto}
+  .nav{display:flex}
+  .header .cta{display:inline-flex}
+  .hero{display:grid;grid-template-columns:1fr 420px;gap:20px;align-items:start;padding:28px}
+  .hero-title{font-size:28px}
+  .hero-sub{font-size:16px}
+  .sandbox-inner{min-height:260px}
+  .sandbox-controls{justify-content:flex-end}
+  .cta-area{align-items:center}
+  .cta-left{max-width:56%}
+  .proof{align-items:center}
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce){
+  *{transition:none!important;animation:none!important}
+}
+</style>
+</head>
+<body>
+  <div class="container">
+    <header class="header" role="banner">
+      <div class="brand" aria-label="{{brand-name}}">
+        <!-- simple inline SVG mark -->
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="4" y="4" width="56" height="56" rx="12" fill="url(#g)"/>
+          <defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#2563EB"/><stop offset="1" stop-color="#06B6D4"/></linearGradient></defs>
+          <path d="M20 40c6-8 18-8 24 0" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div>{{brand-name}}</div>
+      </div>
+
+      <nav class="nav" aria-label="Main navigation">
+        {{#nav-links}}
+        <a href="{{href}}">{{label}}</a>
+        {{/nav-links}}
+      </nav>
+
+      <button class="cta" onclick="document.querySelector('#cta-target')?.scrollIntoView({behavior:'smooth'})">{{cta-text}}</button>
+    </header>
+
+    <main role="main">
+      <section class="hero" aria-labelledby="hero-title">
+        <div>
+          <div class="hero-top">
+            <div class="hero-badge">Before → After</div>
+            <div style="color:var(--muted);font-weight:700;font-size:13px">Personalized for {{visitor-industry}} • From {{traffic-source}}</div>
+          </div>
+
+          <h1 id="hero-title" class="hero-title">{{{hero-h1}}}
+            <span class="muted">Transform the way your team ships product experiences — faster, measured, decisive.</span>
+          </h1>
+
+          <p class="hero-sub">{{hero-sub}}</p>
+
+          <div class="proof" role="region" aria-label="Proof and metrics">
+            <div class="logos" aria-hidden="false">
+              {{#client-logos}}
+                <div class="logo-pill" title="{{name}}">{{{svg}}} <span style="opacity:.9">{{name}}</span></div>
+              {{/client-logos}}
+            </div>
+            <div class="metrics" aria-hidden="true">
+              {{#metrics}}
+              <div class="metric">
+                <div class="val">{{value}}</div>
+                <div class="lbl">{{label}}</div>
+              </div>
+              {{/metrics}}
+            </div>
+          </div>
+
+          <!-- Sandbox micro-demos -->
+          <div class="sandbox" aria-label="Interactive micro-demos">
+            <div class="sandbox-inner" id="sandbox">
+              {{#micro-demos}}
+              <div class="demo-slide" data-duration="{{duration}}">
+                <div style="display:flex;justify-content:space-between;align-items:center;width:100%">
+                  <div style="font-weight:800">{{title}}</div>
+                  <div style="color:var(--muted);font-size:13px">{{duration}}s preview</div>
+                </div>
+
+                <div class="demo-frame" role="region" aria-label="{{title}} demo">
+                  <div class="frame-ui">Interactive preview — {{description}}</div>
+                </div>
+
+                <div style="color:var(--muted);font-size:13px;margin-top:6px">{{description}}</div>
+              </div>
+              {{/micro-demos}}
+            </div>
+
+            <div class="sandbox-controls" aria-hidden="false">
+              <button class="control-btn" id="demo-prev" title="Previous demo">◀</button>
+              <button class="control-btn" id="demo-play" title="Pause/Play">Pause</button>
+              <button class="control-btn" id="demo-next" title="Next demo">▶</button>
+              <button class="control-btn primary" onclick="document.querySelector('#cta-target')?.scrollIntoView({behavior:'smooth'})">Try live demo</button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right column: trust, comparison CTA -->
+        <aside style="padding-left:6px">
+          <div style="background:linear-gradient(180deg,#fff,#FBFDFF);padding:14px;border-radius:12px;border:1px solid rgba(15,23,42,0.04);box-shadow:var(--shadow)">
+            <div style="font-weight:800">Why teams switch</div>
+            <ul style="margin:12px 0 0 18px;color:var(--muted)">
+              <li>Interactive previews without sign-up</li>
+              <li>AI-personalized funnels for every industry</li>
+              <li>Enterprise-grade controls and privacy</li>
+            </ul>
+
+            <div style="margin-top:12px" class="trust" role="status">
+              {{#trust-badges}}
+              <div class="badge">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke="#E6EEF9" stroke-width="2"/><path d="M7 12l2.5 2.5L17 7" stroke="#34D399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <div style="font-size:13px">{{badge}} <span style="display:block;color:var(--muted);font-weight:600;font-size:12px">{{detail}}</span></div>
+              </div>
+              {{/trust-badges}}
+            </div>
+
+            <div style="margin-top:14px" class="cta-area">
+              <div class="cta-left">
+                <div style="font-weight:800">Get started with a tailored demo</div>
+                <div class="cta-sub">{{cta-subtext}}</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
+                <button id="cta-target" class="cta-btn">{{cta-text}}</button>
+                <button class="control-btn" style="font-size:13px">Request enterprise pricing</button>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="compare" style="margin-top:12px" aria-label="Comparison with competitors">
+            <table role="table" aria-describedby="comp-desc">
+              <thead><tr><th>Feature</th><th class="center">{{brand-name}}</th><th class="center">Competitor</th></tr></thead>
+              <tbody>
+                {{#comparison-rows}}
+                <tr>
+                  <td>{{feature}}</td>
+                  <td class="center">{{webscrolls}}</td>
+                  <td class="center">{{competitor}}</td>
+                </tr>
+                {{/comparison-rows}}
+              </tbody>
+            </table>
+            <div id="comp-desc" style="padding:10px 14px;color:var(--muted);font-size:13px">Side-by-side to anchor your evaluation and procurement conversations.</div>
+          </div>
+        </aside>
+      </section>
+
+      <section style="margin-top:20px">
+        <h3 style="margin:0 0 10px 0;font-size:16px;font-weight:800">Customer stories</h3>
+        <div style="display:grid;grid-template-columns:1fr;gap:12px">
+          <div style="background:var(--card);padding:14px;border-radius:12px;border:1px solid rgba(15,23,42,0.03);box-shadow:var(--shadow)">
+            <div style="font-weight:800">Fast onboarding, measurable outcomes</div>
+            <div style="color:var(--muted);margin-top:8px">Delivering a personalized demo flow lifted qualified leads by 2.1x and reduced time-to-value from weeks to days.</div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+          <div style="color:var(--muted)">{{footer-text}}</div>
+          <div style="color:var(--muted);font-weight:700">© <span id="year">{{year}}</span> {{brand-name}}</div>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <!-- Sticky CTA for mobile -->
+  <div class="sticky-cta" role="dialog" aria-label="Start free trial" style="display:none" id="sticky">
+    <div style="display:flex;flex-direction:column">
+      <div style="font-weight:800">{{cta-text}}</div>
+      <div style="font-size:12px;color:var(--muted)">{{cta-subtext}}</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="control-btn" onclick="document.querySelector('#cta-target')?.scrollIntoView({behavior:'smooth'})">Preview</button>
+      <button class="cta-btn" onclick="document.querySelector('#cta-target')?.scrollIntoView({behavior:'smooth'})">{{cta-text}}</button>
+    </div>
+  </div>
+
+<script>
+(function(){
+  // Sticky CTA visibility on small screens
+  function updateSticky(){
+    var sticky = document.getElementById('sticky');
+    if(window.innerWidth < 760) sticky.style.display = 'flex'; else sticky.style.display = 'none';
+  }
+  updateSticky();
+  window.addEventListener('resize', updateSticky);
+
+  // Demo carousel: cycles through .demo-slide elements using data-duration attribute
+  var slides = Array.from(document.querySelectorAll('.demo-slide'));
+  var idx = 0;
+  var playing = true;
+  var timer = null;
+  function showSlide(i){
+    slides.forEach((s, j) => s.classList.toggle('active', j===i));
+  }
+  function schedule(){
+    if(timer) clearTimeout(timer);
+    if(!playing) return;
+    if(slides.length===0) return;
+    var d = parseInt(slides[idx].dataset.duration) || 12;
+    timer = setTimeout(function(){
+      idx = (idx+1)%slides.length;
+      showSlide(idx);
+      schedule();
+    }, d*1000);
+  }
+  if(slides.length){
+    showSlide(0);
+    schedule();
+  }
+
+  // Controls
+  var playBtn = document.getElementById('demo-play');
+  var nextBtn = document.getElementById('demo-next');
+  var prevBtn = document.getElementById('demo-prev');
+  playBtn && playBtn.addEventListener('click', function(){
+    playing = !playing;
+    playBtn.textContent = playing ? 'Pause' : 'Play';
+    if(playing) schedule();
+    else if(timer){ clearTimeout(timer); timer=null; }
+  });
+  nextBtn && nextBtn.addEventListener('click', function(){
+    idx = (idx+1)%slides.length;
+    showSlide(idx);
+    if(playing) schedule();
+  });
+  prevBtn && prevBtn.addEventListener('click', function(){
+    idx = (idx-1+slides.length)%slides.length;
+    showSlide(idx);
+    if(playing) schedule();
+  });
+
+  // Scroll reveal: add class when in viewport (simple)
+  var revealEls = document.querySelectorAll('.demo-frame, .compare, .trust, .metric, .logo-pill');
+  var io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if(e.isIntersecting) e.target.style.transform = 'translateY(0)', e.target.style.opacity = 1;
+    });
+  }, {threshold:0.12});
+  revealEls.forEach(el=>{
+    el.style.transform = 'translateY(8px)';
+    el.style.opacity = 0;
+    io.observe(el);
+  });
+
+  // Inject current year in footer
+  document.getElementById('year').textContent = new Date().getFullYear();
+})();
+</script>
+</body>
+</html>
