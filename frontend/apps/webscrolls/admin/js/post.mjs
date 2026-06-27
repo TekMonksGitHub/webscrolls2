@@ -12,7 +12,8 @@ import {default as jsYaml} from "../../3p/js-yaml.mjs";
 import {loginmanager} from "../../js/loginmanager.mjs";
 import {apimanager as apiman} from "/framework/js/apimanager.mjs";
 
-const CREATE_NEW_POST = "--- create", MUSTACHE = await router.getMustache();
+const CREATE_NEW_POST = "--- create", DEFAULT_POST = "default";
+const MUSTACHE = await router.getMustache();
 const API_AI = `${WEBSCROLLS_CONSTANTS.API_PATH}/ai`;
 const API_DELETE = `${WEBSCROLLS_CONSTANTS.API_PATH}/delete`;
 const API_PUBLISH = `${WEBSCROLLS_CONSTANTS.API_PATH}/publish`;
@@ -25,6 +26,32 @@ async function createdata() {
     const posttypes = ["---", ...(await $$.requireJSON(`${WEBSCROLLS_CONSTANTS.APP_PATH}/themes/${themes[0]}/schemas/posttypes.json`))];
     return {themes, posttypes};
 }	
+
+async function getRenderedPost(theme, posttype, postid) {
+    const lang = session.get($$.MONKSHU_CONSTANTS.LANG_ID);
+    const htmlTemplateURL = `${WEBSCROLLS_CONSTANTS.APP_PATH}/themes/${theme}/${posttype}${posttype.endsWith(".html")?"":".html"}`;
+    const htmlTemplate = await $$.requireText(htmlTemplateURL), postdata = await getPostData(theme, posttype, postid);
+    try {
+        const finalHTML = MUSTACHE.render(htmlTemplate, postdata);
+        return finalHTML;
+    } catch (err) {return null;}
+}
+
+async function getPostData(theme, posttype, postid, postobject) {
+    const lang = session.get($$.MONKSHU_CONSTANTS.LANG_ID);
+    const theme_post_types = await $$.requireJSON(`${WEBSCROLLS_CONSTANTS.APP_PATH}/themes/${theme}/schemas/posttypes.json`);
+    const skipPageTopSideBars = _isReservedPostType(posttype);
+    
+    const header = (!skipPageTopSideBars) && theme_post_types.includes("header") ? await getRenderedPost(theme, "header", "default") : undefined;
+    const footer = (!skipPageTopSideBars) && theme_post_types.includes("footer") ? await getRenderedPost(theme, "footer", "default") : undefined;
+    const leftbar = (!skipPageTopSideBars) && theme_post_types.includes("leftbar") ? await getRenderedPost(theme, "leftbar", "default") : undefined;
+    const rightbar = (!skipPageTopSideBars) && theme_post_types.includes("rightbar") ? await getRenderedPost(theme, "rightbar", "default") : undefined;
+    
+    const posturl = `${WEBSCROLLS_CONSTANTS.APP_PATH}/cms/${posttype}/${postid}.${lang}.yaml`;
+    const postdata = postobject || jsYaml.load(await $$.requireText(posturl));
+    
+    return {header, footer, leftbar, rightbar, ...postdata};
+}
 
 async function themeselected(_element, theme) {
     try {
@@ -40,6 +67,7 @@ async function posttypeselected(_element, posttype) {
     if (posttype == old_posttype) return; else old_posttype = posttype;
     const selectThemes = document.querySelector("select#themeselector"), themeSelected = selectThemes.value;
     let pageSchema = {}, schemaError = false; 
+    const isPostTypeReserved = _isReservedPostType(posttype);
     if (posttype !== "---") {   // this means no post is selected
         try {
             pageSchema = await $$.requireJSON(`${WEBSCROLLS_CONSTANTS.APP_PATH}/themes/${themeSelected}/schemas/${posttype}.json`);
@@ -51,27 +79,28 @@ async function posttypeselected(_element, posttype) {
 
         let posts = []; 
         try {posts = await $$.requireJSON(`${WEBSCROLLS_CONSTANTS.APP_PATH}/cms/${posttype}/posts.json`);} 
-        catch (err) {WEBSCROLLS_LOG.warn(`No posts found for post type ${posttype}`);}
+        catch (err) {}; // no posts found for this post type, silent issue
         
         const selectPosts = document.querySelector("select#posts");
-        let optionsHTML = `<option value="${CREATE_NEW_POST}">${CREATE_NEW_POST}</option>\n`; 
-        for (const post of posts) optionsHTML += `<option value="${post}">${post}</option>\n`;
+        let optionsHTML = isPostTypeReserved ? `<option value="${DEFAULT_POST}">${DEFAULT_POST}</option>\n` :
+            `<option value="${CREATE_NEW_POST}">${CREATE_NEW_POST}</option>\n`; 
+        if (!isPostTypeReserved) for (const post of posts) optionsHTML += `<option value="${post}">${post}</option>\n`;
         selectPosts.innerHTML = optionsHTML; _setPostName(Date.now());
-        
     } 
 
     const templatedata = _parseSchemaIntoTemplateData(pageSchema);
     const templateHTMLElement = document.querySelector("template#postschemaform");
     const templateHTML = templateHTMLElement.innerHTML;
-    current_post_type_rendered_html = (await router.getMustache()).render(templateHTML, templatedata);
+    current_post_type_rendered_html = MUSTACHE.render(templateHTML, templatedata);
     _reinitPostFields();
     if ((posttype == "---") || schemaError) {
         _disableDeleteButton(); _disablePublishButton(); _resetHeaderUI(false);
     } else {_enablePublishButton(); rerender();}
+    postselected(_element, isPostTypeReserved ? DEFAULT_POST : CREATE_NEW_POST, true); // reset post selected
 }
 
-async function postselected(_element, post) {
-    if (post == old_post) return; else old_post = post;
+async function postselected(_element, post, reset) {
+    if ((!reset) && post == old_post) return; else old_post = post;
 
     if (post !== CREATE_NEW_POST) {_enableDeleteButton(); _disablePostNameHeaderInput(); _setPostName(post);}
     else { _disableDeleteButton(); _enablePostNameHeaderInput(); _setPostName(Date.now()); _reinitPostFields(); rerender(); return; }
@@ -81,7 +110,7 @@ async function postselected(_element, post) {
     _renderPostItems(postData); rerender();
 }
 
-async function addToArray(divArrayFields, fieldValue, isFirstFieldValue) {
+function addToArray(divArrayFields, fieldValue, isFirstFieldValue) {
     const newDiv = isFirstFieldValue ? divArrayFields : divArrayFields.cloneNode(true);
     newDiv.id = isFirstFieldValue ? newDiv.id : divArrayFields.id+Date.now(); _emptyFieldValues(newDiv); 
     if (!isFirstFieldValue) {
@@ -96,7 +125,7 @@ async function addToArray(divArrayFields, fieldValue, isFirstFieldValue) {
     }
 }
 
-async function deleteFromArray(divArrayFields) {
+function deleteFromArray(divArrayFields) {
     divArrayFields.parentNode.removeChild(divArrayFields);
 }
 
@@ -113,6 +142,7 @@ async function publishPost(button) {
 }
 
 async function publishPostExternalCall(post, posttype, postname, lang) {
+    if (_isReservedPostType(posttype)) postname = DEFAULT_POST; // override the name if the post type is reserved
     const posturl = `${WEBSCROLLS_CONSTANTS.APP_PATH}/cms/${posttype}/${postname}.${lang}.yaml`;
     return (await apiman.rest(API_PUBLISH, "POST", {postdata: post, posturl}, true)).result;
 }
@@ -151,15 +181,17 @@ async function rerender() {
     const selectThemes = document.querySelector("select#themeselector"), themeSelected = selectThemes.value;
     const selectPostTypes = document.querySelector("select#posttypes"), posttype = selectPostTypes.value;
     const htmlTemplateURL = `${WEBSCROLLS_CONSTANTS.APP_PATH}/themes/${themeSelected}/${posttype}${posttype.endsWith(".html")?"":".html"}`;
-    const htmlTemplate = await $$.requireText(htmlTemplateURL), 
-        post = _getPostObject(),
-        previewIframe = document.querySelector('iframe#previewitem'),
-        iframeDoc = previewIframe.contentDocument || previewIframe.contentWindow.document;
-    if (!htmlTemplate?.trim()) return; // can't render
+    const previewIframe = document.querySelector('iframe#previewitem');
+    const iframeDoc = previewIframe.contentDocument || previewIframe.contentWindow.document;
+    iframeDoc.open(); iframeDoc.write(""); iframeDoc.close();   // reset 
+
     try {
+        const htmlTemplate = await $$.requireText(htmlTemplateURL), 
+            post = await getPostData(themeSelected, posttype, undefined, _getPostObject());
+        if (!htmlTemplate?.trim()) return; // can't render
         const finalHTML = MUSTACHE.render(htmlTemplate, post);
         iframeDoc.open(); iframeDoc.write(finalHTML); iframeDoc.close();
-    } catch (err) {/* we can't preview some issue with html or json*/}
+    } catch (err) {}   // error can't rerender due to bad json, schema or something
 }
 
 function scaleIframe(type) {
@@ -229,6 +261,8 @@ async function callai(prompt) {
 
 const logout = _ => loginmanager.logout();
 
+
+const _isReservedPostType = posttype => ["header", "footer", "leftbar", "rightbar"].includes(posttype);
 
 function _getPostObject() {
     if (active_panel_id == "postraw") try{
@@ -340,6 +374,6 @@ function _parseSchemaIntoTemplateData(pageSchema) {
     return templatedata;
 }
 
-export const post = {createdata, themeselected, posttypeselected, postselected, panelSelect, scaleIframe,
-    addToArray, deleteFromArray, publishPost, deletePost, logout, publishPostExternalCall, dragstart, 
-    dragged, dragstop, rerender, callai};
+export const post = {createdata, getPostData, getRenderedPost, themeselected, posttypeselected, 
+    postselected, panelSelect, scaleIframe, addToArray, deleteFromArray, publishPost, deletePost, 
+    logout, publishPostExternalCall, dragstart, dragged, dragstop, rerender, callai};

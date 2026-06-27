@@ -27,11 +27,12 @@ const init = async _hostname => {
 }
 
 const main = async urlRequested => {
-	let {url, posturl, isadmin, module, theme} = _getURLAndPostToRouteTo(urlRequested);
+	let {url, posturl, isadmin, module, theme, page, postid} = _getURLAndPostToRouteTo(urlRequested);
 	let pushstate = new URL(url, window.location.href).href != window.location.href;
 
 	let postdata = {}; try {
-		if (posturl) postdata = jsYaml.load(await $$.requireText(posturl));
+		const {post} = await import("./../admin/js/post.mjs");
+		if (posturl) postdata = await post.getPostData(theme, page, postid);
 		if (isadmin) {
 			if (!loginmanager.isUserLoggedIn()) {
 				session.set(WEBSCROLLS_CONSTANTS.POST_LOGIN_URL_KEY, url);
@@ -56,7 +57,7 @@ function _getURLAndPostToRouteTo(urlRequested) {
 	const lang = session.get($$.MONKSHU_CONSTANTS.LANG_ID);
 	const posturl = `${protocol}//${host}/apps/${WEBSCROLLS_CONSTANTS.APP_NAME}/cms/${page.split(".")[0]}/${postid||"default"}.${lang}.yaml`;
 	if (search) urlToRouteTo += search; if (hash) urlToRouteTo += hash;
-	return {url: urlToRouteTo, posturl, theme, page, postid, isadmin: false};
+	return {url: urlToRouteTo, posturl, theme, page: page.split(".")[0], postid: postid||"default", isadmin: false};
 }
 
 function _decodePageURL(urlRequested=window.location) {

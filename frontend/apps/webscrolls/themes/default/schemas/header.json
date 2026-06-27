@@ -1,0 +1,13 @@
+
+{
+  "menu-categories":"array",
+  "menu-categories-schema":{
+    "category":"input",
+    "products":"array",
+    "products-schema":{
+      "product-name":"input",
+      "product-description":"textarea",
+      "link":"input"
+    }
+  }
+}

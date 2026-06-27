@@ -43,7 +43,9 @@ async function returnThemeContent(jsonReq) {
         retry++;
         if (retry > 1) LOG.info(`Retrying AI request.`);
         try {
-            const prompt = mustache.render(conf.contextprompt_theme_template, {prompt: jsonReq.prompt, error}).trim();
+            const prompt = mustache.render(conf.contextprompt_theme_template, 
+                {prompt: jsonReq.prompt, header: jsonReq.header, leftbar: jsonReq.leftbar, 
+                    rightbar: jsonReq.rightbar, footer: jsonReq.footer, error}).trim();
             response = await _runAIModel(conf.systemprompt_theme, prompt)
         } catch (err) {LOG.error(`Bad response from AI. OpenAI error ${err}`); continue;}
 
@@ -93,14 +95,18 @@ async function returnPostContent(jsonReq) {
 }
 
 function _runAIModel(instructions, prompt) {
-    return client.responses.create({
+    const aicall_params = {
         model: conf.model, 
-        messages: [
-            {"role": "system", "content": instructions},
-            {"role": "user", "content": prompt}
-        ],
         tools: [{"type": "web_search"}],
-    });
+    };
+    const inputOrMessages = [
+        {"role": "system", "content": instructions},
+        {"role": "user", "content": prompt}
+    ];
+    if (conf.base_url.toLowerCase().includes("openai")) aicall_params.input = inputOrMessages;
+    else aicall_params.messages = inputOrMessages; // openai uses input, claude uses messages etc.
+    
+    return client.responses.create(aicall_params);
 }
 
 const validateRequest = jsonReq => (jsonReq && jsonReq.prompt);
