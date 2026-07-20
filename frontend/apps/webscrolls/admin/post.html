@@ -283,6 +283,7 @@ span#zoomtext {
 div.panelcontent {width: 100%; height: 100%;}
 div.panelcontent textarea {
     width: 100%;
+    min-width: 15em;
     height: 100%;
     min-height: 10em;
     outline: none;
@@ -309,8 +310,10 @@ div.postfields {
     align-items: self-start;
 }
 span.postfieldname {
-    width: 20em;
+    width: 10em;
+    min-width: 10em;
     user-select: none;
+    margin-right: 1em;
 }
 span.postfieldvalue {
     flex-grow: 1;
@@ -318,7 +321,8 @@ span.postfieldvalue {
     flex-direction: column;
 }
 input.postfieldinput, textarea.postfieldinput {
-    width: calc(100% - 0.9rem);
+    width: calc(100% - 0.9em);
+    min-width: 15em;
     padding: 0.5em;
     border-radius: 0.5em;
     border: 0;
@@ -501,16 +505,7 @@ span.arraycarddelete {
         </span>
         <div class="arrayfields" id="arrayfields{{{id}}}">
             <span class="arraycarddelete displaynone" id="deletebutton{{{id}}}" onclick="post.deleteFromArray(this.parentNode)">X</span>
-            {{#schema}}
-            <div class="arraypostfields">
-            <span class="postfieldname" id="spanname{{{id}}}" data-type="{{{type}}}">{{name}}</span>
-
-            <span class="postfieldvalue" id="spanvalue{{{id}}}">
-            {{^textarea}}<input id="value{{{id}}}" class="postfieldinput"/>{{/textarea}}
-            {{#textarea}}<textarea id="value{{{id}}}" class="postfieldinput"></textarea>{{/textarea}}
-            </span>
-            </div>
-            {{/schema}}
+            {{> arraytemplate}}
         </div>
         {{/array}}
         </span>

@@ -6,6 +6,7 @@
  * License: See enclosed license.txt file.
  */
 
+import {util} from "/framework/js/util.mjs";
 import {router} from "/framework/js/router.mjs";
 import {session} from "/framework/js/session.mjs";
 import {default as jsYaml} from "../../3p/js-yaml.mjs";
@@ -90,8 +91,9 @@ async function posttypeselected(_element, posttype) {
 
     const templatedata = _parseSchemaIntoTemplateData(pageSchema);
     const templateHTMLElement = document.querySelector("template#postschemaform");
-    const templateHTML = templateHTMLElement.innerHTML;
-    current_post_type_rendered_html = MUSTACHE.render(templateHTML, templatedata);
+    const templateHTML = util.unescapeHTML(templateHTMLElement.innerHTML);
+    const partials = { arraytemplate: templateHTML };
+    current_post_type_rendered_html = MUSTACHE.render(templateHTML, templatedata, partials);
     _reinitPostFields();
     if ((posttype == "---") || schemaError) {
         _disableDeleteButton(); _disablePublishButton(); _resetHeaderUI(false);
@@ -116,12 +118,18 @@ function addToArray(divArrayFields, fieldValue, isFirstFieldValue) {
     if (!isFirstFieldValue) {
         newDiv.querySelector("span.arraycarddelete").classList.remove("displaynone"); 
         divArrayFields.parentNode.appendChild(newDiv);
-    } else for (const childNode of divArrayFields.parentNode.querySelectorAll("div.arrayfields")) 
+    } else for (const childNode of divArrayFields.parentNode.querySelectorAll(":scope > div.arrayfields")) 
         if (childNode !== newDiv) divArrayFields.parentNode.removeChild(childNode); // delete all other current nodes
     for (const [key,value] of Object.entries(fieldValue)) {
-        const inputField = newDiv.querySelector(`#value${key}`);
-        if (inputField) inputField.value = value; 
-        else WEBSCROLLS_LOG.error(`Missing array input field ${key}`);
+        const isArray = Array.isArray(value);
+        if (isArray) for (let i = 0; i < value.length; i++) {
+            const divArrayFields = newDiv.querySelector(`#arrayfields${key}`);
+            if (divArrayFields) addToArray(divArrayFields, value[i], i==0);
+        } else {
+            const inputField = newDiv.querySelector(`#value${key}`);
+            if (inputField) inputField.value = value; 
+            else WEBSCROLLS_LOG.error(`Missing array input field ${key}`);
+        }
     }
 }
 
@@ -311,13 +319,18 @@ function _renderPostItems(postData) {
 }
 
 function _extractFieldValue(divPostField) {
-    const postfield = divPostField.querySelector("span.postfieldname");
+    const postfield = divPostField.querySelector(":scope > span.postfieldname");
     const key = postfield.id.substring(8), type = postfield.dataset.type;
-        
-    let value; if (type != "array") value = divPostField.querySelector(`#value${key}`).value; else {
-        value = []; for (const divArrayMember of divPostField.querySelectorAll(`div.arrayfields`)) {
-            const divArrayFields = divArrayMember.querySelectorAll(`div.arraypostfields`);
-            const arrayMember = {}; for (const divArrayField of divArrayFields) {
+
+    let value;
+    if (type != "array") value = divPostField.querySelector(`:scope > span.postfieldvalue #value${key}`).value;
+    else {
+        value = [];
+        const divArrayMembers = divPostField.querySelectorAll(`:scope > span.postfieldvalue > div.arrayfields`);
+        for (const divArrayMember of divArrayMembers) {
+            const divArrayFields = divArrayMember.querySelectorAll(`:scope > div.postfields`);
+            const arrayMember = {};
+            for (const divArrayField of divArrayFields) {
                 const arrayObjectField = _extractFieldValue(divArrayField), keyThisObject = Object.keys(arrayObjectField)[0];
                 arrayMember[keyThisObject] = arrayObjectField[keyThisObject];
             }
@@ -325,7 +338,7 @@ function _extractFieldValue(divPostField) {
         }
     }
 
-    const retObject = {}; retObject[key] = value; return retObject
+    const retObject = {}; retObject[key] = value; return retObject;
 }
 
 const _disablePublishButton = _ => document.querySelector("span#publishbutton").classList.add("headerbuttondisabledpublish");
@@ -364,12 +377,13 @@ function _resetHeaderUI(theme=true, posttype=true, createedit=true, name=true, d
     return;
 }
 
-function _parseSchemaIntoTemplateData(pageSchema) {
+function _parseSchemaIntoTemplateData(pageSchema, idprefix) {
     const templatedata = {schema:[]}; for (const [key, value] of Object.entries(pageSchema)) {
         if (key.endsWith("-schema")) continue;  // these are not real fields
-        let schema; if (value == "array") schema = _parseSchemaIntoTemplateData(pageSchema[`${key}-schema`]).schema;
-        templatedata.schema.push({name: key.split("-").map(s => s[0].toLocaleUpperCase() + s.slice(1)).join(" "), 
-            id: key, type: value, schema, array: value=="array"?true:undefined, textarea: value=="textarea"?"true":undefined});
+        const idNormalized = `${idprefix?idprefix+"-":""}${key}`, nameNormalizaed = key.split("-").map(s => s[0].toLocaleUpperCase() + s.slice(1)).join(" ");
+        let schema; if (value == "array") schema = _parseSchemaIntoTemplateData(pageSchema[`${key}-schema`], idNormalized).schema;
+        templatedata.schema.push({name: nameNormalizaed, id: key, type: value, schema, 
+            array: value=="array"?true:undefined, textarea: value=="textarea"?"true":undefined});
     }
     return templatedata;
 }
