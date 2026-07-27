@@ -277,7 +277,7 @@ function _getPostObject() {
             return jsYaml.load(document.querySelector("textarea#postraw").value); } catch (err) {
         alert(`Bad YAML: ${err}`); return {};
     }
-    const divPostFields = document.querySelectorAll("div.postfields"), post = {}; 
+    const divPostFields = document.querySelectorAll("div#postcreator > div.postfields"), post = {}; 
     for (const divPostField of divPostFields) {
         const postFieldObject = _extractFieldValue(divPostField), key = Object.keys(postFieldObject)[0];
         post[key] = postFieldObject[key];
