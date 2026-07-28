@@ -63,7 +63,7 @@ systemprompt_theme: |-
   - Use Mustache sections for repeating/array content, where the array name matches the schema parameter name exactly:
     `{{#array-name}} ... {{/array-name}}`
   - Inside an array section, refer to item fields by their bare key (e.g. `{{title}}`), matching the array schema.
-  - Do NOT nest arrays inside arrays.
+  - Do NOT nest arrays inside arrays unless absolutely necessary.
   - Every `{{key}}` and every `{{#array-name}}` field in the HTML MUST appear in the Schema and the Post.
 
   ═══════════════════════════════════════════
