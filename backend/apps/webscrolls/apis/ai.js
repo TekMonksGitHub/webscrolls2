@@ -9,6 +9,12 @@
  * (C) 2025 TekMonks. All rights reserved.
  */
 
+if (!global.CONSTANTS) {    // for supporting direct execution via main()
+    global.CONSTANTS = require(`${process.env["MONKSHU_DIR"]}/backend/server/lib/constants.js`);
+    const APP_LIBDIR = `${__dirname}/../lib`;
+    global.WEBSCROLLS_CONSTANTS = require(`${APP_LIBDIR}/constants.js`);
+}
+
 const yaml = require("yaml");
 const OpenAI = require("openai");
 const mustache = require("mustache");
@@ -24,7 +30,7 @@ async function _init() {
     conf.real_aikey = crypt.decrypt(conf.ai_key, conf.crypt_key);
     conf.separator = conf.separator.trim();
     const clientOptions = {apiKey: conf.real_aikey}; 
-    if (conf.ai_provider == "claude") client = new Anthropic();
+    if (conf.ai_provider == "claude") client = new Anthropic(clientOptions);
     else client = new OpenAI(clientOptions);
 }
 
@@ -39,10 +45,14 @@ exports.doService = async jsonReq => {
 }
 
 if (require.main === module) {  // console tester
-    try {
-        if (arg[2]) {console.log(`${await _runAIModel("You are a helpful assistant.", arg[2])}\n`); process.exit(0);}
-        else {console.log(`Usage: ${argv[1]} [prompt]\n`); process.exit(1);}
-    } catch (err) { console.log(`Error: ${err}\n`); process.exit(1); }
+
+    (async _ => {try {
+        await _init();
+        if (process.argv[2]) {
+            const output = await _runAIModel("You are a helpful assistant.", process.argv[2]);
+            console.log(`${output}\n`); process.exit(0);
+        } else {console.log(`Usage: ${argv[1]} [prompt]\n`); process.exit(1);}
+    } catch (err) { console.log(`Error: ${err}\n`); process.exit(1); }})();
 }
 
 async function returnThemeContent(jsonReq) {
@@ -102,30 +112,37 @@ async function returnPostContent(jsonReq) {
     return {post: response.output_text, ...CONSTANTS.TRUE_RESULT};
 }
 
-function _runAIModel(instructions, prompt) {
-
+async function _runAIModel(instructions, prompt) {
     const aicall_params = {model: conf.ai_model};
-    const inputOrMessages = [
-        {"role": "system", "content": instructions},
-        {"role": "user", "content": prompt}
-    ];
-    
-    let providerFunction;
+
+    let finalResponse = "";
     if (conf.ai_provider.toLowerCase().includes("openai")) {
+        const inputOrMessages = [
+            {"role": "developer", "content": instructions},
+            {"role": "user", "content": prompt}
+        ];
         aicall_params.input = inputOrMessages; 
         aicall_params.tools = [{"type": "web_search"}];
-        providerFunction = "responses";
+        aicall_params.stream = true;
+        const stream = await client.responses.create(aicall_params);
+        for await (const event of stream) if (event.type == "response.output_text.delta") finalResponse += event.delta;
     }
     else {
+        const inputOrMessages = [{"role": "user", "content": prompt}];
+        aicall_params.system = instructions;
         aicall_params.messages = inputOrMessages; 
         aicall_params.tools = [{type: conf.ai_websearch_version, name: "web_search", allowed_callers: ["direct"]}];
         providerFunction = "messages";
         aicall_params.max_tokens = conf.ai_maxtokens;
         aicall_params.thinking = {type: "adaptive"};
         aicall_params.output_config = {effort: conf.ai_thinking_effort}; // Options: 'low', 'medium', 'high', 'max'
+        const stream = client.messages.stream(aicall_params);
+        const message = await stream.finalMessage();
+        const textBlock = message.content.find((block) => block.type === "text");
+        if (textBlock && textBlock.type === "text") finalResponse = textBlock.text;
     }
 
-    return client[providerFunction].create(aicall_params);
+    return finalResponse;
 }
 
 const validateRequest = jsonReq => (jsonReq && jsonReq.prompt);
