@@ -1,7 +1,10 @@
 crypt_key: 82577als2141rwq294938wasj3029ldwpz
-base_url: https://api.openai.com
-ai_key: 50239586465817ae7271d6bd9e8e521317d1104b30cff516ef7e823bc3452d4875f50b7a4681766238f376c679deb935ccbc3bd5cbad739f0d655551e7a45c38e5911e7ad6bbfc333cbe0a3efed754272fceb22b80aca26d2713b2c064548945b0d9bd456f7efa75cbdb81ea4cbdd8d4785cc504d90fa0de24d1af325302eb9667b33e6ebd6ca13924745c26a68446511fdb03b182b74587c11b38808be107a51b4c51187b9cd88b9d29e94a
-model: gpt-5.4-mini
+ai_provider: claude
+ai_key: 368aa716f6f910d701896b01f102769f34b72e50f87a5ec3d6417326c5c2654bc3816c939d03a982306fb9d257244aa745c08995d4399303706b054061576e63268322db8e61cb491ea52fcdb755e7527d0d24eeb2b902ef97de59b30d29e8e0be4de19b90df37c5881f34ceff4b07e44a031fe5
+ai_model: claude-opus-5
+ai_maxtokens: 40000
+ai_websearch_version: web_search_20260209
+ai_thinking_effort: medium
 separator: "*&&&&*"
 systemprompt_theme: |-
   You are an expert UI designer and front-end engineer generating production-ready, responsive web pages for a product called **Webscrolls**.

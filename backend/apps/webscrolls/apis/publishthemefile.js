@@ -47,13 +47,18 @@ async function _initThemePath(this_theme_path, themespath) {
 
     if (!(await serverutils.exists(themespath))) try {
         await fspromises.mkdir(`${themespath}`, {recursive: true});
-        await fspromises.writeFile(`${themespath}/themes.json`, "[]", "utf8");
-    } 
-    catch (err) { // create themes parent dir if needed
-        LOG.error(`Error initializing the themes root directory ${this_theme_path}. Error: ${err}`); 
+    } catch (err) { // create themes parent dir if needed
+        LOG.error(`Error initializing the themes root directory ${themespath}. Error: ${err}`); 
         return false;
     }
 
+    if (!(await serverutils.exists(`${themespath}/themes.json`, "[]", "utf8"))) try {
+        await fspromises.writeFile(`${themespath}/themes.json`, "[]", "utf8");
+    } catch (err) { // create themes parent dir if needed
+        LOG.error(`Error initializing the themes root directory ${this_theme_path}. Error: ${err}`); 
+    }
+
+    
     try {await fspromises.mkdir(`${this_theme_path}/schemas`, {recursive: true});} 
     catch (err) {LOG.error(`Error creating theme or schema directory ${this_theme_path}. Error: ${err}`); return false;}
     try {await fspromises.writeFile(`${this_theme_path}/schemas/posttypes.json`, "[]", "utf8");}

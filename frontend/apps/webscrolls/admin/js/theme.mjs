@@ -22,7 +22,8 @@ const API_PUBLISH_THEME_FILE = `${WEBSCROLLS_CONSTANTS.API_PATH}/publishthemefil
 let old_posttype, dragging_to_resize=false, currentResizer, can_not_repaint, current_theme, current_posttype, current_theme_post_types;
 
 async function createdata() {
-    const themes = [CREATE_NEW, ...(await $$.requireJSON(`${WEBSCROLLS_CONSTANTS.APP_PATH}/themes/themes.json`))];
+    const themes = [CREATE_NEW, ...(await _readObjectFileOrDefaultObjectOnError(
+        `${WEBSCROLLS_CONSTANTS.APP_PATH}/themes/themes.json`, []))];
     const posttypes = [CREATE_NEW];
     return {themes, posttypes};
 }
@@ -191,10 +192,10 @@ function scaleIframe(type) {
 
 async function callai() {
     const prompt = document.querySelector('textarea#aiitem').value;
-    const header = current_theme_post_types.includes("header") ? post.getRenderedPost(current_theme, "header", "default") : undefined;
-    const footer = current_theme_post_types.includes("footer") ? post.getRenderedPost(current_theme, "footer", "default") : undefined;
-    const leftbar = current_theme_post_types.includes("leftbar") ? post.getRenderedPost(current_theme, "leftsidebar", "default") : undefined;
-    const rightbar = current_theme_post_types.includes("rightbar") ? post.getRenderedPost(current_theme, "rightsidebar", "default") : undefined;
+    const header = current_theme_post_types?.includes("header") ? post.getRenderedPost(current_theme, "header", "default") : undefined;
+    const footer = current_theme_post_types?.includes("footer") ? post.getRenderedPost(current_theme, "footer", "default") : undefined;
+    const leftbar = current_theme_post_types?.includes("leftbar") ? post.getRenderedPost(current_theme, "leftsidebar", "default") : undefined;
+    const rightbar = current_theme_post_types?.includes("rightbar") ? post.getRenderedPost(current_theme, "rightsidebar", "default") : undefined;
 
     const divWorking = document.querySelector("div#working"); divWorking.classList.add("visible");
     const html_schema_post_result = await apiman.rest(API_AI, "POST", {header, leftbar, rightbar, footer, prompt}, 
@@ -228,6 +229,10 @@ function _resetHeaderUI(theme=true, themenameinput=true, posttype=true, postname
     if (deletebtn) _disableDeleteButton();
 
     return;
+}
+
+const _readObjectFileOrDefaultObjectOnError = async (url, defaultObject) => {
+    try {return await $$.requireJSON(url);} catch (err) {return defaultObject;}
 }
 
 export const theme = {createdata, themeselected, posttypeselected, dragstart, callai, logout,

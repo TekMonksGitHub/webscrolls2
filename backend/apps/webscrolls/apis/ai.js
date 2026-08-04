@@ -13,6 +13,7 @@ const yaml = require("yaml");
 const OpenAI = require("openai");
 const mustache = require("mustache");
 const fspromises = require("fs").promises;
+const Anthropic = require("@anthropic-ai/sdk");
 const crypt = require(`${CONSTANTS.LIBDIR}/crypt.js`);
 
 let conf, client;
@@ -23,8 +24,8 @@ async function _init() {
     conf.real_aikey = crypt.decrypt(conf.ai_key, conf.crypt_key);
     conf.separator = conf.separator.trim();
     const clientOptions = {apiKey: conf.real_aikey}; 
-    if (conf.base_url?.trim()) clientOptions.base_url = conf.base_url;  // allows using Claude etc
-    client = new OpenAI(clientOptions);
+    if (conf.ai_provider == "claude") client = new Anthropic();
+    else client = new OpenAI(clientOptions);
 }
 
 exports.doService = async jsonReq => {
@@ -35,6 +36,13 @@ exports.doService = async jsonReq => {
     LOG.info(`Servicing a new AI ${jsonReq.postschema?"post":"theme"} request`);
     if (jsonReq.postschema) return returnPostContent(jsonReq);
     else return returnThemeContent(jsonReq);
+}
+
+if (require.main === module) {  // console tester
+    try {
+        if (arg[2]) {console.log(`${await _runAIModel("You are a helpful assistant.", arg[2])}\n`); process.exit(0);}
+        else {console.log(`Usage: ${argv[1]} [prompt]\n`); process.exit(1);}
+    } catch (err) { console.log(`Error: ${err}\n`); process.exit(1); }
 }
 
 async function returnThemeContent(jsonReq) {
@@ -95,18 +103,29 @@ async function returnPostContent(jsonReq) {
 }
 
 function _runAIModel(instructions, prompt) {
-    const aicall_params = {
-        model: conf.model, 
-        tools: [{"type": "web_search"}],
-    };
+
+    const aicall_params = {model: conf.ai_model};
     const inputOrMessages = [
         {"role": "system", "content": instructions},
         {"role": "user", "content": prompt}
     ];
-    if (conf.base_url.toLowerCase().includes("openai")) aicall_params.input = inputOrMessages;
-    else aicall_params.messages = inputOrMessages; // openai uses input, claude uses messages etc.
     
-    return client.responses.create(aicall_params);
+    let providerFunction;
+    if (conf.ai_provider.toLowerCase().includes("openai")) {
+        aicall_params.input = inputOrMessages; 
+        aicall_params.tools = [{"type": "web_search"}];
+        providerFunction = "responses";
+    }
+    else {
+        aicall_params.messages = inputOrMessages; 
+        aicall_params.tools = [{type: conf.ai_websearch_version, name: "web_search", allowed_callers: ["direct"]}];
+        providerFunction = "messages";
+        aicall_params.max_tokens = conf.ai_maxtokens;
+        aicall_params.thinking = {type: "adaptive"};
+        aicall_params.output_config = {effort: conf.ai_thinking_effort}; // Options: 'low', 'medium', 'high', 'max'
+    }
+
+    return client[providerFunction].create(aicall_params);
 }
 
 const validateRequest = jsonReq => (jsonReq && jsonReq.prompt);

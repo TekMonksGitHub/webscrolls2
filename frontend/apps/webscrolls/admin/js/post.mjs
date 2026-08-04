@@ -40,7 +40,8 @@ async function getRenderedPost(theme, posttype, postid) {
 
 async function getPostData(theme, posttype, postid, postobject) {
     const lang = session.get($$.MONKSHU_CONSTANTS.LANG_ID);
-    const theme_post_types = await $$.requireJSON(`${WEBSCROLLS_CONSTANTS.APP_PATH}/themes/${theme}/schemas/posttypes.json`);
+    const theme_post_types = theme ? 
+        await $$.requireJSON(`${WEBSCROLLS_CONSTANTS.APP_PATH}/themes/${theme}/schemas/posttypes.json`) : [];
     const skipPageTopSideBars = _isReservedPostType(posttype);
     
     const header = (!skipPageTopSideBars) && theme_post_types.includes("header") ? await getRenderedPost(theme, "header", "default") : undefined;
