@@ -152,12 +152,16 @@ async function publishThemeFile() {
             template: htmlTemplate, schemaJSON}, true)).result) {
         const publishTestPostResult = publishtestpost ? (await post.publishPostExternalCall(
             testpost, posttype, testpostname, session.get($$.MONKSHU_CONSTANTS.LANG_ID))).result : true;
-        if (publishTestPostResult) alert("Published"); else ("Theme template published but test post publishing failed");
+        if (publishTestPostResult) alert("Published"); 
+        else ("Theme template published but test post publishing failed");
         
         const posttypeNormalized = posttype.endsWith(".html") ? posttype.split(".").at(-2) : posttype;
-        const newPostOption = new Option(posttypeNormalized, posttypeNormalized);
         const posttypeSelect = document.querySelector("select#posttypes");
-        posttypeSelect.add(newPostOption); posttypeSelect.selectedIndex = posttypeSelect.options.length-1;
+        const exists = Array.from(posttypeSelect.options).some(option => option.value === posttypeNormalized);
+        if (!exists) {
+            const newPostOption = new Option(posttypeNormalized, posttypeNormalized);
+            posttypeSelect.add(newPostOption); posttypeSelect.selectedIndex = posttypeSelect.options.length-1;
+        }
         const postname = document.querySelector("input#posttypename");
         postname.classList.add("headerinputdisabled");
 
@@ -201,7 +205,7 @@ async function callai() {
     const html_schema_post_result = await apiman.rest(API_AI, "POST", {header, leftbar, rightbar, footer, prompt}, 
         true, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, SSE_URL_FOR_APIS);
     if (html_schema_post_result?.result) {
-        const {html, schema, post, _airesponse} = html_schema_post_result;
+        const {html, schema, post, airesponse} = html_schema_post_result;
         const htmlElement = document.querySelector("textarea#htmlitem");
         const schemaElement = document.querySelector("textarea#schemaitem");
         const testpostElement = document.querySelector("textarea#testpostitem");

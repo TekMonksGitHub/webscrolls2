@@ -1,0 +1,139 @@
+<!-- Init scripts -->
+<script type="module">
+if (window.WEBSCROLLS_CONSTANTS && (!window.post)) window.post = (await import ("./../js/post.mjs")).post;
+
+window.copyLink = function(shadowRoot) {
+    $$.copyTextToClipboard(shadowRoot.querySelector('span#link').innerText);
+    const spanCopied = shadowRoot.querySelector('span#copied');
+    if (spanCopied) {
+        spanCopied.classList.add("visible");
+        setTimeout(_=>spanCopied.classList.remove("visible"), 500);
+    }
+}
+</script>
+
+<style>
+    div#dialog {
+        background-color: #424242 !important;
+        padding: 2rem 0rem 0rem 0rem;
+        border-radius: 1rem;
+        box-sizing: border-box;
+    }
+    div#error {display: none;}
+    span#close {
+        top: 1rem;
+        right: 1rem;
+    }
+    div#dialogcontent {margin: 0rem;}
+    div#buttonbar {height: 1rem;}
+    div#buttonbar span {display: none !important;}
+    div#main {
+        background-color: #424242;
+        width: 50vw;
+        height: 50vh;
+        padding: 1rem;
+        overflow: auto;
+        display: flex;
+        flex-direction: column;
+    }
+
+    div#selectorheaderdiv {
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        border: 1px solid #D9D9D9;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        min-width: fit-content;
+        max-height: fit-content;
+    }
+    div#selectorheaderdiv > span {
+        display: flex;
+        white-space: nowrap;
+        align-items: center;
+    }
+    select.header {
+        padding: 0.5rem;
+        border-radius: 0.8rem;
+        width: 7rem;
+        margin: 0rem 0.5em;
+        outline: none;
+        background-color: #D9D9D9;
+    }
+
+    span#linkspan {
+        margin-top: 1rem;
+        cursor: copy;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+    span#copied {
+        transition: opacity 0.5s ease, visibility 0.5s ease;
+        opacity: 0;
+        color: darkseagreen;
+        font-size: smaller;
+    }
+    span#copied.visible {
+        opacity: 1 !important;
+    }
+
+    span#spacer {flex-grow: 1;}
+
+    div#actionbuttons {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-evenly;
+    }
+
+    span.actionbutton {
+        padding: 0.5rem 1rem;
+        border: 1px solid;
+        border-radius: 0.5rem;
+        background-color: #D9D9D9;
+        color: #4c4c4c;
+        cursor: default;
+    }
+</style>
+<div id="main">
+    <div id="selectorheaderdiv">
+        <span>
+        <label for="themeselector">Theme</label>
+        <select name="theme" id="themeselector" class="header" onchange="window.post.linkselectionchanged(this, this.value, 'theme')">
+            {{#themes}}
+            <option value="{{.}}">{{.}}</option>
+            {{/themes}}
+        </select>
+        </span>
+
+        <span>
+        <label for="posttypes">Post type</label>
+        <select name="posttype" id="posttypes" class="header" onchange="post.linkselectionchanged(this, this.value, 'posttype')">
+            {{#posttypes}}
+            <option value="{{.}}">{{.}}</option>
+            {{/posttypes}}
+        </select>
+        </span>
+
+        <span>
+        <label for="posts">Post</label>
+        <select name="posts" id="posts" class="header" onchange="post.linkselectionchanged(this, this.value, 'post')">
+            {{#posts}}
+            <option value="{{.}}">{{.}}</option>
+            {{/posts}}
+        </select>
+        </span>
+        </span>
+    </div>
+    <span id="linkspan" onclick="copyLink(this)">
+        <span>Link: <span id="link">{{link}}</span></span>
+        <span id="copied">Copied</span>
+    </span>
+    <span id="spacer"></span>
+    <div id="actionbuttons">
+        <span class="actionbutton" onclick="copyLink(this.parentNode.parentNode)">Copy</span>
+        <span class="actionbutton" onclick="post.closeLinkDialog(this)">Close</span>
+    </div>
+</div>

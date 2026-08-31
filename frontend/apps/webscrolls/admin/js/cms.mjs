@@ -28,6 +28,9 @@ function createdata() {
     };
 }
 
-function setcmstype(type) {session.set(CMSTYPE_KEY, type); router.hardreload();}
+function setcmstype(type) {
+    session.set(CMSTYPE_KEY, type); 
+    window.monkshu_env.components["file-manager"].reset("fm"); // as the cms type is changing reset the path to root
+}
 
 export const cms = {createdata, logout: loginmanager.logout, setcmstype};

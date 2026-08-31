@@ -3,9 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <!-- Run inside the monkshu framework -->
 <script type="text/javascript" src="./../js/index.mjs" defer></script>
-<script type="module">if (window.WEBSCROLLS_CONSTANTS) window.post = (await import ("./js/post.mjs")).post;</script>
+
+<!-- Init scripts -->
+<script type="module">
+if (window.WEBSCROLLS_CONSTANTS) {
+    window.post = (await import ("./js/post.mjs")).post;
+    await import("./components/dialog-box/dialog-box.mjs");
+}
+</script>
+
 <title>{{i18n.Admin_CreatePost}}</title>
 
 <style>
@@ -27,7 +36,7 @@
 }
 
 body {
-    padding: 1rem 1.5rem;
+    padding: 1rem 0rem;
     background-color: #424242;
     color: #FFFFFF;
     font-size: 0.9rem;
@@ -41,6 +50,15 @@ body {
     margin: 0;
 }
 
+div#postselector {
+    margin: 0rem 0.5rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    box-sizing: border-box;
+}
+
 img.headericon {width: 2rem; height: 2rem; margin-right: 0.5rem; cursor: pointer;;}
 
 div#selectorheaderdiv {
@@ -48,7 +66,7 @@ div#selectorheaderdiv {
     border-radius: 0.5rem;
     border: 1px solid #D9D9D9;
     flex-grow: 1;
-    margin-right: 4rem;
+    margin-right: 1rem;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -66,14 +84,25 @@ div#buttonsheaderdiv {
     align-items: center;
 }
 
-div#postselector {
-    padding: 0rem 1.5rem;
+div#linkdiv {
+    padding: 0.6rem;
+    border-radius: 0.5rem;
+    border: 1px solid #D9D9D9;
     display: flex;
     flex-direction: row;
+    justify-content: space-between;
+    min-width: fit-content;
+    max-width: fit-content;
+    align-items: center;
+    margin-right: 1rem;
+}
+span#linkbutton {
+    display: flex;
     align-items: center;
     justify-content: space-between;
-    box-sizing: border-box;
+    width: 2.5rem;
 }
+span#linkbutton svg {height: 0.68rem;}
 
 select.header {
     padding: 0.5rem;
@@ -114,6 +143,7 @@ span.headerbutton {
     cursor: pointer;
     background-color: #D9D9D9;
     font-weight: 400;
+    user-select: none;
 }
 span.headerbuttondelete {
     background: #de5959;
@@ -127,6 +157,9 @@ span.headerbuttondisabledpublish {
 span.headerbuttondisableddelete {
     color: #a5a5a5;
     pointer-events: none;
+}
+span.headerbuttonlink {
+    padding: 0.5rem 1rem;
 }
 span#logout {
     width: 1.5rem; 
@@ -404,6 +437,16 @@ span.arraycarddelete {
         </span>
     </div>
 
+    <div id="linkdiv">
+        <span id="linkbutton" class="headerbutton headerbuttonlink" onclick="post.showLinkGenerator(this)">
+            <svg xmlns="http://w3.org" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+            </svg>
+            Link
+        </span>
+    </div>
+
     <div id="buttonsheaderdiv">
         <span id="deletebutton" class="headerbutton headerbuttondelete headerbuttondisableddelete" onclick="post.deletePost(this)">Delete</span>
         <span id="publishbutton" class="headerbutton headerbuttondisabledpublish" onclick="post.publishPost(this)">Publish</span>
@@ -484,6 +527,8 @@ span.arraycarddelete {
         </div>
     </div>
 </div>
+
+<dialog-box id="postdialog"></dialog-box>
 
 <!-- Templates follow -->
 <template id="postschemaform">

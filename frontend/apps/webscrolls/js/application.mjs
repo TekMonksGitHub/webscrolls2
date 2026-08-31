@@ -10,7 +10,6 @@
 import {loginmanager} from "./loginmanager.mjs";
 import {router} from "/framework/js/router.mjs";
 import {session} from "/framework/js/session.mjs";
-import {default as jsYaml} from "../3p/js-yaml.mjs";
 import {securityguard} from "/framework/js/securityguard.mjs";
 import {apimanager as apiman} from "/framework/js/apimanager.mjs";
 
@@ -19,7 +18,7 @@ const init = async _hostname => {
 
 	window.WEBSCROLLS_CONSTANTS = (await import ("./constants.mjs")).WEBSCROLLS_CONSTANTS;
 	window.WEBSCROLLS_LOG = $$.LOG;
-	window.monkshu_env.apps[WEBSCROLLS_CONSTANTS.APP_NAME] = {main};
+	window.monkshu_env.apps[WEBSCROLLS_CONSTANTS.APP_NAME] = {...application};
 	if (!session.get($$.MONKSHU_CONSTANTS.LANG_ID)) session.set($$.MONKSHU_CONSTANTS.LANG_ID, "en");
 	securityguard.setPermissionsMap(WEBSCROLLS_CONSTANTS.PERMISSIONS_MAP);
 	securityguard.setCurrentRole(securityguard.getCurrentRole() || WEBSCROLLS_CONSTANTS.GUEST_ROLE);
@@ -47,6 +46,8 @@ const main = async urlRequested => {
 	try {await router.loadPage(url, {WEBSCROLLS_CONSTANTS, ...postdata}, true, pushstate);} catch (error) { 
 		router.loadPage(WEBSCROLLS_CONSTANTS.ERROR_HTML, {WEBSCROLLS_CONSTANTS, error, stack: error.stack || new Error().stack}); }
 }
+
+const getRelativeURL = (theme, posttype, postid) => `/apps/${WEBSCROLLS_CONSTANTS.APP_NAME}/themes/${theme}/${posttype}.html?p=${postid}`;
 
 function _getURLAndPostToRouteTo(urlRequested) {
 	const {adminurl, loginurl, protocol, host, theme, page, postid, search, hash} = _decodePageURL(urlRequested);
@@ -81,4 +82,4 @@ function _decodePageURL(urlRequested=window.location) {
 	return {protocol, host, theme, page, postid, search, hash};
 }
 
-export const application = {init, main};
+export const application = {init, main, getRelativeURL};

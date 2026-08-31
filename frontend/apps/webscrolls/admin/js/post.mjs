@@ -19,13 +19,18 @@ const API_AI = `${WEBSCROLLS_CONSTANTS.API_PATH}/ai`;
 const API_DELETE = `${WEBSCROLLS_CONSTANTS.API_PATH}/delete`;
 const API_PUBLISH = `${WEBSCROLLS_CONSTANTS.API_PATH}/publish`;
 const SSE_URL_FOR_APIS = `${WEBSCROLLS_CONSTANTS.API_PATH}/appevents`;
+const COMPONENT_PATH = util.getModulePath(import.meta), DIALOGS_PATH = `${COMPONENT_PATH}/../dialogs`;
 
 let old_posttype, old_post, current_post_schema, dragging_to_resize=false, currentResizer, active_panel_id, current_post_type_rendered_html; 
 
-async function createdata() {
+async function createdata(dontAddBlanks=false, addPosts=false) {
     const themes = await $$.requireJSON(`${WEBSCROLLS_CONSTANTS.APP_PATH}/themes/themes.json`);
-    const posttypes = ["---", ...(await $$.requireJSON(`${WEBSCROLLS_CONSTANTS.APP_PATH}/themes/${themes[0]}/schemas/posttypes.json`))];
-    return {themes, posttypes};
+    let posttypes = [...(await $$.requireJSON(`${WEBSCROLLS_CONSTANTS.APP_PATH}/themes/${themes[0]}/schemas/posttypes.json`))];
+    const firstPostType = posttypes[0]; if (!dontAddBlanks) posttypes = ["---", ...posttypes];
+    let posts = dontAddBlanks ? [] : [CREATE_NEW_POST]; 
+    try {if (firstPostType) posts = [...posts, await $$.requireJSON(`${WEBSCROLLS_CONSTANTS.APP_PATH}/cms/${firstPostType}/posts.json`)];} 
+    catch (err) {}; // no posts found for this post type, silent issue
+    return addPosts ? {themes, posttypes, posts} : {themes, posttypes};
 }	
 
 async function getRenderedPost(theme, posttype, postid) {
@@ -268,6 +273,41 @@ async function callai(prompt) {
     divWorking.classList.remove("visible");
 }
 
+async function showLinkGenerator(_element) {
+    const dialog = monkshu_env.components['dialog-box'];
+    const initialData = await createdata(true, true);
+    initialData.link = window.monkshu_env.apps[WEBSCROLLS_CONSTANTS.APP_NAME].getRelativeURL(
+        initialData.themes[0], initialData.posttypes[0], initialData.posts[0]);
+    dialog.showDialog(`${DIALOGS_PATH}/linkgen.html`, true, true, initialData, "postdialog");
+}
+
+const closeLinkDialog = _ => monkshu_env.components['dialog-box'].hideDialog("postdialog");
+
+async function linkselectionchanged(element, value, type) {
+    const shadowRoot = monkshu_env.components['dialog-box'].getShadowRootByContainedElement(element);
+    if (type == "theme") {
+        const posttypes = [...(await $$.requireJSON(`${WEBSCROLLS_CONSTANTS.APP_PATH}/themes/${value}/schemas/posttypes.json`))];
+        const selectPostTypes = shadowRoot.querySelector("select#posttypes");
+        let optionsHTML = ""; for (const posttype of posttypes) if (!_isReservedPostType(posttype)) 
+            optionsHTML += `<option value="${posttype}">${posttype}</option>\n`;
+        selectPostTypes.innerHTML = optionsHTML;
+        linkselectionchanged(element, posttypes[0], "posttype");
+    } else if (type == "posttype") {
+        let posts = []; 
+        try {posts = await $$.requireJSON(`${WEBSCROLLS_CONSTANTS.APP_PATH}/cms/${value}/posts.json`);} 
+        catch (err) {}; // no posts found for this post type, silent issue
+        const selectPosts = shadowRoot.querySelector("select#posts");
+        let optionsHTML = ""; for (const post of posts) optionsHTML += `<option value="${post}">${post}</option>\n`;
+        selectPosts.innerHTML = optionsHTML;
+        linkselectionchanged(element, posts[0], "post");
+    } else if (type == "post") {
+        const theme = shadowRoot.querySelector("select#themeselector").value;
+        const posttype = shadowRoot.querySelector("select#posttypes").value;
+        const link = window.monkshu_env.apps[WEBSCROLLS_CONSTANTS.APP_NAME].getRelativeURL(theme, posttype, value);
+        shadowRoot.querySelector("span#link").innerText = link;
+    }
+}
+
 const logout = _ => loginmanager.logout();
 
 
@@ -391,4 +431,5 @@ function _parseSchemaIntoTemplateData(pageSchema, idprefix) {
 
 export const post = {createdata, getPostData, getRenderedPost, themeselected, posttypeselected, 
     postselected, panelSelect, scaleIframe, addToArray, deleteFromArray, publishPost, deletePost, 
-    logout, publishPostExternalCall, dragstart, dragged, dragstop, rerender, callai};
+    logout, publishPostExternalCall, dragstart, dragged, dragstop, rerender, callai, showLinkGenerator,
+    linkselectionchanged, closeLinkDialog};

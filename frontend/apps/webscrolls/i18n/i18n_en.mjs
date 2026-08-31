@@ -13,4 +13,7 @@ export const i18n = {
 "LoginMsg": "Sign in with Tekmonks Login",
 "LoginFailed": "Login failure",
 "InternalError": "Internal error",
+
+"OK": "OK",
+"Cancel": "Cancel"
 }

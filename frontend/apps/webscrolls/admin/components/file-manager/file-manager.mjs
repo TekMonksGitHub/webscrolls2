@@ -451,6 +451,8 @@ function changeToPath(hostid, path) {
    (file_manager.getSessionMemory(hostid))["__lastPath"] = path; router.reload(!ENCODE_URL, false);   // ideally should be file-manager.reload but that for some reason breaks SVG with currentColor
 }
 
+function reset(hostid) {file_manager.clearSessionMemory(hostid); router.hardreload();}
+
 const _getReqIDForDownloading = path => encodeURIComponent(path+Date.now()+Math.random());
 
 async function downloadFile(element) {
@@ -683,5 +685,6 @@ const _getHostAttribute = (hostOrElement, attributeName) => {
 export const file_manager = { trueWebComponentMode: true, elementConnected, elementRendered, handleClick, 
    showMenu, deleteFile, editFile, downloadFile, cut, copy, paste, upload, uploadFiles, create, shareFile, 
    renameFile, menuEventDispatcher, isMobile, getDragAndDropDownloadURL, showDownloadProgress, hideNotification,
-   cancelFile, editFileVisible, showHideNotifications, getInfoOnFile, updateFileEntryCommentIfModified, changeToPath }
+   cancelFile, editFileVisible, showHideNotifications, getInfoOnFile, updateFileEntryCommentIfModified, changeToPath,
+   reset}
 monkshu_component.register("file-manager", `${COMPONENT_PATH}/file-manager.html`, file_manager);

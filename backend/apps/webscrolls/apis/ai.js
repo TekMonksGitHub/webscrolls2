@@ -1,6 +1,7 @@
 /**
  * Runs AI with the given prompt. This should be setup as a long
- * running API. Handles both post and theme generation via AI.
+ * running API. Handles both post and theme generation via AI. 
+ * Supports two providers - OpenAI and Claude.
  * 
  * Params
  * 	prompt: The prompt. By default assumes it is a theme generation prompt. 
@@ -142,7 +143,7 @@ async function _runAIModel(instructions, prompt) {
         if (textBlock && textBlock.type === "text") finalResponse = textBlock.text;
     }
 
-    return finalResponse;
+    return {output_text: finalResponse};
 }
 
 const validateRequest = jsonReq => (jsonReq && jsonReq.prompt);
