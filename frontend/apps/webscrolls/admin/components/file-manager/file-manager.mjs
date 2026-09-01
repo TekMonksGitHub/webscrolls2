@@ -90,16 +90,17 @@ async function elementConnected(host) {
    }
    
    // if a file or folder has been selected, show the paste button
-   const folder_ops = [];
-   if (selectedCopyPath || selectedCutPath) folder_ops.unshift({name: await i18n.get("Paste"), path, stats:{paste: true}, icon:`${COMPONENT_PATH}/img/paste.svg`});
+   const folder_ops = []; if ((!host.getAttribute("folderops")) || (host.getAttribute("folderops").toLowerCase() == "true")) {
+      if (selectedCopyPath || selectedCutPath) folder_ops.unshift({name: await i18n.get("Paste"), path, stats:{paste: true}, icon:`${COMPONENT_PATH}/img/paste.svg`});
 
-   folder_ops.unshift({name: await i18n.get("Create"), path, stats:{create: true}, icon:`${COMPONENT_PATH}/img/create.svg`});
-   folder_ops.unshift({name: await i18n.get("Upload"), path, stats:{upload: true}, icon:`${COMPONENT_PATH}/img/upload.svg`});
+      folder_ops.unshift({name: await i18n.get("Create"), path, stats:{create: true}, icon:`${COMPONENT_PATH}/img/create.svg`});
+      folder_ops.unshift({name: await i18n.get("Upload"), path, stats:{upload: true}, icon:`${COMPONENT_PATH}/img/upload.svg`});
 
-   if (!path.match(/^[\/]+$/g)) { // add in back and home buttons
-      let parentPath = path.substring(0, path.lastIndexOf("/")); if (parentPath == "") parentPath = "/";
-      folder_ops.unshift({name: await i18n.get("Back"), path:parentPath, stats:{back: true}, icon:`${COMPONENT_PATH}/img/back.svg`});
-      folder_ops.unshift({name: await i18n.get("Home"), path:"/", stats:{home: true}, icon:`${COMPONENT_PATH}/img/home.svg`});
+      if (!path.match(/^[\/]+$/g)) { // add in back and home buttons
+         let parentPath = path.substring(0, path.lastIndexOf("/")); if (parentPath == "") parentPath = "/";
+         folder_ops.unshift({name: await i18n.get("Back"), path:parentPath, stats:{back: true}, icon:`${COMPONENT_PATH}/img/back.svg`});
+         folder_ops.unshift({name: await i18n.get("Home"), path:"/", stats:{home: true}, icon:`${COMPONENT_PATH}/img/home.svg`});
+      }
    }
 
    const pathcrumbs = [{action:`monkshu_env.components['file-manager'].changeToPath('${host.id}','/')`, name: await i18n.get("Home")}];
@@ -156,13 +157,14 @@ function handleClick(element, path, isDirectory, fromClickEvent, nomenu, clickEv
    selectedIsDirectory = (isDirectory!== undefined) ? util.parseBoolean(isDirectory) : selectedIsDirectory;
    selectedElement = element; const event = JSON.parse(element.dataset.stats||"{}");  // used below in eval
    const hostElement = file_manager.getHostElement(element); if (hostElement.getAttribute("onselect")) eval(hostElement.getAttribute("onselect"));
+   const showContextMenu = hostElement.getAttribute("nomenu")?.toLowerCase() == "true" ? false : true;
 
    if (nomenu) return;
    
    if (timer) {clearTimeout(timer); if (fromClickEvent) editFile(element); timer=null;}
    else timer = setTimeout(_=> { timer=null; _fileListingEntrySelected(element, event);
-      if ((fromClickEvent && isMobile())||!fromClickEvent) {if (!menuOpen) showMenu(element, false, clickEvent); else hideMenu(element); return;}
-      if (fromClickEvent && menuOpen) hideMenu(element); // menu is open and user clicked anywhere, close it
+      if (showContextMenu && ((fromClickEvent && isMobile())||!fromClickEvent)) {if (!menuOpen) showMenu(element, false, clickEvent); else hideMenu(element); return;}
+      if (showContextMenu && fromClickEvent && menuOpen) hideMenu(element); // menu is open and user clicked anywhere, close it
    }, DOUBLE_CLICK_DELAY);
 }
 
@@ -448,7 +450,7 @@ function editFileVisible() {
 
 function changeToPath(hostid, path) {
    const host = file_manager.getHostElementByID(hostid); host.setAttribute("path", path); 
-   (file_manager.getSessionMemory(hostid))["__lastPath"] = path; router.reload(!ENCODE_URL, false);   // ideally should be file-manager.reload but that for some reason breaks SVG with currentColor
+   (file_manager.getSessionMemory(hostid))["__lastPath"] = path; file_manager.reload(hostid, true); 
 }
 
 function reset(hostid) {file_manager.clearSessionMemory(hostid); router.hardreload();}
@@ -627,6 +629,8 @@ async function _renderTemplateOnElement(templateID, data, element) {
 const cancelFile = (file, element) => _updateProgress(file_manager.getHostElementID(element), 0, 0, file, UPLOAD_ICON, 
    false, true);  // cancels and updates the view
 
+const getSelectedPath = _ => selectedPath;
+
 async function _performRename(oldPath, newPath, element) {
    const resp = await apiman.rest(API_RENAMEFILE(), "GET", _addExtraInfo({old: oldPath, new: newPath}, element), true), hostID = file_manager.getHostElementID(element);
    if (!resp || !resp.result) _showErrorDialog(_=>router.reload(!ENCODE_URL, false)); else router.reload(!ENCODE_URL, false);
@@ -686,5 +690,5 @@ export const file_manager = { trueWebComponentMode: true, elementConnected, elem
    showMenu, deleteFile, editFile, downloadFile, cut, copy, paste, upload, uploadFiles, create, shareFile, 
    renameFile, menuEventDispatcher, isMobile, getDragAndDropDownloadURL, showDownloadProgress, hideNotification,
    cancelFile, editFileVisible, showHideNotifications, getInfoOnFile, updateFileEntryCommentIfModified, changeToPath,
-   reset}
+   reset, getSelectedPath}
 monkshu_component.register("file-manager", `${COMPONENT_PATH}/file-manager.html`, file_manager);

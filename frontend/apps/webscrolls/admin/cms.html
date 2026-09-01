@@ -107,7 +107,6 @@ div#maincontent {
     border-radius: 1rem;
     color: #424242;
 }
-
 file-manager#fm {height: 100%;}
 </style>
 </head>
@@ -129,7 +128,7 @@ file-manager#fm {height: 100%;}
     </span>
 </div>
 <div id="maincontent">
-	<file-manager id="fm" defaultShareDuration="5" zindex-fullscreen="51" fmiconsize="3rem"
+	<file-manager id="fm" disable="sharefile" zindex-fullscreen="51" fmiconsize="3rem"
 		user="{{#_org_monkshu_session}}id{{/_org_monkshu_session}}" genStats="true" extrainfo="{{{extrainfo}}}"
 		encodeurls="false" apipath="{{{apipath}}}" apppath="{{{apppath}}}"></file-manager>
 </div>

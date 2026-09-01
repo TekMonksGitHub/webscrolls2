@@ -275,9 +275,16 @@ async function callai(prompt) {
 
 async function showLinkGenerator(_element) {
     const dialog = monkshu_env.components['dialog-box'];
-    const initialData = await createdata(true, true);
+    const initialData = await createdata(true, true);   // sets data for post selection headers
+
     initialData.link = window.monkshu_env.apps[WEBSCROLLS_CONSTANTS.APP_NAME].getRelativeURL(
-        initialData.themes[0], initialData.posttypes[0], initialData.posts[0]);
+        initialData.themes[0], initialData.posttypes[0], initialData.posts[0]); // the initial link
+
+    // these are for XBin to point to the CMS and work correctly
+    initialData.apipath = `${WEBSCROLLS_CONSTANTS.BACKEND}/apps/${WEBSCROLLS_CONSTANTS.APP_NAME}`;
+    initialData.appath = `${WEBSCROLLS_CONSTANTS.FRONTEND}/apps/${WEBSCROLLS_CONSTANTS.APP_NAME}`;
+    initialData.extrainfo = util.stringToBase64(JSON.stringify({apppath: `/apps/${WEBSCROLLS_CONSTANTS.APP_NAME}`, cmstype: "cms"}));
+    
     dialog.showDialog(`${DIALOGS_PATH}/linkgen.html`, true, true, initialData, "postdialog");
 }
 

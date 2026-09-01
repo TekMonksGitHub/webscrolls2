@@ -48,6 +48,7 @@ const main = async urlRequested => {
 }
 
 const getRelativeURL = (theme, posttype, postid) => `/apps/${WEBSCROLLS_CONSTANTS.APP_NAME}/themes/${theme}/${posttype}.html?p=${postid}`;
+const getRelativeURLForCMSPath = cmspath => `/apps/${WEBSCROLLS_CONSTANTS.APP_NAME}/cms/${cmspath}`.replaceAll("//", "/");
 
 function _getURLAndPostToRouteTo(urlRequested) {
 	const {adminurl, loginurl, protocol, host, theme, page, postid, search, hash} = _decodePageURL(urlRequested);
@@ -82,4 +83,4 @@ function _decodePageURL(urlRequested=window.location) {
 	return {protocol, host, theme, page, postid, search, hash};
 }
 
-export const application = {init, main, getRelativeURL};
+export const application = {init, main, getRelativeURL, getRelativeURLForCMSPath};

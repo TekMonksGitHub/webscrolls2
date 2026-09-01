@@ -7,7 +7,6 @@
  */
 
 import {util} from "/framework/js/util.mjs";
-import {router} from "/framework/js/router.mjs";
 import {session} from "/framework/js/session.mjs";
 import {loginmanager} from "../../js/loginmanager.mjs";
 
