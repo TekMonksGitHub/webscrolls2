@@ -115,7 +115,7 @@ async function elementConnected(host) {
    const data = {operations: folder_ops, entries: resp.entries, hostID: host.id, COMPONENT_PATH, 
       pathcrumbs: JSON.stringify(pathcrumbs), style};
 
-   if (host.getAttribute("styleBody")) data.styleBody = `<style>${host.getAttribute("styleBody")}</style>`;
+   if (host.getAttribute("styleBody")||host.getAttribute("stylebody")) data.styleBody = `<style>${host.getAttribute("styleBody")||host.getAttribute("stylebody")}</style>`;
    SHARE_DURATION = host.getAttribute("defaultShareDuration") || DEFAULT_SHARE_EXPIRY; 
    
    file_manager.setData(host.id, data);
@@ -142,7 +142,7 @@ async function elementRendered(host) {
    shadowRoot.addEventListener("mousemove", e => {mouseX = e.clientX; mouseY = e.clientY;});
 
    const container = shadowRoot.querySelector("div#filelistingscontainer");
-   shadowRoot.addEventListener(isMobile()?"click":"contextmenu", e => { 
+   if (!noMenu(null, host)) shadowRoot.addEventListener(isMobile()?"click":"contextmenu", e => { 
       e.stopPropagation(); e.preventDefault(); if (e.___handled) return; else e.___handled = true; 
       if (!menuOpen) showMenu(container, true); else hideMenu(container); });
    if (!isMobile()) shadowRoot.addEventListener("click", e => { e.stopPropagation(); if (menuOpen) hideMenu(container); });
@@ -150,6 +150,12 @@ async function elementRendered(host) {
    if (showNotification) _updateProgress(hostID, null, null, null, null, null, null, true);  // rerender progress
 
    if (host.getAttribute("quotabarids")) _updateQuotaBars(host, host.getAttribute("quotabarids").split(","));
+}
+
+function noMenu(element, hostElement) {
+   const noMenuFlag = (hostElement||file_manager.getHostElement(element)).getAttribute("nomenu");
+   if (noMenuFlag && noMenuFlag.toLowerCase() == "true") return true;
+   else return false;
 }
 
 function handleClick(element, path, isDirectory, fromClickEvent, nomenu, clickEvent) {
@@ -200,8 +206,7 @@ async function create(element) {
    if ((await apiman.rest(API_CHECKFILEEXISTS(), "GET", _addExtraInfo({path}, element), true))?.result) {   // don't overwrite an existing file
       dialog(element).error(FMDIALOG_ID, await i18n.get("FileAlreadyExists")); LOG.error(`Create failed as ${path} already exists.`); return;
    }
-   const resp = await apiman.rest(API_CREATEFILE(), "GET", _addExtraInfo({path, isDirectory}, element), true), 
-      hostID = file_manager.getHostElementID(element);
+   const resp = await apiman.rest(API_CREATEFILE(), "GET", _addExtraInfo({path, isDirectory}, element), true);
    if (resp?.result) {dialog(element).hideDialog(FMDIALOG_ID); router.reload(!ENCODE_URL, false);}
    else dialog(element).error(FMDIALOG_ID, await i18n.get("Error"));
 }
@@ -453,7 +458,7 @@ function changeToPath(hostid, path) {
    (file_manager.getSessionMemory(hostid))["__lastPath"] = path; file_manager.reload(hostid, true); 
 }
 
-function reset(hostid) {file_manager.clearSessionMemory(hostid); router.hardreload();}
+function reset(hostid, dontreload=false) {file_manager.clearSessionMemory(hostid); if (!dontreload) router.hardreload();}
 
 const _getReqIDForDownloading = path => encodeURIComponent(path+Date.now()+Math.random());
 
@@ -690,5 +695,5 @@ export const file_manager = { trueWebComponentMode: true, elementConnected, elem
    showMenu, deleteFile, editFile, downloadFile, cut, copy, paste, upload, uploadFiles, create, shareFile, 
    renameFile, menuEventDispatcher, isMobile, getDragAndDropDownloadURL, showDownloadProgress, hideNotification,
    cancelFile, editFileVisible, showHideNotifications, getInfoOnFile, updateFileEntryCommentIfModified, changeToPath,
-   reset, getSelectedPath}
+   reset, getSelectedPath, noMenu}
 monkshu_component.register("file-manager", `${COMPONENT_PATH}/file-manager.html`, file_manager);

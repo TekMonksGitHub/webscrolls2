@@ -13,13 +13,13 @@ import {default as jsYaml} from "../../3p/js-yaml.mjs";
 import {loginmanager} from "../../js/loginmanager.mjs";
 import {apimanager as apiman} from "/framework/js/apimanager.mjs";
 
-const CREATE_NEW_POST = "--- create", DEFAULT_POST = "default";
 const MUSTACHE = await router.getMustache();
 const API_AI = `${WEBSCROLLS_CONSTANTS.API_PATH}/ai`;
 const API_DELETE = `${WEBSCROLLS_CONSTANTS.API_PATH}/delete`;
 const API_PUBLISH = `${WEBSCROLLS_CONSTANTS.API_PATH}/publish`;
 const SSE_URL_FOR_APIS = `${WEBSCROLLS_CONSTANTS.API_PATH}/appevents`;
 const COMPONENT_PATH = util.getModulePath(import.meta), DIALOGS_PATH = `${COMPONENT_PATH}/../dialogs`;
+const CREATE_NEW_POST = "--- create", DEFAULT_POST = "default", FILE_MANAGER_COMPONENT_ID = "fmlinks";
 
 let old_posttype, old_post, current_post_schema, dragging_to_resize=false, currentResizer, active_panel_id, current_post_type_rendered_html; 
 
@@ -285,6 +285,9 @@ async function showLinkGenerator(_element) {
     initialData.appath = `${WEBSCROLLS_CONSTANTS.FRONTEND}/apps/${WEBSCROLLS_CONSTANTS.APP_NAME}`;
     initialData.extrainfo = util.stringToBase64(JSON.stringify({apppath: `/apps/${WEBSCROLLS_CONSTANTS.APP_NAME}`, cmstype: "cms"}));
     
+    // reset saved path so the file browser starts from the home every time
+    if (monkshu_env.components["file-manager"])monkshu_env.components["file-manager"].reset(FILE_MANAGER_COMPONENT_ID, true); 
+
     dialog.showDialog(`${DIALOGS_PATH}/linkgen.html`, true, true, initialData, "postdialog");
 }
 

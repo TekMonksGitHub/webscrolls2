@@ -153,7 +153,13 @@ window.copyLink = function(shadowRoot) {
             user="{{#_org_monkshu_session}}id{{/_org_monkshu_session}}" genStats="true" extrainfo="{{{extrainfo}}}"
             encodeurls="false" apipath="{{{apipath}}}" apppath="{{{apppath}}}"
             onselect="monkshu_env.components['dialog-box'].getShadowRootByHostId('postdialog').querySelector('span#link').innerText = 
-                window.monkshu_env.apps[WEBSCROLLS_CONSTANTS.APP_NAME].getRelativeURLForCMSPath(filemanager.getSelectedPath())"></file-manager>
+                window.monkshu_env.apps[WEBSCROLLS_CONSTANTS.APP_NAME].getRelativeURLForCMSPath(filemanager.getSelectedPath())"
+            styleBody="
+                div#filemanager {padding-top: 1.5em !important;}
+                div#filelistingscontainer {row-gap: 0em !important;}
+                div.filemanagerentries {height: 4rem !important;width: 4rem !important;}
+            ">
+        </file-manager>
     </div>
     <span id="linkspan" onclick="copyLink(this)">
         <span>Link: <span id="link">{{link}}</span></span>

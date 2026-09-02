@@ -360,7 +360,8 @@ span.button {
     crumbiconhover="{{COMPONENT_PATH}}/img/crumbicon_folder_hover.svg"></bread-crumbs>
 <div id="filelistingscontainer" ondragover="event.preventDefault(); event.dataTransfer.dropEffect='copy';"
         ondrop="event.preventDefault(); monkshu_env.components['file-manager'].upload(this, event.dataTransfer.files)">
-    <div id="operations">
+    
+    {{#operations}}<div id="operations">{{/operations}}
     {{#operations}}
     <div tabindex="0" class="filemanagerentries filemanageroperations"
         id="{{#stats.home}}home{{/stats.home}}{{#stats.back}}back{{/stats.back}}{{#stats.upload}}upload{{/stats.upload}}{{#stats.create}}create{{/stats.create}}{{#stats.paste}}paste{{/stats.paste}}"
@@ -369,7 +370,9 @@ span.button {
             monkshu_env.components["file-manager"].menuEventDispatcher("editFile",this); }'
         onfocusin='event.preventDefault(); event.stopPropagation(); monkshu_env.components["file-manager"].handleClick(this, "{{path}}", "{{#stats.home}}true{{/stats.home}}{{#stats.back}}true{{/stats.back}}", false, true);'
         onclick='event.preventDefault(); event.stopPropagation(); monkshu_env.components["file-manager"].handleClick(this, "{{path}}", "{{#stats.home}}true{{/stats.home}}{{#stats.back}}true{{/stats.back}}", true, false, event);' 
-        oncontextmenu='if (monkshu_env.components["file-manager"].isMobile()) return; event.preventDefault(); event.stopPropagation(); monkshu_env.components["file-manager"].handleClick(this, "{{path}}", "{{#stats.directory}}true{{/stats.directory}}{{#stats.home}}true{{/stats.home}}{{#stats.back}}true{{/stats.back}}", false, false, event);'
+        oncontextmenu='if (monkshu_env.components["file-manager"].isMobile() || monkshu_env.components["file-manager"].noMenu(this)) return; 
+            event.preventDefault(); event.stopPropagation(); 
+            monkshu_env.components["file-manager"].handleClick(this, "{{path}}", "{{#stats.directory}}true{{/stats.directory}}{{#stats.home}}true{{/stats.home}}{{#stats.back}}true{{/stats.back}}", false, false, event);'
         {{#stats.json}}data-stats='{{{.}}}'{{/stats.json}}
         title="{{name}}">
 
@@ -382,7 +385,7 @@ span.button {
         <span>{{name}}</span>
     </div>
     {{/operations}}
-    </div>
+    {{#operations}}</div>{{/operations}}
     {{#entries}}
     {{^skip}}
     <div tabindex="0" class="filemanagerentries"
@@ -391,7 +394,9 @@ span.button {
                 monkshu_env.components["file-manager"].menuEventDispatcher("editFile",this); }'
         onfocusin='event.preventDefault(); event.stopPropagation(); monkshu_env.components["file-manager"].handleClick(this, "{{path}}", "{{#stats.directory}}true{{/stats.directory}}{{#stats.file}}false{{/stats.file}}", false, true);'
         onclick='event.preventDefault(); event.stopPropagation(); monkshu_env.components["file-manager"].handleClick(this, "{{path}}", "{{#stats.directory}}true{{/stats.directory}}{{#stats.file}}false{{/stats.file}}", true, false, event);' 
-        oncontextmenu='if (monkshu_env.components["file-manager"].isMobile()) return; event.preventDefault(); event.stopPropagation(); monkshu_env.components["file-manager"].handleClick(this, "{{path}}", "{{#stats.directory}}true{{/stats.directory}}{{#stats.file}}false{{/stats.file}}", false, false, event);'
+        oncontextmenu='if (monkshu_env.components["file-manager"].isMobile() || monkshu_env.components["file-manager"].noMenu(this)) return; 
+            event.preventDefault(); event.stopPropagation(); 
+            monkshu_env.components["file-manager"].handleClick(this, "{{path}}", "{{#stats.directory}}true{{/stats.directory}}{{#stats.home}}true{{/stats.home}}{{#stats.back}}true{{/stats.back}}", false, false, event);'
         {{#stats.json}}data-stats='{{{.}}}'{{/stats.json}} 
         title="{{name}}">
         <span class="icon" draggable="true" ondragstart="event.dataTransfer.setData(
