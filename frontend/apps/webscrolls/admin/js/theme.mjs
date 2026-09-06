@@ -131,7 +131,7 @@ async function rerender() {
         const postdata = await post.getPostData(current_theme, current_posttype, undefined, jsYaml.load(postYAML));
         const finalHTML = MUSTACHE.render(htmlTemplate, postdata);
         iframeDoc.open(); iframeDoc.write(finalHTML); iframeDoc.close();
-    } catch (err) {/* we can't preview some issue with html or json*/}
+    } catch (err) {LOG.error(`Can't re-render due to error ${err}`);}
 }
 
 async function publishThemeFile() {
@@ -151,9 +151,8 @@ async function publishThemeFile() {
     if ((await apiman.rest(API_PUBLISH_THEME_FILE, "POST", {themeurl, 
             template: htmlTemplate, schemaJSON}, true)).result) {
         const publishTestPostResult = publishtestpost ? (await post.publishPostExternalCall(
-            testpost, posttype, testpostname, session.get($$.MONKSHU_CONSTANTS.LANG_ID))).result : true;
-        if (publishTestPostResult) alert("Published"); 
-        else ("Theme template published but test post publishing failed");
+            testpost, posttype, testpostname, session.get($$.MONKSHU_CONSTANTS.LANG_ID))) : true;
+        alert(publishTestPostResult?"Published":"Theme template published but test post publishing failed"); 
         
         const posttypeNormalized = posttype.endsWith(".html") ? posttype.split(".").at(-2) : posttype;
         const posttypeSelect = document.querySelector("select#posttypes");

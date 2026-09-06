@@ -41,7 +41,7 @@ window.copyLink = function(shadowRoot) {
     div#main {
         background-color: #424242;
         width: 50vw;
-        height: 50vh;
+        height: 60vh;
         padding: 1rem;
         overflow: auto;
         display: flex;
@@ -75,11 +75,17 @@ window.copyLink = function(shadowRoot) {
 
     span#linkspan {
         margin-top: 1rem;
-        cursor: copy;
         display: flex;
         flex-direction: row;
         justify-content: space-between;
         align-items: center;
+        user-select: none;
+    }
+    span#link:hover {
+        cursor: pointer;
+        text-decoration: underline;
+        user-select: text;
+        width: 100%;
     }
     span#copied {
         transition: opacity 0.5s ease, visibility 0.5s ease;
@@ -161,8 +167,8 @@ window.copyLink = function(shadowRoot) {
             ">
         </file-manager>
     </div>
-    <span id="linkspan" onclick="copyLink(this)">
-        <span>Link: <span id="link">{{link}}</span></span>
+    <span id="linkspan">
+        <span>Link: <span id="link" onclick="window.open(this.innerText, '_blank');">{{link}}</span></span>
         <span id="copied">Copied</span>
     </span>
     <div id="actionbuttons">

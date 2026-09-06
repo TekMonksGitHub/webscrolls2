@@ -155,10 +155,11 @@ async function publishPost(button) {
         alert("Published"); _enableDeleteButton(); } else alert("Publishing failed!");
 }
 
-async function publishPostExternalCall(post, posttype, postname, lang) {
+async function publishPostExternalCall(postYamlText, posttype, postname, lang) {
     if (_isReservedPostType(posttype)) postname = DEFAULT_POST; // override the name if the post type is reserved
     const posturl = `${WEBSCROLLS_CONSTANTS.APP_PATH}/cms/${posttype}/${postname}.${lang}.yaml`;
-    return (await apiman.rest(API_PUBLISH, "POST", {postdata: post, posturl}, true)).result;
+    const publishResult = await apiman.rest(API_PUBLISH, "POST", {postdata: _getPostObject(postYamlText), posturl}, true);
+    return publishResult.result;
 }
 
 async function deletePost(button) {
@@ -323,11 +324,12 @@ const logout = _ => loginmanager.logout();
 
 const _isReservedPostType = posttype => ["header", "footer", "leftbar", "rightbar"].includes(posttype);
 
-function _getPostObject() {
-    if (active_panel_id == "postraw") try{
-            return jsYaml.load(document.querySelector("textarea#postraw").value); } catch (err) {
-        alert(`Bad YAML: ${err}`); return {};
-    }
+function _getPostObject(rawYaml) {
+    if (active_panel_id == "postraw" || rawYaml) try {  // if we have raw YAML then just return that
+        if (rawYaml) return jsYaml.load(rawYaml);
+        else return jsYaml.load(document.querySelector("textarea#postraw").value); 
+    } catch (err) {alert(`Bad YAML: ${err}`); return {};}
+
     const divPostFields = document.querySelectorAll("div#postcreator > div.postfields"), post = {}; 
     for (const divPostField of divPostFields) {
         const postFieldObject = _extractFieldValue(divPostField), key = Object.keys(postFieldObject)[0];
