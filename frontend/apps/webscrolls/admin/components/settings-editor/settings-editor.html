@@ -17,14 +17,20 @@ div.settingsfields {
     padding: 1em 0em;
     align-items: self-start;
 }
-span.fieldname {width: 20em;}
+span.fieldname {
+    width: 10em;
+    min-width: 10em;
+    user-select: none;
+    margin-right: 1em;
+}
 span.fieldvalue {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
 }
 input.fieldinput, textarea.fieldinput {
-    width: calc(100% - 0.9rem);
+    width: calc(100% - 0.9em);
+    min-width: 15em;
     padding: 0.5em;
     border-radius: 0.5em;
     border: 0;
@@ -34,18 +40,76 @@ input.fieldinput, textarea.fieldinput {
     font-family: inherit;
 }
 textarea.fieldinput {height: 8em;}
+div.nestedfields {
+    width: calc(100% - 2px);
+    border: 1px solid #D9D9D9;
+    padding: 0.5rem 1.5rem 1.5rem 1.5rem;
+    box-sizing: border-box;
+    border-radius: 0.8em;
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+span.arrayopbutton {
+    padding: 0.5rem 1.2rem;
+    background-color: #DFDFDF;
+    border-radius: 0.5rem;
+    color: #424242;
+    margin-right: 1rem;
+    cursor: pointer;
+}
+span.arrayopbuttonlabel {margin-right: 2rem;}
+span.arraycarddelete {
+    background-color: #DE5959;
+    padding: 0.3rem 0.5rem;
+    width: fit-content;
+    border-radius: 0.5rem;
+    margin-left: calc(100% - 0.5rem);
+    cursor: pointer;
+}
+.displaynone {display: none;}
 </style>
 
-<div id="settings">
-    {{#schema}}
-    <div class="settingsfields">
-        <span class="fieldname" id="spanname{{{key}}}">{{name}}</span>
-        <span class="fieldvalue">
-            {{^textarea}}<input id="value{{{key}}}" class="fieldinput" value="{{{value}}}" 
-                placeholder="Value for {{{name}}}"/>{{/textarea}}
-            {{#textarea}}<textarea id="value{{{key}}}" class="fieldinput" 
-                placeholder="Value for {{{name}}}"/>{{{value}}}</textarea>{{/textarea}}
+<div id="settings"></div>
+
+<!-- This template is Mustache-rendered once automatically before this JS runs, so its own
+     delimiter-switch directive is HTML-entity-escaped to survive that pass untouched.
+     settings-editor.mjs's elementRendered does the real render, a second time, with partials. -->
+<template id="fieldtemplate">
+&#123;&#123;=<% %>=&#125;&#125;
+<%#schema%>
+<div class="settingsfields" id="div<%{id}%>">
+    <span class="fieldname" id="spanname<%{id}%>" data-key="<%{key}%>"><%name%></span>
+    <span class="fieldvalue" id="spanvalue<%{id}%>" data-array="<%#array%>true<%/array%>">
+        <%^array%><%^object%>
+        <%^textarea%><input id="value<%{id}%>" class="fieldinput" value="<%{value}%>"/><%/textarea%>
+        <%#textarea%><textarea id="value<%{id}%>" class="fieldinput"><%{value}%></textarea><%/textarea%>
+        <%/object%><%/array%>
+
+        <%#array%>
+        <span>
+            <span class="arrayopbutton" id="addbutton<%{id}%>" onclick="monkshu_env.components['settings-editor'].addArrayItem(this.parentNode.nextElementSibling)">+</span>
+            <span class="arrayopbuttonlabel">Add</span>
         </span>
-    </div>
-    {{/schema}}
+        <div class="nestedfields arrayitem" id="arrayfields<%{id}%>">
+            <span class="arraycarddelete displaynone" id="deletebutton<%{id}%>" onclick="monkshu_env.components['settings-editor'].deleteArrayItem(this.parentNode)">X</span>
+            <%#itemisvalue%>
+            <span class="itemvalue">
+                <%^itemtextarea%><input class="fieldinput"/><%/itemtextarea%>
+                <%#itemtextarea%><textarea class="fieldinput"></textarea><%/itemtextarea%>
+            </span>
+            <%/itemisvalue%>
+            <%^itemisvalue%><%>fieldtemplatepartial%><%/itemisvalue%>
+        </div>
+        <%/array%>
+
+        <%#object%>
+        <div class="nestedfields" id="objectfields<%{id}%>">
+            <%>fieldtemplatepartial%>
+        </div>
+        <%/object%>
+    </span>
 </div>
+<%/schema%>
+</template>
