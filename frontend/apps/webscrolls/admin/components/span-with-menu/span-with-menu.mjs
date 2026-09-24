@@ -15,10 +15,7 @@ async function initialRender(host) {
 function hideMenu(element) {
 	const shadowRoot = span_with_menu.getShadowRootByContainedElement(element);
 	const memory = span_with_menu.getMemoryByContainedElement(element);
-	if (!memory.menuOpen) return;
-
-	const contextMenu = shadowRoot.querySelector("div#menu"); contextMenu.classList.remove("visible");
-	memory.menuOpen = false;
+	_closeMenu(shadowRoot, memory);
 }
 
 function showMenu(element) {
@@ -27,8 +24,12 @@ function showMenu(element) {
 	if (memory.menuOpen == true) return;
 
 	const contextMenu = shadowRoot.querySelector("div#menu");
-	contextMenu.classList.add("visible");
-	memory.menuOpen = true; 
+	contextMenu.classList.add("visible"); memory.menuOpen = true;
+
+	// close on any click outside this component
+	const host = span_with_menu.getHostElementByContainedElement(element);
+	memory.outsideClickHandler = event => {if (!event.composedPath().includes(host)) _closeMenu(shadowRoot, memory);};
+	document.addEventListener("click", memory.outsideClickHandler, true);
 }
 
 function toggleMenu(element) {
@@ -40,6 +41,18 @@ function doAction(element, id) {
 	const dataThisElement = span_with_menu.getDataByContainedElement(element);
 	Function(dataThisElement.menuitems[id].onclick)();
 	hideMenu(element);
+}
+
+function _closeMenu(shadowRoot, memory) {
+	if (!memory.menuOpen) return;
+
+	shadowRoot.querySelector("div#menu").classList.remove("visible");
+	memory.menuOpen = false;
+
+	if (memory.outsideClickHandler) {
+		document.removeEventListener("click", memory.outsideClickHandler, true);
+		delete memory.outsideClickHandler;
+	}
 }
 
 async function _render(host) {

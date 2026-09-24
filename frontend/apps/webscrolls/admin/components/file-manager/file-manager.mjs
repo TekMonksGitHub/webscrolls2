@@ -203,11 +203,11 @@ function upload(containedElement, files) {
 async function create(element) {
    const result = await dialog(element).showDialog(`${DIALOGS_PATH}/createfile.html`, true, true, {}, FMDIALOG_ID, ["createType", "path"]);
    const path = `${selectedPath}/${result.path}`, isDirectory = result.createType == "file" ? false: true
-   if ((await apiman.rest(API_CHECKFILEEXISTS(), "GET", _addExtraInfo({path}, element), true))?.result) {   // don't overwrite an existing file
+   if (await checkFileExists(path, element)) {   // don't overwrite an existing file
       dialog(element).error(FMDIALOG_ID, await i18n.get("FileAlreadyExists")); LOG.error(`Create failed as ${path} already exists.`); return;
    }
    const resp = await apiman.rest(API_CREATEFILE(), "GET", _addExtraInfo({path, isDirectory}, element), true);
-   if (resp?.result) {dialog(element).hideDialog(FMDIALOG_ID); router.reload(!ENCODE_URL, false);}
+   if (resp?.result) {dialog(element).hideDialog(FMDIALOG_ID); file_manager.reload(file_manager.getHostElementID(element), true);}
    else dialog(element).error(FMDIALOG_ID, await i18n.get("Error"));
 }
 
@@ -416,9 +416,9 @@ function showHideNotifications(hostID) {
    else hideNotification(hostID);
 }
 
-async function deleteFile(element) {
-   let resp = await apiman.rest(API_DELETEFILE(), "GET", _addExtraInfo({path: selectedPath}, element), true);
-   if (resp.result) router.reload(!ENCODE_URL, false); else _showErrorDialog();
+async function deleteFile(element, path) {
+   let resp = await apiman.rest(API_DELETEFILE(), "GET", _addExtraInfo({path: path||selectedPath}, element), true);
+   if (resp.result) file_manager.reload(file_manager.getHostElementID(element), true); else _showErrorDialog();
 }
 
 async function editFile(element) {
@@ -446,6 +446,13 @@ async function editFileLoadData(element) {
          data: result.filecontents}, element), true);
       if (!resp.result) _showErrordialog();
    }); else _showErrordialog();
+}
+
+async function operateFileExternal(hostID, path, op, data, comment) {
+   const hostElement = file_manager.getHostElementByID(hostID);
+   if (["read","write","updatecomment"].includes(op)) return await apiman.rest(API_OPERATEFILE(), "POST", 
+      _addExtraInfo({path: _normalizedPath(path), op, data, comment}, hostElement), true);
+   else if (op == "delete") return deleteFile(hostElement, path);
 }
 
 function editFileVisible() {
@@ -482,16 +489,16 @@ function getDragAndDropDownloadURL(path, element) {
 const showDownloadProgress = (path, element) => _showDownloadProgress(element, path, element["data-reqid"]);
 
 function cut(element) { selectedCutPath = selectedPath; selectedCutCopyElement = selectedElement.cloneNode(); 
-   file_manager.reload(file_manager.getHostElementID(element)); }
+   file_manager.reload(file_manager.getHostElementID(element), true); }
 
 function copy(element) { selectedCopyPath = selectedPath; selectedCutCopyElement = selectedElement.cloneNode(); 
-   file_manager.reload(file_manager.getHostElementID(element)); }
+   file_manager.reload(file_manager.getHostElementID(element), true); }
 
 async function paste(element) {
    const _copyRequestedToItsOwnSubdirectory = (from, to) => {const pathSplits = to.split("/");
       for (const [i, _val] of pathSplits.entries()) if (pathSplits.slice(0, i).join("/")==from) return true; return false;}
    const _nullOutSelectedCutCopyPathsAndElements = (reload=true) => { selectedCutPath = null; selectedCopyPath = null; 
-      selectedCutCopyElement = null; if (reload) router.reload(!ENCODE_URL, false); }
+      selectedCutCopyElement = null; if (reload) file_manager.reload(file_manager.getHostElementID(element), true); }
 
    const selectedPathToOperate = selectedCutPath?selectedCutPath:selectedCopyPath;
    const baseName = selectedPathToOperate.substring(selectedPathToOperate.lastIndexOf("/")+1);
@@ -514,6 +521,12 @@ async function paste(element) {
    if (selectedCutPath) await _performRename(from, to, element);
    else if (selectedCopyPath) await _performCopy(from, to, element);
    _nullOutSelectedCutCopyPathsAndElements(false);
+}
+
+const checkFileExists = async (path, elementOrHostID) => {
+   const hostElementorContainedElement = typeof elementOrHostID === 'string' ? file_manager.getHostElementByID(elementOrHostID) : elementOrHostID;
+   return ((await apiman.rest(API_CHECKFILEEXISTS(), "GET", _addExtraInfo(
+      {path: _normalizedPath(path)}, hostElementorContainedElement), true))||{result: false}).result; 
 }
 
 function _showDownloadProgress(element, path, reqid) {
@@ -566,7 +579,7 @@ async function _updateProgress(hostID, currentBlock, totalBlocks, fileName, icon
    const templateData = {files:[]}; for (const file of Object.keys(FILES_AND_PERCENTS)) templateData.files.unshift({...FILES_AND_PERCENTS[file]});
    
    await _showNotification(hostID, PROGRESS_TEMPLATE, templateData);
-   if (!justRerender && reloadFlag) router.reload(!ENCODE_URL, false);
+   if (!justRerender && reloadFlag) file_manager.reload(hostID, true);
 }
 
 function renameFile(element) {
@@ -635,17 +648,18 @@ const cancelFile = (file, element) => _updateProgress(file_manager.getHostElemen
    false, true);  // cancels and updates the view
 
 const getSelectedPath = _ => selectedPath;
+const getCurrentlyActiveFolder = _ => currentlyActiveFolder;
 
 async function _performRename(oldPath, newPath, element) {
    const resp = await apiman.rest(API_RENAMEFILE(), "GET", _addExtraInfo({old: oldPath, new: newPath}, element), true), hostID = file_manager.getHostElementID(element);
-   if (!resp || !resp.result) _showErrorDialog(_=>router.reload(!ENCODE_URL, false)); else router.reload(!ENCODE_URL, false);
+   if (!resp || !resp.result) _showErrorDialog(_=>file_manager.reload(hostID, true)); else file_manager.reload(hostID, true);
 }
 
 async function _performCopy(fromPath, toPath, element) {
    const sizeOfCopy = JSON.parse(selectedCutCopyElement.dataset.stats).size; 
    if (!(await _checkQuotaAndReportError(element, sizeOfCopy))) return;
    const resp = await apiman.rest(API_COPYFILE(), "GET", _addExtraInfo({from: fromPath, to: toPath}, element), true), hostID = file_manager.getHostElementID(element)
-   if (!resp || !resp.result) _showErrorDialog(_=>router.reload(!ENCODE_URL, false)); else router.reload(!ENCODE_URL, false);
+   if (!resp || !resp.result) _showErrorDialog(_=>file_manager.reload(hostID, true)); else file_manager.reload(hostID, true);
 }
 
 const _roundToTwo = number => Math.round(number * 100)/100;
@@ -684,8 +698,10 @@ const _addExtraInfo = (req, hostOrElement) => {
 }
 
 const _getHostAttribute = (hostOrElement, attributeName) => {
-   try{const host = file_manager.getHostElementByContainedElement(hostOrElement);
-       const attrValue = host.getAttribute(attributeName); return attrValue;}catch(error){
+   try { 
+      const host = file_manager.getHostElementByContainedElement(hostOrElement);
+      const attrValue = host.getAttribute(attributeName); return attrValue;
+   } catch(error) {
       LOG.error(`Failed to get host attribute value with ${hostOrElement}`);
       return file_manager.getHostElementByID("fm").getAttribute(attributeName); // Forced to get the attribute value from the file manager element for the attributeName
    }
@@ -695,5 +711,5 @@ export const file_manager = { trueWebComponentMode: true, elementConnected, elem
    showMenu, deleteFile, editFile, downloadFile, cut, copy, paste, upload, uploadFiles, create, shareFile, 
    renameFile, menuEventDispatcher, isMobile, getDragAndDropDownloadURL, showDownloadProgress, hideNotification,
    cancelFile, editFileVisible, showHideNotifications, getInfoOnFile, updateFileEntryCommentIfModified, changeToPath,
-   reset, getSelectedPath, noMenu}
+   reset, getSelectedPath, getCurrentlyActiveFolder, noMenu, operateFileExternal, checkFileExists }
 monkshu_component.register("file-manager", `${COMPONENT_PATH}/file-manager.html`, file_manager);

@@ -1,0 +1,254 @@
+<!-- Init scripts -->
+<script type="module">
+if (window.WEBSCROLLS_CONSTANTS && (!window.post)) window.post = (await import ("./../js/post.mjs")).post;
+
+if (window.WEBSCROLLS_CONSTANTS) {  // needed by xbin
+    await import("./components/dialog-box/dialog-box.mjs");
+    await import("./components/bread-crumbs/bread-crumbs.mjs");
+    await import( "./components/span-with-menu/span-with-menu.mjs");
+    window.filemanager = (await import( "./components/file-manager/file-manager.mjs")).file_manager;
+    await import( "./components/progress-bar/progress-bar.mjs");
+    window.cms = (await import ("./js/cms.mjs")).cms;
+}
+
+window.copyLink = function(shadowRoot) {
+    $$.copyTextToClipboard(shadowRoot.querySelector('span#link').innerText);
+    const spanCopied = shadowRoot.querySelector('span#copied');
+    if (spanCopied) {
+        spanCopied.classList.add("visible");
+        setTimeout(_=>spanCopied.classList.remove("visible"), 500);
+    }
+}
+</script>
+
+<style>
+    div#dialog {
+        background-color: #424242 !important;
+        padding: 2rem 0rem 0rem 0rem;
+        border-radius: 1rem;
+        box-sizing: border-box;
+    }
+    div#error {display: none;}
+    span#close {
+        top: 1rem;
+        right: 1rem;
+    }
+    div#dialogcontent {margin: 0rem;}
+    div#buttonbar {height: 1rem;}
+    div#buttonbar span {display: none !important;}
+    span#close {cursor: pointer;}
+
+    div#main {
+        background-color: #424242;
+        width: 95vw;
+        height: 85vh;
+        padding: 1rem 1rem 0rem 1rem;
+        overflow: auto;
+        display: flex;
+        flex-direction: column;
+    }
+
+    div#guide {
+        padding-bottom: 0.5rem;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+        user-select: none;
+    }
+
+    div#panelholder {
+        display: flex;
+        flex-direction: row;
+        flex-grow: 1;
+    }
+
+    div#aipanel {
+        width: 33%;
+        margin-right: 1rem;
+        background-color: #D9D9D9;
+        border-radius: 1rem;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+    }
+    div#aipanel div#working {
+        width: 100%;
+        height: 100%;
+        background-color: #D9D9D9;
+        position: absolute;
+        border-radius: 1rem;
+        opacity: 0.9;
+        display: none;
+    }
+    div#aipanel div#working.visible {
+        display: flex !important;
+        justify-content: space-around;
+        align-items: center;
+    }
+    div#aipanel div#working img {width: 50%; height: 50%;}
+    textarea#imgprompt {
+        flex-grow: 1;
+        background-color: transparent;
+        border: 0;
+        resize: none;
+        padding: 1rem;
+        box-sizing: border-box;
+        outline: none;
+    }
+    span#callai {
+        text-align: end;
+        padding-bottom: 1rem;
+        padding-right: 1rem;
+        color: #4c4c4c;
+        cursor: pointer;
+    }
+    svg#callai {
+        border: 1px solid #4c4c4d;
+        border-radius: 0.2rem;
+        background: #fff4e6;
+    }
+
+    div#imgpanel {
+        display: flex;
+        flex-direction: column;
+        width: 33%;
+        margin-right: 1rem;
+        background-color: #FFFFFF;
+        border-radius: 1rem;
+        padding: 1rem;
+        box-sizing: border-box;
+        justify-content: space-around;
+        align-items: center;
+    }
+    img#generatedimage {
+        max-width: 100%;
+        max-height: 100%;
+    }
+
+    div#savepanel {
+        display: flex;
+        flex-direction: column;
+        width: 33%;
+    }
+    input#filename {
+        outline: none;
+        padding: 0.5rem;
+        margin-bottom: 1rem;
+        border-radius: 0.5rem;
+        border: none;
+        background-color: #DFDFDF;
+    }
+    div#assetslinker {
+        background: #D9D9D9;
+        padding: 1rem;
+        color: #4c4c4c;
+        border-radius: 0.5rem;
+        flex-grow: 1;
+    }
+    span#linkspan {
+        margin-top: 1rem;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        user-select: none;
+        max-width: 100%;
+    }
+    span#linktext {
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        flex-grow: 1;
+    }
+    span#link:hover {
+        cursor: pointer;
+        text-decoration: underline;
+        user-select: text;
+        width: 100%;
+    }
+    span#copied {
+        transition: opacity 0.5s ease, visibility 0.5s ease;
+        opacity: 0;
+        color: darkseagreen;
+        font-size: smaller;
+        padding: 0rem 0.4rem;
+    }
+    span#copied.visible {
+        opacity: 1 !important;
+    }
+
+    div#actionbuttons {
+        display: flex;
+        flex-direction: row;
+        justify-content: end;
+        margin-top: 1rem;
+        grid-gap: calc(33% - 9rem);
+    }
+    span.actionbutton {
+        padding: 0.5rem 1rem;
+        border: 1px solid;
+        border-radius: 0.5rem;
+        background-color: #D9D9D9;
+        color: #4c4c4c;
+        cursor: default;
+    }
+</style>
+<div id="main">
+    <div id="guide">
+        <span>Create</span>
+        <span>Review</span>
+        <span>Finish</span>
+    </div>
+
+    <div id="panelholder">
+        <div id="aipanel">
+            <div id="working"><img src="./img/sparkles_wait.svg"></div>
+            <textarea id="imgprompt" placeholder="Describe the image to create."></textarea>
+            <span id="callai" onclick="post.callaiForImageGeneration(this.parentNode.querySelector('textarea#imgprompt').value, this)">
+                <svg id="callai" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2z"/>
+                    <path d="M19 15l1 3 3 1-3 1-1 3-1-3-3-1 3-1 1-3z"/>
+                    <path d="M5 18l.5 1.5L7 20l-1.5.5L5 22l-.5-1.5L3 20l1.5-.5L5 18z"/>
+                </svg>
+            </span>
+        </div>
+
+        <div id="imgpanel">
+            <img id="generatedimage" src="./img/imggen.svg">
+        </div>
+
+        <div id="savepanel">
+            <input id="filename" type="text" placeholder="Filename (e.g. abc.svg)">
+            <div id="assetslinker">
+                <file-manager id="fmdialog" nomenu="true" zindex-fullscreen="51" fmiconsize="2rem" folderops="false"
+                    user="{{#_org_monkshu_session}}id{{/_org_monkshu_session}}" genStats="true" extrainfo="{{{extrainfo}}}"
+                    encodeurls="false" apipath="{{{apipath}}}" apppath="{{{apppath}}}"
+                    onselect="monkshu_env.components['dialog-box'].getShadowRootByHostId('postdialog').querySelector('span#link').innerText = 
+                        window.monkshu_env.apps[WEBSCROLLS_CONSTANTS.APP_NAME].getRelativeURLForCMSPath(filemanager.getSelectedPath())"
+                    styleBody="
+                        div#filemanager {padding-top: 1.5em !important;}
+                        div#filelistingscontainer {row-gap: 0em !important;}
+                        div.filemanagerentries {height: 4rem !important;width: 4rem !important;}
+                    ">
+                </file-manager>
+            </div>
+            <span id="linkspan">
+                <span id="linktext">Link: <span id="link" onclick="window.open(this.innerText, '_blank');">{{link}}</span></span>
+                <span id="copied">Copied</span>
+                <span class="actionbutton" onclick="copyLink(this.parentNode.parentNode)">Copy</span>
+            </span>
+        </div>
+    </div>
+
+    <div id="actionbuttons">
+        <span class="actionbutton" onclick="
+            const uri_encoded_data = this.parentNode.parentNode.querySelector('img#generatedimage').src.split(',')[1];
+            if (!uri_encoded_data) {alert('Missing image to save'); return;}
+            const filename = this.parentNode.parentNode.querySelector('input#filename').value;
+            if (!filename) {alert('Missing proper file name'); return;}
+            post.saveCMSFile(`${filemanager.getCurrentlyActiveFolder()}/${filename}`, decodeURIComponent(uri_encoded_data))"
+        >Save</span>
+        <span class="actionbutton" onclick="post.closeDialog(this)">Close</span>
+    </div>
+</div>

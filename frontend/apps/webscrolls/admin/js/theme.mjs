@@ -201,10 +201,10 @@ async function callai() {
     const rightbar = current_theme_post_types?.includes("rightbar") ? post.getRenderedPost(current_theme, "rightsidebar", "default") : undefined;
 
     const divWorking = document.querySelector("div#working"); divWorking.classList.add("visible");
-    const html_schema_post_result = await apiman.rest(API_AI, "POST", {header, leftbar, rightbar, footer, prompt}, 
+    const html_schema_post_result = await apiman.rest(API_AI, "POST", {header, leftbar, rightbar, footer, prompt, type: "theme"}, 
         true, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, SSE_URL_FOR_APIS);
     if (html_schema_post_result?.result) {
-        const {html, schema, post, airesponse} = html_schema_post_result;
+        const {html, schema, post, _airesponse} = html_schema_post_result;
         const htmlElement = document.querySelector("textarea#htmlitem");
         const schemaElement = document.querySelector("textarea#schemaitem");
         const testpostElement = document.querySelector("textarea#testpostitem");

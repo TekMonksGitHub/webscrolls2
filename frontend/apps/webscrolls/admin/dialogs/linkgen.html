@@ -155,7 +155,7 @@ window.copyLink = function(shadowRoot) {
         </span>
     </div>
     <div id="assetslinker">
-        <file-manager id="fmlinks" nomenu="true" zindex-fullscreen="51" fmiconsize="2rem" folderops="false"
+        <file-manager id="fmdialog" nomenu="true" zindex-fullscreen="51" fmiconsize="2rem" folderops="false"
             user="{{#_org_monkshu_session}}id{{/_org_monkshu_session}}" genStats="true" extrainfo="{{{extrainfo}}}"
             encodeurls="false" apipath="{{{apipath}}}" apppath="{{{apppath}}}"
             onselect="monkshu_env.components['dialog-box'].getShadowRootByHostId('postdialog').querySelector('span#link').innerText = 
@@ -173,6 +173,6 @@ window.copyLink = function(shadowRoot) {
     </span>
     <div id="actionbuttons">
         <span class="actionbutton" onclick="copyLink(this.parentNode.parentNode)">Copy</span>
-        <span class="actionbutton" onclick="post.closeLinkDialog(this)">Close</span>
+        <span class="actionbutton" onclick="post.closeDialog(this)">Close</span>
     </div>
 </div>

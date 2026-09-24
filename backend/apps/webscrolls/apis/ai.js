@@ -5,6 +5,7 @@
  * 
  * Params
  * 	prompt: The prompt. By default assumes it is a theme generation prompt. 
+ *  type: Can be svg, post or theme
  *  postschema: Optional: If provided, assumes it is a post generation prompt for this schema.
  *  
  * (C) 2025 TekMonks. All rights reserved.
@@ -41,7 +42,8 @@ exports.doService = async jsonReq => {
     if (!conf) await _init();
     
     LOG.info(`Servicing a new AI ${jsonReq.postschema?"post":"theme"} request`);
-    if (jsonReq.postschema) return returnPostContent(jsonReq);
+    if (jsonReq.type=="svg") return returnSVGImageContent(jsonReq); 
+    else if (jsonReq.type=="post") return returnPostContent(jsonReq);
     else return returnThemeContent(jsonReq);
 }
 
@@ -56,17 +58,46 @@ if (require.main === module) {  // console tester
     } catch (err) { console.log(`Error: ${err}\n`); process.exit(1); }})();
 }
 
+async function returnSVGImageContent(jsonReq) {
+    let retry = 0, response, error;
+    while (retry < 3) {
+        retry++;
+        if (retry > 1) LOG.info(`Retrying AI request for SVG image.`);
+        try {
+            const prompt = mustache.render(conf.contextprompt_image_template, {prompt: jsonReq.prompt, error}).trim();
+            response = await _runAIModel(conf.systemprompt_image, prompt)
+        } catch (err) {LOG.error(`Bad response from AI. AI model error ${err}`); continue;}
+
+        // check response for correctness
+        if (!_isValidSVG(response?.output_text)) {
+            error = response?.output_text||"";
+            LOG.error(`Response ${JSON.stringify(response||{})} is bad. Not well formed SVG.`);
+            continue; 
+        }
+        
+        break;  // reaching here means it is a good response
+    }
+    if (retry == 3) { LOG.info(`AI failed to process the SVG generation request. Returning false.`); return CONSTANTS.FALSE_RESULT; }  // ai failed
+
+    LOG.info("Returning the response, good AI response for SVG image generation.");
+    const fixedSvg = response.output_text.replace(/<svg\b[^>]*?>/, tag => { // why? because apparently LLMs have a huge issue putting in the right XML namespace
+        const noNs = tag.replace(/\sxmlns\s*=\s*(["'])[^"']*\1/, "");
+        return noNs.replace(/<svg\b/, '<svg xmlns="http://www.w3.org/2000/svg"');
+    });
+    return {airesponse: response, svg: fixedSvg, ...CONSTANTS.TRUE_RESULT};
+}
+
 async function returnThemeContent(jsonReq) {
     let retry = 0, response, error;
     while (retry < 3) {
         retry++;
-        if (retry > 1) LOG.info(`Retrying AI request.`);
+        if (retry > 1) LOG.info(`Retrying AI request for Theme generation.`);
         try {
             const prompt = mustache.render(conf.contextprompt_theme_template, 
                 {prompt: jsonReq.prompt, header: jsonReq.header, leftbar: jsonReq.leftbar, 
                     rightbar: jsonReq.rightbar, footer: jsonReq.footer, error}).trim();
             response = await _runAIModel(conf.systemprompt_theme, prompt)
-        } catch (err) {LOG.error(`Bad response from AI. OpenAI error ${err}`); continue;}
+        } catch (err) {LOG.error(`Bad response from AI. AI model error ${err}`); continue;}
 
         // check response for correctness
         if (response?.output_text.split(conf.separator).length !== 3) {
@@ -79,7 +110,7 @@ async function returnThemeContent(jsonReq) {
     }
     if (retry == 3) { LOG.info(`AI failed to process the theme generation request. Returning false.`); return CONSTANTS.FALSE_RESULT; }  // ai failed
 
-    LOG.info("Returning the response, good AI response.");
+    LOG.info("Returning the response, good AI response for theme generation.");
     const [html, schema, post] = response.output_text.split(conf.separator);
     return {airesponse: response, html, schema, post, ...CONSTANTS.TRUE_RESULT};
 }
@@ -88,12 +119,12 @@ async function returnPostContent(jsonReq) {
     let retry = 0, response, error;
     outerloop: while (retry < 3) {
         retry++;
-        if (retry > 1) LOG.info(`Retrying AI request.`);
+        if (retry > 1) LOG.info(`Retrying AI request for Post generation.`);
         try { 
             const prompt = mustache.render(conf.contextprompt_post_template, {
                 prompt: jsonReq.prompt, postschema: JSON.stringify(jsonReq.postschema, null, 2), error}).trim();
             response = response = await _runAIModel(conf.systemprompt_post, prompt)
-        } catch (err) {LOG.error(`Bad response from AI. OpenAI error ${err}`); continue;}
+        } catch (err) {LOG.error(`Bad response from AI. AI model error ${err}`); continue;}
 
         // check response is good 
         let responseObject; try {responseObject = yaml.parse(response?.output_text)} catch (err) {
@@ -109,7 +140,7 @@ async function returnPostContent(jsonReq) {
     }
     if (retry == 3) { LOG.info(`AI failed to process the post generation request. Returning false.`); return CONSTANTS.FALSE_RESULT; }  // ai failed
 
-    LOG.info(`Returning the response, good AI response.`);
+    LOG.info(`Returning the response, good AI response for post generation.`);
     return {post: response.output_text, ...CONSTANTS.TRUE_RESULT};
 }
 
@@ -144,6 +175,22 @@ async function _runAIModel(instructions, prompt) {
     }
 
     return {output_text: finalResponse};
+}
+
+function _isValidSVG(svgString) {
+  const trimmed = svgString.trim();
+  // 1. Basic structural check: Must start and end with correct characters
+  if (!trimmed.startsWith('<') || !trimmed.endsWith('>')) return false;
+
+  // 2. Ensure it contains an <svg> opening tag and </svg> closing tag
+  const hasSvgOpen = /<svg\b[^>]*>/i.test(trimmed);
+  const hasSvgClose = /<\/svg>/i.test(trimmed);
+  if (!hasSvgOpen || !hasSvgClose)return false;
+
+  // 3. Simple tag balance check (Ensures brackets match up roughly)
+  const openBrackets = (trimmed.match(/</g) || []).length;
+  const closeBrackets = (trimmed.match(/>/g) || []).length;
+  return openBrackets === closeBrackets;
 }
 
 const validateRequest = jsonReq => (jsonReq && jsonReq.prompt);

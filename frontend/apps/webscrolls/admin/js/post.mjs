@@ -19,7 +19,9 @@ const API_DELETE = `${WEBSCROLLS_CONSTANTS.API_PATH}/delete`;
 const API_PUBLISH = `${WEBSCROLLS_CONSTANTS.API_PATH}/publish`;
 const SSE_URL_FOR_APIS = `${WEBSCROLLS_CONSTANTS.API_PATH}/appevents`;
 const COMPONENT_PATH = util.getModulePath(import.meta), DIALOGS_PATH = `${COMPONENT_PATH}/../dialogs`;
-const CREATE_NEW_POST = "--- create", DEFAULT_POST = "default", FILE_MANAGER_COMPONENT_ID = "fmlinks";
+const CREATE_NEW_POST = "--- create", DEFAULT_POST = "default", FILE_MANAGER_COMPONENT_ID = "fmdialog";
+
+const FILE_MANAGER = _ => monkshu_env.components["file-manager"];
 
 let old_posttype, old_post, current_post_schema, dragging_to_resize=false, currentResizer, active_panel_id, current_post_type_rendered_html; 
 
@@ -34,7 +36,6 @@ async function createdata(dontAddBlanks=false, addPosts=false) {
 }	
 
 async function getRenderedPost(theme, posttype, postid) {
-    const lang = session.get($$.MONKSHU_CONSTANTS.LANG_ID);
     const htmlTemplateURL = `${WEBSCROLLS_CONSTANTS.APP_PATH}/themes/${theme}/${posttype}${posttype.endsWith(".html")?"":".html"}`;
     const htmlTemplate = await $$.requireText(htmlTemplateURL), postdata = await getPostData(theme, posttype, postid);
     try {
@@ -259,19 +260,26 @@ function dragged(event) {
     updateUI();
 }
 
-async function callai(prompt) {
+async function callaiForPostGeneration(prompt) {
+    if (!prompt) {alert("Nothing to do"); return;}
     if (!current_post_schema) {alert("Please select a post type first."); return;}
-    const divWorking = document.querySelector("div#working"); divWorking.classList.add("visible");
-    const post_result = await apiman.rest(API_AI, "POST", {prompt, postschema: current_post_schema}, true, 
-        undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, SSE_URL_FOR_APIS);
+    const post_result = await _callAIInternal({prompt, postschema: current_post_schema, type: "post"});
     const {post: postYaml, result} = post_result;
     if (result) {
         document.querySelector("textarea#postraw").value = postYaml;    // load post text area
         _renderPostItems(jsYaml.load(postYaml));                        // load post UI fields
         panelSelect(document.querySelector("span#postitem"), "postwork");   // shift focus to the fields tab
         rerender();                                                     // rerender the page
-    } else alert("AI call failed, please retry with a new or same prompt.")
-    divWorking.classList.remove("visible");
+    } else alert("AI call failed, please retry with a new or same prompt.");
+}
+
+async function callaiForImageGeneration(prompt, element) {
+    const shadowRoot = monkshu_env.components['dialog-box'].getShadowRootByContainedElement(element);
+    if (!prompt) {alert("Nothing to do"); return;}
+    const image_result = await _callAIInternal({prompt: prompt.trim(), type: "svg"}, shadowRoot);
+    const {svg, result} = image_result;
+    if (result) shadowRoot.querySelector("img#generatedimage").src = `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+    else alert("AI call failed, please retry with a new or same prompt.");
 }
 
 async function showLinkGenerator(_element) {
@@ -287,12 +295,25 @@ async function showLinkGenerator(_element) {
     initialData.extrainfo = util.stringToBase64(JSON.stringify({apppath: `/apps/${WEBSCROLLS_CONSTANTS.APP_NAME}`, cmstype: "cms"}));
     
     // reset saved path so the file browser starts from the home every time
-    if (monkshu_env.components["file-manager"])monkshu_env.components["file-manager"].reset(FILE_MANAGER_COMPONENT_ID, true); 
+    if (FILE_MANAGER()) FILE_MANAGER().reset(FILE_MANAGER_COMPONENT_ID, true); 
 
     dialog.showDialog(`${DIALOGS_PATH}/linkgen.html`, true, true, initialData, "postdialog");
 }
 
-const closeLinkDialog = _ => monkshu_env.components['dialog-box'].hideDialog("postdialog");
+async function showImageGenerator(_element) {
+    const dialog = monkshu_env.components['dialog-box'], initialData = {
+        // these are for XBin to point to the CMS and work correctly
+        apipath: `${WEBSCROLLS_CONSTANTS.BACKEND}/apps/${WEBSCROLLS_CONSTANTS.APP_NAME}`,
+        appath: `${WEBSCROLLS_CONSTANTS.FRONTEND}/apps/${WEBSCROLLS_CONSTANTS.APP_NAME}`,
+        extrainfo: util.stringToBase64(JSON.stringify({apppath: `/apps/${WEBSCROLLS_CONSTANTS.APP_NAME}`, cmstype: "cms"})) 
+    };
+    // reset saved path so the Xbin starts from the home every time
+    if (FILE_MANAGER()) FILE_MANAGER().reset(FILE_MANAGER_COMPONENT_ID, true); 
+
+    dialog.showDialog(`${DIALOGS_PATH}/imggen.html`, true, true, initialData, "postdialog");
+}
+
+const closeDialog = _ => monkshu_env.components['dialog-box'].hideDialog("postdialog");
 
 async function linkselectionchanged(element, value, type) {
     const shadowRoot = monkshu_env.components['dialog-box'].getShadowRootByContainedElement(element);
@@ -319,10 +340,35 @@ async function linkselectionchanged(element, value, type) {
     }
 }
 
+async function saveCMSFile(filepath, data) {
+    if (!filepath.trim()) {alert("Bad path"); return;}
+    if (!data?.trim()) {alert("Missing data"); return;}
+    const parts = filepath.split("."); 
+    if (parts[parts.length - 1].toLowerCase() != "svg") filepath = filepath + ".svg";
+    else filepath = parts.slice(0, parts.length-1).join(".") + ".svg";    // fix extension to always end with lowercase .svg
+
+    if (FILE_MANAGER()) {
+        if (await FILE_MANAGER().checkFileExists(filepath, FILE_MANAGER_COMPONENT_ID) &&  // don't allow accidental overwrites
+            (!confirm("A file by the same name already exists.\nChoose OK to overwrite or Cancel to abort."))) return;
+
+        const result = await FILE_MANAGER().operateFileExternal(FILE_MANAGER_COMPONENT_ID, filepath, "write", data, 
+            `AI generated image file on date: ${new Date().toISOString().replace('T', ' ').substring(0, 19)} UTC`);
+        if (result.result) {FILE_MANAGER().reload(FILE_MANAGER_COMPONENT_ID, true); alert("Saved");}
+        else alert (`Failed to save the file, please retry.`);
+    } else return;
+}
+
 const logout = _ => loginmanager.logout();
 
-
 const _isReservedPostType = posttype => ["header", "footer", "leftbar", "rightbar"].includes(posttype);
+
+const _callAIInternal = async (request, shadowRoot) => {
+    const divWorking = (shadowRoot||document).querySelector("div#working"); divWorking.classList.add("visible");
+    const ai_result = await apiman.rest(API_AI, "POST", request, true, undefined, undefined, undefined, 
+        undefined, undefined, undefined, undefined, undefined, SSE_URL_FOR_APIS);
+    divWorking.classList.remove("visible");
+    return ai_result;
+}
 
 function _getPostObject(rawYaml) {
     if (active_panel_id == "postraw" || rawYaml) try {  // if we have raw YAML then just return that
@@ -443,5 +489,6 @@ function _parseSchemaIntoTemplateData(pageSchema, idprefix) {
 
 export const post = {createdata, getPostData, getRenderedPost, themeselected, posttypeselected, 
     postselected, panelSelect, scaleIframe, addToArray, deleteFromArray, publishPost, deletePost, 
-    logout, publishPostExternalCall, dragstart, dragged, dragstop, rerender, callai, showLinkGenerator,
-    linkselectionchanged, closeLinkDialog};
+    logout, publishPostExternalCall, dragstart, dragged, dragstop, rerender, callaiForPostGeneration, 
+    callaiForImageGeneration, showLinkGenerator, linkselectionchanged, closeDialog, showImageGenerator, 
+    saveCMSFile};

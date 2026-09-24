@@ -12,6 +12,7 @@
 if (window.WEBSCROLLS_CONSTANTS) {
     window.post = (await import ("./js/post.mjs")).post;
     await import("./components/dialog-box/dialog-box.mjs");
+    await import( "./components/span-with-menu/span-with-menu.mjs");
 }
 </script>
 
@@ -84,8 +85,8 @@ div#buttonsheaderdiv {
     align-items: center;
 }
 
-div#linkdiv {
-    padding: 0.6rem;
+div#toolsdiv {
+    height: 3.12rem;
     border-radius: 0.5rem;
     border: 1px solid #D9D9D9;
     display: flex;
@@ -93,14 +94,8 @@ div#linkdiv {
     justify-content: space-between;
     align-items: center;
     margin-right: 1rem;
+    user-select: none;
 }
-span#linkbutton {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-right: 1.2rem;
-}
-span#linkbutton svg {height: 0.68rem;}
 
 select.header {
     padding: 0.5rem;
@@ -281,6 +276,7 @@ div.panelcontent span#callai {
     padding-bottom: 1rem;
     padding-right: 1rem;
     color: #4c4c4c;
+    cursor: pointer;
 }
 div.panelcontent span#callai svg#callai {
     border: 1px solid #4c4c4d;
@@ -435,16 +431,18 @@ span.arraycarddelete {
         </span>
     </div>
 
-    <div id="linkdiv">
-        <span id="linkbutton" class="headerbutton headerbuttonlink" onclick="post.showLinkGenerator(this)">
-            <svg xmlns="http://w3.org" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-            </svg>
-            <span>Link</span>
-        </span>
-    </div>
+    <div id="toolsdiv">
+        <span-with-menu styleBody="html,body {height: 3.12rem;} div.menuitem {color: #4c4c4c; padding-right: 1.2rem !important;} div.menuitem:hover {background-color: #4c4c4c !important;} span#content {cursor: pointer !important; display: flex; height: 100%; align-items: center; padding: 0rem 1rem;}">
+            <span id="toolstext" style="height:1rem; display:flex; margin-right:0.4rem;">
+                <img style="height:100%; margin-top:0.1rem;" src="img/tools.svg">&nbsp;Tools
+            </span>
 
+            <menu-item onclick='post.showLinkGenerator(this)' 
+                label="Link Generator" icon="img/linkgen.svg" iconhover="img/linkgen_hover.svg"></menu-item>
+            <menu-item onclick='post.showImageGenerator(this)' 
+                label="Image Generator" icon="img/imggen.svg" iconhover="img/imggen_hover.svg"></menu-item>
+        </span-with-menu>
+    </div>
     <div id="buttonsheaderdiv">
         <span id="deletebutton" class="headerbutton headerbuttondelete headerbuttondisableddelete" onclick="post.deletePost(this)">Delete</span>
         <span id="publishbutton" class="headerbutton headerbuttondisabledpublish" onclick="post.publishPost(this)">Publish</span>
@@ -467,14 +465,14 @@ span.arraycarddelete {
             </div>
 
             <div id="postraw" class="panelcontent displaynone" onchange="post.rerender()">
-                <textarea id="postraw" placeholder="Type post in YAML Here" onchange="post.rerender()"></textarea>
+                <textarea id="postraw" placeholder="Type post in YAML Here" onchange="post.rerender()">{}</textarea>
             </div>
 
             <div id="aiitem" class="panelcontent displaynone">
                 <div id="aicontent">
                     <div id="working"><span id="aimagic"><img src="./img/sparkles_wait.svg"></span></div>
                     <textarea id="aiitem" placeholder="Type AI prompt"></textarea>
-                    <span id="callai" onclick="post.callai(this.parentNode.querySelector('textarea#aiitem').value)">
+                    <span id="callai" onclick="post.callaiForPostGeneration(this.parentNode.querySelector('textarea#aiitem').value)">
                         <svg id="callai" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2z"/>
                             <path d="M19 15l1 3 3 1-3 1-1 3-1-3-3-1 3-1 1-3z"/>
