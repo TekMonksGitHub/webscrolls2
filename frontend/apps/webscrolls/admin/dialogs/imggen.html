@@ -129,7 +129,8 @@ window.copyLink = function(shadowRoot) {
     div#savepanel {
         display: flex;
         flex-direction: column;
-        width: 33%;
+        min-width: 33%;
+        max-width: 33%;
     }
     input#filename {
         outline: none;
@@ -224,8 +225,14 @@ window.copyLink = function(shadowRoot) {
                 <file-manager id="fmdialog" nomenu="true" zindex-fullscreen="51" fmiconsize="2rem" folderops="false"
                     user="{{#_org_monkshu_session}}id{{/_org_monkshu_session}}" genStats="true" extrainfo="{{{extrainfo}}}"
                     encodeurls="false" apipath="{{{apipath}}}" apppath="{{{apppath}}}"
-                    onselect="monkshu_env.components['dialog-box'].getShadowRootByHostId('postdialog').querySelector('span#link').innerText = 
-                        window.monkshu_env.apps[WEBSCROLLS_CONSTANTS.APP_NAME].getRelativeURLForCMSPath(filemanager.getSelectedPath())"
+                    onselect="
+                    const shadowRoot = monkshu_env.components['dialog-box'].getShadowRootByHostId('postdialog');
+                    const link = window.monkshu_env.apps[WEBSCROLLS_CONSTANTS.APP_NAME].getRelativeURLForCMSPath(filemanager.getSelectedPath());
+                    shadowRoot.querySelector('span#link').innerText = link;
+                    const uri_encoded_data_check = shadowRoot.querySelector('img#generatedimage').src.split(',')[1];
+                    if (!uri_encoded_data_check && link.endsWith('.svg')) shadowRoot.querySelector('img#generatedimage').src = link;
+                    "
+                    {{#fmpath}}path="{{{.}}}"{{/fmpath}}
                     styleBody="
                         div#filemanager {padding-top: 1.5em !important;}
                         div#filelistingscontainer {row-gap: 0em !important;}
@@ -243,12 +250,20 @@ window.copyLink = function(shadowRoot) {
 
     <div id="actionbuttons">
         <span class="actionbutton" onclick="
-            const uri_encoded_data = this.parentNode.parentNode.querySelector('img#generatedimage').src.split(',')[1];
+            const selectorNode = this.parentNode.parentNode;
+            const uri_encoded_data = selectorNode.querySelector('img#generatedimage').src.split(',')[1];
             if (!uri_encoded_data) {alert('Missing image to save'); return;}
-            const filename = this.parentNode.parentNode.querySelector('input#filename').value;
+            const filename = selectorNode.querySelector('input#filename').value;
             if (!filename) {alert('Missing proper file name'); return;}
-            post.saveCMSFile(`${filemanager.getCurrentlyActiveFolder()}/${filename}`, decodeURIComponent(uri_encoded_data))"
-        >Save</span>
+            post.saveCMSFile(`${filemanager.getCurrentlyActiveFolder()}/${filename}`, 
+                decodeURIComponent(uri_encoded_data), 'svg', savedResult => { 
+                    if (savedResult) {
+                        alert ('Saved');
+                        selectorNode.querySelector('img#generatedimage').src='./img/imggen.svg';
+                        selectorNode.querySelector('textarea#imgprompt').value='';
+                    } else alert (`Failed to save the file, please retry.`);
+                });
+        ">Save</span>
         <span class="actionbutton" onclick="post.closeDialog(this)">Close</span>
     </div>
 </div>

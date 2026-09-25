@@ -303,12 +303,13 @@ async function showLinkGenerator(_element) {
 async function showImageGenerator(_element) {
     const dialog = monkshu_env.components['dialog-box'], initialData = {
         // these are for XBin to point to the CMS and work correctly
+        fmpath: old_posttype ? `/${old_posttype}` : undefined,
         apipath: `${WEBSCROLLS_CONSTANTS.BACKEND}/apps/${WEBSCROLLS_CONSTANTS.APP_NAME}`,
         appath: `${WEBSCROLLS_CONSTANTS.FRONTEND}/apps/${WEBSCROLLS_CONSTANTS.APP_NAME}`,
         extrainfo: util.stringToBase64(JSON.stringify({apppath: `/apps/${WEBSCROLLS_CONSTANTS.APP_NAME}`, cmstype: "cms"})) 
     };
     // reset saved path so the Xbin starts from the home every time
-    if (FILE_MANAGER()) FILE_MANAGER().reset(FILE_MANAGER_COMPONENT_ID, true); 
+    if (FILE_MANAGER() && (!old_posttype)) FILE_MANAGER().reset(FILE_MANAGER_COMPONENT_ID, true); 
 
     dialog.showDialog(`${DIALOGS_PATH}/imggen.html`, true, true, initialData, "postdialog");
 }
@@ -340,12 +341,15 @@ async function linkselectionchanged(element, value, type) {
     }
 }
 
-async function saveCMSFile(filepath, data) {
+async function saveCMSFile(filepath, data, expectedExtension, callback) {
     if (!filepath.trim()) {alert("Bad path"); return;}
     if (!data?.trim()) {alert("Missing data"); return;}
-    const parts = filepath.split("."); 
-    if (parts[parts.length - 1].toLowerCase() != "svg") filepath = filepath + ".svg";
-    else filepath = parts.slice(0, parts.length-1).join(".") + ".svg";    // fix extension to always end with lowercase .svg
+    if (expectedExtension) {
+        const parts = filepath.split("."); 
+        if (parts[parts.length - 1].toLowerCase() != expectedExtension) filepath = filepath + `.${expectedExtension}`;
+        else filepath = parts.slice(0, parts.length-1).join(".") + `.${expectedExtension}`;    // fix extension to always end with lowercase .svg
+    }
+    filepath = filepath.toLowerCase();  // we only support lower case as these go into URLs
 
     if (FILE_MANAGER()) {
         if (await FILE_MANAGER().checkFileExists(filepath, FILE_MANAGER_COMPONENT_ID) &&  // don't allow accidental overwrites
@@ -353,9 +357,9 @@ async function saveCMSFile(filepath, data) {
 
         const result = await FILE_MANAGER().operateFileExternal(FILE_MANAGER_COMPONENT_ID, filepath, "write", data, 
             `AI generated image file on date: ${new Date().toISOString().replace('T', ' ').substring(0, 19)} UTC`);
-        if (result.result) {FILE_MANAGER().reload(FILE_MANAGER_COMPONENT_ID, true); alert("Saved");}
-        else alert (`Failed to save the file, please retry.`);
-    } else return;
+        if (result.result) {FILE_MANAGER().reload(FILE_MANAGER_COMPONENT_ID, true); if (callback) callback(true); return true;}
+        else {if (callback) callback(false); return false;}
+    } else {if (callback) callback(false); return false;}
 }
 
 const logout = _ => loginmanager.logout();
