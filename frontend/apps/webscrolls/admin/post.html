@@ -13,6 +13,7 @@ if (window.WEBSCROLLS_CONSTANTS) {
     window.post = (await import ("./js/post.mjs")).post;
     await import("./components/dialog-box/dialog-box.mjs");
     await import( "./components/span-with-menu/span-with-menu.mjs");
+    await import( "./components/file-manager/file-manager.mjs");
 }
 </script>
 
@@ -525,6 +526,14 @@ span.arraycarddelete {
 </div>
 
 <dialog-box id="postdialog"></dialog-box>
+
+<file-manager id="fmdialog" nomenu="true" zindex-fullscreen="51" folderops="false"
+    user="{{#_org_monkshu_session}}id{{/_org_monkshu_session}}" genStats="true" 
+    extrainfo="{{{extrainfo}}}"
+    encodeurls="false" apipath="{{{apipath}}}" apppath="{{{apppath}}}"
+    {{#fmpath}}path="/"{{/fmpath}}
+    style="display:none">   <!-- Used exclusively for CMS file operations, not display -->
+</file-manager>
 
 <!-- Templates follow -->
 <template id="postschemaform">

@@ -256,11 +256,11 @@ window.copyLink = function(shadowRoot) {
             const filename = selectorNode.querySelector('input#filename').value;
             if (!filename) {alert('Missing proper file name'); return;}
             post.saveCMSFile(`${filemanager.getCurrentlyActiveFolder()}/${filename}`, 
-                decodeURIComponent(uri_encoded_data), 'svg', savedResult => { 
+                decodeURIComponent(uri_encoded_data), 'svg', (savedResult, savedpath) => { 
                     if (savedResult) {
                         alert ('Saved');
-                        selectorNode.querySelector('img#generatedimage').src='./img/imggen.svg';
-                        selectorNode.querySelector('textarea#imgprompt').value='';
+                        const link = window.monkshu_env.apps[WEBSCROLLS_CONSTANTS.APP_NAME].getRelativeURLForCMSPath(savedpath);
+                        selectorNode.querySelector('img#generatedimage').src=link;
                     } else alert (`Failed to save the file, please retry.`);
                 });
         ">Save</span>

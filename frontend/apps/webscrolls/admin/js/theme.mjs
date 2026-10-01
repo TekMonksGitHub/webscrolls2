@@ -151,7 +151,7 @@ async function publishThemeFile() {
     if ((await apiman.rest(API_PUBLISH_THEME_FILE, "POST", {themeurl, 
             template: htmlTemplate, schemaJSON}, true)).result) {
         const publishTestPostResult = publishtestpost ? (await post.publishPostExternalCall(
-            testpost, posttype, testpostname, session.get($$.MONKSHU_CONSTANTS.LANG_ID))) : true;
+            testpost, theme, posttype, testpostname, session.get($$.MONKSHU_CONSTANTS.LANG_ID))) : true;
         alert(publishTestPostResult?"Published":"Theme template published but test post publishing failed"); 
         
         const posttypeNormalized = posttype.endsWith(".html") ? posttype.split(".").at(-2) : posttype;
@@ -214,6 +214,8 @@ async function callai() {
     divWorking.classList.remove("visible");
 }
 
+const getThemeTemplate = (theme, posttype) => $$.requireText(`${WEBSCROLLS_CONSTANTS.APP_PATH}/themes/${theme}/${posttype}${posttype.endsWith(".html")?"":".html"}`);
+
 const logout = _ => loginmanager.logout();
 const _disableDeleteButton = _ => document.querySelector("span#deletebutton").classList.add("headerbuttondisableddelete");
 const _enableDeleteButton = _ => document.querySelector("span#deletebutton").classList.remove("headerbuttondisableddelete");
@@ -239,4 +241,4 @@ const _readObjectFileOrDefaultObjectOnError = async (url, defaultObject) => {
 }
 
 export const theme = {createdata, themeselected, posttypeselected, dragstart, callai, logout,
-    dragged, dragstop, panelSelect, rerender, scaleIframe, publishThemeFile, deleteThemeFile};
+    dragged, dragstop, panelSelect, rerender, scaleIframe, publishThemeFile, deleteThemeFile, getThemeTemplate};
