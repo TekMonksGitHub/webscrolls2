@@ -57,7 +57,7 @@ async function getPostData(theme, posttype, postid, postobject) {
     const rightbar = (!skipPageTopSideBars) && theme_post_types.includes("rightbar") ? await getRenderedPost(theme, "rightbar", "default") : undefined;
     
     let finalPostData = postobject; if (!finalPostData) try {
-        const posturl = `${WEBSCROLLS_CONSTANTS.APP_PATH}/cms/${posttype}/${postid}.${lang}.yaml`;
+        const posturl = `${WEBSCROLLS_CONSTANTS.APP_PATH}/cms/${theme}/${posttype}/${postid}.${lang}.yaml`;
         const postData = await $$.requireText(posturl);
         finalPostData = jsYaml.load(postData);
     } catch (err) {return false};
@@ -120,7 +120,8 @@ async function postselected(_element, post, reset) {
     else { _disableDeleteButton(); _enablePostNameHeaderInput(); _setPostName(Date.now()); return; }
 
     const lang = session.get($$.MONKSHU_CONSTANTS.LANG_ID);
-    const posturl = `/${old_posttype}/${post}.${lang}.yaml`; // TODO: fix this path to go under the theme
+    const themeSelected = document.querySelector("select#themeselector").value;
+    const posturl = `/${themeSelected}/${old_posttype}/${post}.${lang}.yaml`; 
     const postData = (await FILE_MANAGER().operateFileExternal(FILE_MANAGER_COMPONENT_ID, posturl, "read"))?.data;
     if (!postData) {alert("Error reading post, retry or delete and recreate on repeated errors."); return;}
     try {_renderPostItems(jsYaml.load(postData)); document.querySelector("textarea#postraw").value = postData; rerender();} catch (err) {alert("Bad post data, unparseable. Recreate the post."); return;}
@@ -171,7 +172,8 @@ async function publishPost(button) {
 
 async function publishPostExternalCall(postYamlText, theme, posttype, postname, lang) {
     if (_isReservedPostType(posttype)) postname = DEFAULT_POST; // override the name if the post type is reserved
-    const posturl = `/${posttype}/${postname}.${lang}.yaml`;    // TODO: fix this path to go under the theme
+    const themeSelected = document.querySelector("select#themeselector").value;
+    const posturl = `/${themeSelected}/${posttype}/${postname}.${lang}.yaml`;    
     if ((await FILE_MANAGER().operateFileExternal(FILE_MANAGER_COMPONENT_ID, posturl, "write", postYamlText))?.result) {    // write the post
         const posts = await _getPostsForPostType(theme, old_posttype);
         if (!posts.includes(postname)) {
@@ -193,8 +195,12 @@ async function deletePost(button) {
     if (posts.indexOf(postname) != -1) {    // post needs to be removed from posts.json
         posts.splice(posts.indexOf(postname), 1); 
         if (!await _setPostsForPostType(themeSelected, old_posttype, posts)) {alert("Deletion failed."); return;}
-        else {alert("Post has been deleted.\n\nYou can select a new post on reload."); router.hardreload();}
     }
+
+    const lang = session.get($$.MONKSHU_CONSTANTS.LANG_ID);
+    const posturl = `/${themeSelected}/${old_posttype}/${postname}.${lang}.yaml`;  
+    await FILE_MANAGER().operateFileExternal(FILE_MANAGER_COMPONENT_ID, posturl, "delete"); // post.json already skips this post, so this step's success is not all that important
+    alert("Post has been deleted.\n\nYou can select a new post on reload."); router.hardreload();
 }
 
 function panelSelect(sender, panel) {
@@ -411,13 +417,13 @@ function _getPostObject(rawYaml, forceFromFields) {
 
 async function _getPostsForPostType(theme, posttype) {
     const postsJSONText = (await FILE_MANAGER().operateFileExternal(FILE_MANAGER_COMPONENT_ID, 
-        `/${posttype}/posts.json`, "read"))?.data;
+        `/${theme}/${posttype}/posts.json`, "read"))?.data;
     if (!postsJSONText) return []; else try {return JSON.parse(postsJSONText);} catch (err) {
         alert(`Post index file is bad for ${posttype}, all posts lost.`); return [];
     }
 }
 const _setPostsForPostType = async (theme, posttype, posts) => ( await FILE_MANAGER().operateFileExternal(
-    FILE_MANAGER_COMPONENT_ID, `/${posttype}/posts.json`, 
+    FILE_MANAGER_COMPONENT_ID, `/${theme}/${posttype}/posts.json`, 
     "write", JSON.stringify(posts)) )?.result;
 
 function _reinitPostFields() {
