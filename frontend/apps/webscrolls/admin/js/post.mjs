@@ -256,6 +256,8 @@ function dragstop(event) {
     window.removeEventListener('mouseup', dragstop);
 };
 
+const isDragging = _ => dragging_to_resize;
+
 function dragged(event) {
     if ((!dragging_to_resize) || (!currentResizer)) return;
     event.preventDefault(); 
@@ -529,6 +531,6 @@ function _parseSchemaIntoTemplateData(pageSchema, idprefix) {
 
 export const post = {createdata, getPostData, getRenderedPost, themeselected, posttypeselected, 
     postselected, panelSelect, scaleIframe, addToArray, deleteFromArray, publishPost, deletePost, 
-    logout, publishPostExternalCall, dragstart, dragged, dragstop, rerender, callaiForPostGeneration, 
+    logout, publishPostExternalCall, dragstart, dragged, dragstop, isDragging, rerender, callaiForPostGeneration, 
     callaiForImageGeneration, showLinkGenerator, linkselectionchanged, closeDialog, showImageGenerator, 
     saveCMSFile};

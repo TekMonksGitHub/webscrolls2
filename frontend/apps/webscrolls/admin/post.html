@@ -492,7 +492,8 @@ span.arraycarddelete {
             document.querySelector('div#postwork').style.width='25rem';
         " style="cursor: default;"><</span>
         <span>&nbsp;</span>
-        <span id="resizermiddler" onclick="
+        <span id="resizermiddler" ondblclick="
+            if (post.isDragging()) return;
             document.querySelector('div#preview').style.width='50%';
             document.querySelector('div#postwork').style.width='50%';
         ">
