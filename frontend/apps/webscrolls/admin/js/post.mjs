@@ -425,11 +425,13 @@ function _reinitPostFields() {
 }
 
 function _activePanelChanged(sender) {
+    const old_active_panel_id = active_panel_id;
+
     if (sender.id == "postitem") {
         const yaml = document.querySelector("textarea#postraw").value; 
         try {_renderPostItems(jsYaml.load(yaml));} catch (err) {alert(`Bad YAML: ${err}`); return false;}
     }
-    if (sender.id == "postraw") {
+    if (old_active_panel_id == "postitem" && sender.id == "postraw") {
         const yaml = jsYaml.dump(_getPostObject());
         document.querySelector("textarea#postraw").value = yaml;
     }
