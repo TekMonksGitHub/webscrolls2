@@ -393,8 +393,8 @@ const _callAIInternal = async (request, shadowRoot) => {
     return ai_result;
 }
 
-function _getPostObject(rawYaml) {
-    if (active_panel_id == "postraw" || rawYaml) try {  // if we have raw YAML then just return that
+function _getPostObject(rawYaml, forceFromFields) {
+    if ((!forceFromFields) && (active_panel_id == "postraw" || rawYaml)) try {  // if we have raw YAML then just return that
         if (rawYaml) return jsYaml.load(rawYaml);
         else return jsYaml.load(document.querySelector("textarea#postraw").value); 
     } catch (err) {alert(`Bad YAML: ${err}`); return {};}
@@ -419,8 +419,9 @@ const _setPostsForPostType = async (theme, posttype, posts) => ( await FILE_MANA
     "write", JSON.stringify(posts)) )?.result;
 
 function _reinitPostFields() {
-    const divPostcreator = document.querySelector("div#postcreator");
-    divPostcreator.innerHTML = current_post_type_rendered_html;
+    document.querySelector("div#postcreator").innerHTML = current_post_type_rendered_html;
+    const yaml = jsYaml.dump(_getPostObject(undefined, true));
+    document.querySelector("textarea#postraw").value = yaml;
 }
 
 function _activePanelChanged(sender) {
