@@ -40,7 +40,7 @@ let PAGE_DOWNLOADFILE_SHARED = COMPONENT_PATH+"/downloadshared.html", ENCODE_URL
 const LOG = $$.LOG;
 
 const DIALOG_SCROLL_ELEMENT_ID = "notificationscrollpositioner", DIALOG_HOST_ELEMENT_ID = "notification", 
-   PROGRESS_TEMPLATE="progressdialog", DEFAULT_SHARE_EXPIRY = 5;
+   PROGRESS_TEMPLATE="progressdialog", DEFAULT_SHARE_EXPIRY = 5 , DEFAULT_SHARE_EXPIRY_UNIT = "days";
 const DOUBLE_CLICK_DELAY=400, DOWNLOADFILE_REFRESH_INTERVAL = 1000, UPLOAD_ICON = "⇧", DOWNLOAD_ICON = "⇩",
    DOWNLOAD_FILE_OP = "DOWNLOAD_DIRECTION", UPLOAD_FILE_OP = "UPLOAD_DIRECTION", FMDIALOG_ID = "fmdialog";
 const dialog = element => {
@@ -90,7 +90,8 @@ async function elementConnected(host) {
    }
    
    // if a file or folder has been selected, show the paste button
-   const folder_ops = []; if ((!host.getAttribute("folderops")) || (host.getAttribute("folderops").toLowerCase() == "true")) {
+   const hasoperations = (!host.getAttribute("folderops")) || (host.getAttribute("folderops").toLowerCase() == "true") ? true : undefined;
+   const folder_ops = []; if (hasoperations) {
       if (selectedCopyPath || selectedCutPath) folder_ops.unshift({name: await i18n.get("Paste"), path, stats:{paste: true}, icon:`${COMPONENT_PATH}/img/paste.svg`});
 
       folder_ops.unshift({name: await i18n.get("Create"), path, stats:{create: true}, icon:`${COMPONENT_PATH}/img/create.svg`});
@@ -112,7 +113,7 @@ async function elementConnected(host) {
       fmBackgroundColor: computedStyle.backgroundColor, fmIconSize: host.getAttribute("fmiconsize"), 
       fmPadding: host.getAttribute("fmpadding")};
    await _readIcons(folder_ops); await _readIcons(resp.entries); 
-   const data = {operations: folder_ops, entries: resp.entries, hostID: host.id, COMPONENT_PATH, 
+   const data = {hasoperations, operations: folder_ops, entries: resp.entries, hostID: host.id, COMPONENT_PATH, 
       pathcrumbs: JSON.stringify(pathcrumbs), style};
 
    if (host.getAttribute("styleBody")||host.getAttribute("stylebody")) data.styleBody = `<style>${host.getAttribute("styleBody")||host.getAttribute("stylebody")}</style>`;
@@ -177,8 +178,8 @@ function handleClick(element, path, isDirectory, fromClickEvent, nomenu, clickEv
 function _fileListingEntrySelected(containedElement, stats) {
    const informationbox = file_manager.getShadowRootByContainedElement(containedElement).querySelector("div#informationbox");
    if (stats.size) stats.sizeLocale = parseInt(stats.size).toLocaleString(); 
-   if (stats.birthtime) stats.birthTimestampLocale = new Date(stats.birthtime).toLocaleString(); 
-   if (stats.mtime) stats.modifiedTimestampLocale = new Date(stats.mtime).toLocaleString(); 
+   if (stats.birthtimeMs) stats.birthTimestampLocale = new Date(stats.birthtimeMs).toLocaleString(); 
+   if (stats.mtimeMs) stats.modifiedTimestampLocale = new Date(stats.mtimeMs).toLocaleString(); 
    const arrayForBreadcrumbs = selectedPath.trim().replace(/^\/+/, "").split("/").slice(0, -1); arrayForBreadcrumbs.unshift("Home");
    stats.path = selectedPath; stats.pathBreadcrumbs = arrayForBreadcrumbs.join(" > "); 
    if (!stats.name) stats.name = containedElement.innerText;
@@ -445,6 +446,7 @@ async function editFileLoadData(element) {
       const resp = await apiman.rest(API_OPERATEFILE(), "POST", _addExtraInfo({path: selectedPath, op: "write", 
          data: result.filecontents}, element), true);
       if (!resp.result) _showErrordialog();
+      else router.reload(!ENCODE_URL, false);
    }); else _showErrordialog();
 }
 
@@ -596,16 +598,22 @@ function renameFile(element) {
 
 async function shareFile(element) {
    const paths = selectedPath.split("/"), name = paths[paths.length-1];
-   const resp = await apiman.rest(API_SHAREFILE(), "GET", _addExtraInfo({path: selectedPath, expiry: SHARE_DURATION}, element), true);
-   const downloadlink = resp?`${PAGE_DOWNLOADFILE_SHARED}?id=${resp.id}&name=${name}&apipath=${API_PATH}`:null;
+   const resp = await apiman.rest(API_SHAREFILE(), "GET", _addExtraInfo({path: selectedPath, expiry: SHARE_DURATION, expiry_unit: DEFAULT_SHARE_EXPIRY_UNIT}, element), true);
+   const downloadlink = resp?`${PAGE_DOWNLOADFILE_SHARED}?${new URLSearchParams({id: resp.id, name, apipath: API_PATH}).toString()}`:null;
    if (!resp || !resp.result) _showErrorDialog(); else dialog(element).showDialog( 
       `${DIALOGS_PATH}/sharefile.html`, true, true, 
       { link: ENCODE_URL ? router.encodeURL(downloadlink):downloadlink, id: resp.id, 
-         shareDuration: SHARE_DURATION, dialogpath: DIALOGS_PATH }, 
-      FMDIALOG_ID, ["expiry"], async result => {   // on OK clicked, next param is for cancel clicked
+         shareDuration: SHARE_DURATION, minutesSelected: "", hoursSelected: "", daysSelected: "selected", dialogpath: DIALOGS_PATH }, 
+      FMDIALOG_ID, ["expiry_value", "expiry_unit"], async result => {
          dialog(element).hideDialog(FMDIALOG_ID); 
-         if (result.expiry != SHARE_DURATION) apiman.rest(API_SHAREFILE(), "GET", _addExtraInfo(
-            {id: resp.id, expiry: result.expiry}, element), true); 
+         const value = Number(result.expiry_value), unit = result.expiry_unit || DEFAULT_SHARE_EXPIRY_UNIT;
+         if (!Number.isInteger(value) || value < 1) {
+            _showErrorDialog(null, "Share duration must be at least 1.");
+            await apiman.rest(API_SHAREFILE(), "GET", _addExtraInfo({id: resp.id, expiry: 0}, element), true);
+            return;
+         }
+         if ((value != SHARE_DURATION) || (unit != DEFAULT_SHARE_EXPIRY_UNIT)) await apiman.rest(API_SHAREFILE(), "GET", _addExtraInfo(
+            {id: resp.id, expiry: value, expiry_unit: unit}, element), true); 
       }, async _ => apiman.rest(API_SHAREFILE(), "GET", _addExtraInfo({id: resp.id, expiry: 0}, element), true) 
    );
 }
