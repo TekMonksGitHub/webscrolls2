@@ -6,6 +6,7 @@ export const i18n = {
 "Admin_CMS": "ファイル管理",
 "Admin_Main": "管理ホーム",
 "Admin_Settings": "設定",
+"Admin_Permissions": "許可",
 
 "logintagline": "Tekmonks の Webscrolls",
 "loginsubtag": "AI ファーストのウェブサイトフレームワークです。",

@@ -6,6 +6,7 @@ export const i18n = {
 "Admin_CMS": "File management",
 "Admin_Main": "Administration Home",
 "Admin_Settings": "Settings",
+"Admin_Permissions": "Permissions",
 
 "logintagline": "Webscrolls by Tekmonks",
 "loginsubtag": "An AI first website framework.",
