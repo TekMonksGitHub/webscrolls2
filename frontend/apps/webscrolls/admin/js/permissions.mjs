@@ -6,4 +6,12 @@
 
 import {loginmanager} from "../../js/loginmanager.mjs";
 
-export const permissions = {createdata: _ => {return {}}, logout: loginmanager.logout}
+function createdata() {
+    return {};
+}
+
+function userSelected(element, email) {}
+
+function addUser(name, email) {}
+
+export const permissions = {createdata, logout: loginmanager.logout, userSelected, addUser}

@@ -63,15 +63,16 @@ exports.downloadFile = async (fileReq, servObject, headers, url) => {
 }
 
 exports.readUTF8File = async function (headers, inpath, extraInfo) {
+	return (await exports.readBinaryFile(headers, inpath, extraInfo)).toString("utf8");
+}
+
+exports.readBinaryFile = async function (headers, inpath, extraInfo) {
 	const fullpath = await cms.getFullPath(headers, inpath, extraInfo);
 	const readstream = exports.getReadStream(fullpath);
     return new Promise((resolve, reject) => {
         const contents = [];
         readstream.on("data", chunk => contents.push(chunk));
-        readstream.on("close", _ => {
-			const utfContents = Buffer.concat(contents).toString("utf8"); 
-			resolve(utfContents);
-		});
+        readstream.on("close", _ => resolve(Buffer.concat(contents)));
         readstream.on("error", err => reject(err));
     });
 }

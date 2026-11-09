@@ -170,16 +170,16 @@ async function publishPost(button) {
     } else alert ("Publishing failed");
 }
 
-async function publishPostExternalCall(postYamlText, theme, posttype, postname, lang) {
+async function publishPostExternalCall(postYamlText, theme, posttype, postname, lang, filemanager, filemanager_id) {
     if (_isReservedPostType(posttype)) postname = DEFAULT_POST; // override the name if the post type is reserved
     const themeSelected = document.querySelector("select#themeselector").value;
     const posturl = `/${themeSelected}/${posttype}/${postname}.${lang}.yaml`;    
-    if ((await FILE_MANAGER().operateFileExternal(FILE_MANAGER_COMPONENT_ID, posturl, "write", postYamlText))?.result) {    // write the post
+    if ((await (filemanager||FILE_MANAGER()).operateFileExternal(filemanager_id||FILE_MANAGER_COMPONENT_ID, posturl, "write", postYamlText))?.result) {    // write the post
         const posts = await _getPostsForPostType(theme, old_posttype);
         if (!posts.includes(postname)) {
             posts.push(postname);
             if (await _setPostsForPostType(theme, old_posttype, posts)) return true; // update the list of posts
-            else {FILE_MANAGER().operateFileExternal(FILE_MANAGER_COMPONENT_ID, posturl, "delete"); return false;}
+            else {(filemanager||FILE_MANAGER()).operateFileExternal(filemanager_id||FILE_MANAGER_COMPONENT_ID, posturl, "delete"); return false;}
         } else return true;
     } else return false;
 }

@@ -62,7 +62,7 @@ const screenFocusUnfocus = (host, unfocus) => {
 }
 
 const IO_CHUNK_SIZE = 10485760, INITIAL_UPLOAD_BUFFER_SIZE = 40960, MAX_UPLOAD_WAIT_TIME_SECONDS = 5, 
-   MAX_EDIT_SIZE = 4194304, MAX_UPLOAD_BUFFER_SIZE = 10485760, SERVER_ID_HEADER = "x_monkshu_serverid",
+   MAX_EDIT_SIZE = 26214400, MAX_UPLOAD_BUFFER_SIZE = 10485760, SERVER_ID_HEADER = "x_monkshu_serverid",
    APIMAN_RETRIES = 3;
 
 async function elementConnected(host) {
@@ -142,11 +142,10 @@ async function elementRendered(host) {
    const hostID = host.getAttribute("id"), shadowRoot = file_manager.getShadowRootByHostId(hostID);
    shadowRoot.addEventListener("mousemove", e => {mouseX = e.clientX; mouseY = e.clientY;});
 
-   const container = shadowRoot.querySelector("div#filelistingscontainer");
    if (!noMenu(null, host)) shadowRoot.addEventListener(isMobile()?"click":"contextmenu", e => { 
       e.stopPropagation(); e.preventDefault(); if (e.___handled) return; else e.___handled = true; 
-      if (!menuOpen) showMenu(container, true); else hideMenu(container); });
-   if (!isMobile()) shadowRoot.addEventListener("click", e => { e.stopPropagation(); if (menuOpen) hideMenu(container); });
+      if (!menuOpen) showMenu(e.target, true); else hideMenu(e.target); });
+   if (!isMobile()) shadowRoot.addEventListener("click", e => { e.stopPropagation(); if (menuOpen) hideMenu(e.target); });
 
    if (showNotification) _updateProgress(hostID, null, null, null, null, null, null, true);  // rerender progress
 
@@ -224,7 +223,7 @@ const uploadFiles = async (element, files) => {
       }  // already being uploaded
       
       const checkFileExists = await apiman.rest(API_CHECKFILEEXISTS(), "GET", _addExtraInfo({path: normalizedName}, element), true); 
-      if (checkFileExists.result) {
+      if (checkFileExists?.result) {
          const cancelRenameRewrite = await dialog(element).showDialog(`${DIALOGS_PATH}/cancel_rename_overwrite.html`, true, false, 
             {fileexistswarning: await i18n.getRendered("FileExistsWarning", {name: file.name})}, FMDIALOG_ID, ["result"]);
          switch (cancelRenameRewrite.result) {
@@ -232,7 +231,7 @@ const uploadFiles = async (element, files) => {
             case "rename": file.renameto = checkFileExists.suggestedNewName; break;
             case "overwrite": {
                const deleteResult = await apiman.rest(API_DELETEFILE(), "GET", _addExtraInfo({path: normalizedName}, element), true);
-               if (!deleteResult.result) {dialog(element).showMessage(`${await i18n.get("OverwriteFailed")}${file.name}`, FMDIALOG_ID); continue;}
+               if (!(deleteResult?.result)) {dialog(element).showMessage(`${await i18n.get("OverwriteFailed")}${file.name}`, FMDIALOG_ID); continue;}
                else break;
             }
             default: {LOG.info(`Invalid choice so skipping existing file ${file.name}, skipping.`); continue;}
@@ -419,7 +418,7 @@ function showHideNotifications(hostID) {
 
 async function deleteFile(element, path) {
    let resp = await apiman.rest(API_DELETEFILE(), "GET", _addExtraInfo({path: path||selectedPath}, element), true);
-   if (resp.result) file_manager.reload(file_manager.getHostElementID(element), true); else _showErrorDialog();
+   if (resp?.result) file_manager.reload(file_manager.getHostElementID(element), true); else _showErrorDialog();
 }
 
 async function editFile(element) {
@@ -437,17 +436,17 @@ async function editFile(element) {
 }
 
 async function editFileLoadData(element) {
-   const resp = await apiman.rest(API_OPERATEFILE(), "POST", _addExtraInfo({path: selectedPath, op: "read"}, element), true);
+   const resp = await apiman.rest(API_OPERATEFILE(), "POST", _addExtraInfo({path: selectedPath, op: "readbinary"}, element), true);
    screenFocusUnfocus(file_manager.getHostElement(element));
-   if (resp?.result) dialog(element).showDialog(`${DIALOGS_PATH}/editfile.html`, true, true, {fileContents: resp.data}, 
-         FMDIALOG_ID, ["filecontents"], async result => {
-      
-      dialog(element).hideDialog(FMDIALOG_ID); screenFocusUnfocus(file_manager.getHostElement(element, true));
-      const resp = await apiman.rest(API_OPERATEFILE(), "POST", _addExtraInfo({path: selectedPath, op: "write", 
-         data: result.filecontents}, element), true);
-      if (!resp.result) _showErrordialog();
-      else router.reload(!ENCODE_URL, false);
-   }); else _showErrordialog();
+   if (!resp?.result) {_showErrordialog(); return;}
+
+   // opens the file viewer dialog and closes it later
+   const objectURL = URL.createObjectURL(util.base64ToBlob(resp.data)), filename = selectedPath.substring(selectedPath.lastIndexOf("/")+1);
+   dialog(element).showDialog(`${DIALOGS_PATH}/viewfile.html`, true, true, {src: objectURL, filename}, FMDIALOG_ID, [], _ => {
+      dialog(element).hideDialog(FMDIALOG_ID); 
+      screenFocusUnfocus(file_manager.getHostElement(element, true)); 
+      URL.revokeObjectURL(objectURL); 
+   });
 }
 
 async function operateFileExternal(hostID, path, op, data, comment) {
@@ -509,7 +508,7 @@ async function paste(element) {
    const checkFileExists = await apiman.rest(API_CHECKFILEEXISTS(), "GET", _addExtraInfo({path: to}, element), true); 
 
    
-   if (checkFileExists.result) {
+   if (checkFileExists?.result) {
       const cancelRenameRewrite = await dialog(element).showDialog(`${DIALOGS_PATH}/cancel_rename_overwrite.html`, true, 
          false, {fileexistswarning: await i18n.getRendered("FileExistsWarning", {name: to})}, FMDIALOG_ID, ["result"]);
       switch (cancelRenameRewrite.result) {
@@ -688,7 +687,7 @@ const _updateQuotaBars = async (element, quotabarIDs) => {
    const quotaStats = await apiman.rest(API_CHECKQUOTA(), "GET", _addExtraInfo({bytestowrite: 0}, element), true); 
    if (!quotaStats) return; // can't update
 
-   const percentUsed = _roundToTwo(quotaStats.currentsize/quotaStats.quota), quotaGB = _roundToTwo(quotaStats.quota/(1024*1024*1024));
+   const percentUsed = _roundToTwo(quotaStats.currentsize/quotaStats.quota*100), quotaGB = _roundToTwo(quotaStats.quota/(1024*1024*1024));
    const _setupUpdateWhenProgressBarLive = _ => {
       blackboard.registerListener(monkshu_component.BLACKBOARD_MESSAGE_COMPONENT_RENDERED, component => {
          for (const quotabarID of quotabarIDs) if (component == `progress-bar#${quotabarID}`) _updateQuotaBars(element, [quotabarID]); });

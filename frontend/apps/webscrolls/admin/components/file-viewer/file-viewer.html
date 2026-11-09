@@ -1,0 +1,69 @@
+<style>
+:host {
+    display: block;
+    --file-viewer-bg: #f5f5f5;
+    --file-viewer-fg: #222222;
+    --file-viewer-border: #d0d0d0;
+    --file-viewer-accent: #0b63ce;
+    --file-viewer-font: system-ui, -apple-system, "Segoe UI", sans-serif;
+    --file-viewer-mono: ui-monospace, "SFMono-Regular", Consolas, monospace;
+}
+
+html,body {height: 100%; margin: 0;}
+
+#viewer {
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background: var(--file-viewer-bg);
+    color: var(--file-viewer-fg);
+    border: 0.0625rem solid var(--file-viewer-border);
+    border-radius: 0.375rem;
+    font-family: var(--file-viewer-font);
+    -webkit-user-select: text;
+    user-select: text;
+}
+
+/* media and frames fill the box */
+.media-host.image { display: block; max-width: 100%; max-height: 100%; margin: auto; object-fit: contain; }
+.media-host.video { display: block; width: 100%; height: 100%; background: #000; }
+.media-host.audio { display: block; width: calc(100% - 2rem); margin: 2rem 1rem; }
+.frame-host { display: block; width: 100%; height: 100%; border: 0; background: #ffffff; }
+
+/* text and markdown */
+.text-host {
+    margin: 0; padding: 1rem; font-family: var(--file-viewer-mono); font-size: 0.8125rem; line-height: 1.5;
+    white-space: pre-wrap; overflow-wrap: anywhere;
+}
+.markdown-host { padding: 1rem 1.5rem; line-height: 1.6; max-width: 56.25rem; }
+.markdown-host img { max-width: 100%; }
+.markdown-host pre { background: #ffffff; padding: 0.75rem; overflow: auto; border-radius: 0.25rem; }
+.markdown-host table { border-collapse: collapse; }
+.markdown-host th, .markdown-host td { border: 0.0625rem solid var(--file-viewer-border); padding: 0.25rem 0.5rem; }
+
+/* docx: docx-preview draws white pages on a gray wrapper */
+.docx-host { min-height: 100%; }
+
+/* spreadsheets */
+.sheet-host { display: flex; flex-direction: column; height: 100%; }
+.sheet-tabs { display: flex; gap: 0.25rem; padding: 0.375rem 0.375rem 0; flex-wrap: wrap; border-bottom: 0.0625rem solid var(--file-viewer-border); }
+.sheet-tabs button {
+    font: inherit; font-size: 0.8125rem; padding: 0.25rem 0.75rem; cursor: pointer; background: transparent;
+    border: 0.0625rem solid var(--file-viewer-border); border-bottom: 0; border-radius: 0.25rem 0.25rem 0 0; color: inherit;
+}
+.sheet-tabs button.active { background: #ffffff; color: var(--file-viewer-accent); }
+.sheet-table { flex: 1; overflow: auto; background: #ffffff; }
+.sheet-table table { border-collapse: collapse; font-size: 0.8125rem; }
+.sheet-table td { border: 0.0625rem solid #e2e2e2; padding: 0.1875rem 0.5rem; white-space: nowrap; }
+.sheet-table tr:first-child td { background: #fafafa; font-weight: 600; position: sticky; top: 0; }
+
+/* status, errors, unsupported */
+.status { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.75rem;
+    height: 100%; padding: 1.5rem; box-sizing: border-box; text-align: center; opacity: 0.85; }
+.status.error p { color: #b3261e; }
+.status p { margin: 0; max-width: 32.5rem; }
+.download { color: #ffffff; background: var(--file-viewer-accent); padding: 0.5rem 1rem; border-radius: 0.25rem; text-decoration: none; }
+</style>
+
+<div id="viewer"></div>

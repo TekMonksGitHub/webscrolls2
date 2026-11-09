@@ -4,6 +4,10 @@
     "CREATE TABLE shares(fullpath varchar not null, id varchar primary key, expiry varchar not null)",
 	
     "CREATE TABLE quotas(id varchar not null primary key, quota integer not null)",
+
+    "CREATE TABLE permissions(userid varchar not null primary key, permissions json not null)",
+
+    "INSERT INTO permissions (userid, permissions) values ('*', '{\"*\":[\"*\"]}')",
 	
     "COMMIT TRANSACTION"
 ]

@@ -18,7 +18,8 @@ exports.doService = async (jsonReq, _, headers) => {
 
 	try {
 		const result = {...CONSTANTS.TRUE_RESULT}, fullpath = await cms.getFullPath(headers, jsonReq.path, jsonReq.extraInfo);
-		if (jsonReq.op == "read") result.data = await downloadfile.readUTF8File(headers, jsonReq.path, jsonReq.extraInfo);	// it is a read operation
+		if (jsonReq.op == "read") result.data = await downloadfile.readUTF8File(headers, jsonReq.path, jsonReq.extraInfo);	// it is a read text operation
+		if (jsonReq.op == "readbinary") result.data = (await downloadfile.readBinaryFile(headers, jsonReq.path, jsonReq.extraInfo)).toString("base64");	// it is a read binary operation
 		else if (jsonReq.op == "write") {
 			await uploadfile.writeUTF8File(headers, jsonReq.path, Buffer.isBuffer(jsonReq.data) ? 
 				jsonReq.data : Buffer.from(jsonReq.data, "utf8"), jsonReq.extraInfo);	// it is a write operation
@@ -31,4 +32,5 @@ exports.doService = async (jsonReq, _, headers) => {
 }
 
 const validateRequest = jsonReq => (jsonReq && jsonReq.path && (!jsonReq.op || jsonReq.op == "read" || 
-	(jsonReq.op == "write" && jsonReq.data) || (jsonReq.op == "updatecomment" && jsonReq.comment)));
+	jsonReq.op == "readbinary" || (jsonReq.op == "write" && jsonReq.data) || 
+	(jsonReq.op == "updatecomment" && jsonReq.comment)));

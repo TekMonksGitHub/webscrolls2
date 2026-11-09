@@ -2,6 +2,10 @@
  * Main entry point. Parses and routes to the page.
  * 
  * URL format: https://host:port/apps/webscrolls/theme/page.html?p=postid
+ * Default theme - default, default post type - home.html, default post ID - default
+ * 
+ * Themes are collections of post types, and post IDs are data for the posts types.
+ * Final webpage - theme -> post type (html template in Mustache format) -> post ID (YAML object data)
  *  
  * (C) 2015 TekMonks. All rights reserved.
  * License: See enclosed license.txt file.

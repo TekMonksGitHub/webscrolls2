@@ -14,25 +14,7 @@ exports.doService = async (jsonReq, _, headers) => {
 	if (!validateRequest(jsonReq)) {LOG.error("Validation failure."); return CONSTANTS.FALSE_RESULT;}
 	
 	LOG.debug("Got deletefile request for path: " + jsonReq.path);
-	const headersOrLoginIDAndOrg = jsonReq.id && jsonReq.org ? 
-		{xbin_id: jsonReq.id, xbin_org: jsonReq.org, headers} : headers;
-
-	const fullpath = await cms.getFullPath(headersOrLoginIDAndOrg, jsonReq.path, jsonReq.extraInfo);
-	if (!await cms.isSecure(headersOrLoginIDAndOrg, fullpath, jsonReq.extraInfo)) {LOG.error(`Path security validation failure: ${jsonReq.path}`); return CONSTANTS.FALSE_RESULT;}
-
-	try {await fspromises.access(fullpath)} catch (err) { 
-		if (err.code == "ENOENT") {
-			LOG.warn(`Told to delete file ${fullpath}, which doesn't exist. Ignoring.`);
-			return CONSTANTS.TRUE_RESULT;
-		}
-	}
-
-	const ip = utils.getLocalIPs()[0], id = cms.getID(headersOrLoginIDAndOrg), org = cms.getOrg(headersOrLoginIDAndOrg);
-
-	try {
-		await rmrf(fullpath, id, org, ip, jsonReq.extraInfo); 
-		return CONSTANTS.TRUE_RESULT;
-	} catch (err) {LOG.error(`Error deleting  path: ${fullpath}, error is: ${err}`); return CONSTANTS.FALSE_RESULT;}
+	return exports.deleteFile(headers, jsonReq.path, jsonReq.extraInfo);
 }
 
 exports.deleteFile = async (headersOrIDAndOrg, cmsPath, extraInfo, noevent) => {
@@ -68,7 +50,7 @@ async function rmrf(path, id, org, ip, extraInfo, noevent) {
 	for (const entry of entries) {
 		const stats = await uploadfile.getFileStats(`${path}/${entry}`);
 		if (stats.xbintype == XBIN_CONSTANTS.XBIN_FILE) await _deleteFile(`${path}/${entry}`); 
-		else if (stats.xbintype == XBIN_CONSTANTS.XBIN_FOLDER) await rmrf(`${path}/${entry}`);
+		else if (stats.xbintype == XBIN_CONSTANTS.XBIN_FOLDER) await rmrf(`${path}/${entry}`, id, org, ip, extraInfo, noevent);
 	}
 	await fspromises.rmdir(path); try {await uploadfile.deleteDiskFileMetadata(path);} catch (err) {};
 }

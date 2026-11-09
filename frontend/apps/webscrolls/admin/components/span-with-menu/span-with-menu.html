@@ -12,10 +12,19 @@ body{
     font-size: inherit;
     font-weight: inherit;
     height: fit-content;
+    width: 100%;
+    height: 100%;
 }
 
 span#content {
     cursor: default;
+    width: 100%;
+    height: 100%;
+}
+
+span#content img {
+    width: 100%;
+    height: 100%;
 }
 
 div#menu {
@@ -29,7 +38,6 @@ div#menu {
     margin-left: -1.5em;
     background-color: rgba(255,255,255,1);
     z-index: 50;
-    padding: 0.2rem 0rem;
 }
 
 div#menu.visible {
@@ -42,7 +50,7 @@ div#menu.bottom {
 }
 
 div#menu > div.menuitem {
-    padding: 0.8rem;
+    padding: 15px 30px 15px 30px;
     cursor: default;
     white-space: nowrap;
     display: flex;

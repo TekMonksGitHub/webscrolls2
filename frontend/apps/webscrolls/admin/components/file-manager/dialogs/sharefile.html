@@ -1,5 +1,5 @@
 <style>
-body {width: 50vw}
+body {width: 50vw; color: #1d1d1d;}
 
 div#wrapper {
     display: flex;
@@ -36,14 +36,51 @@ span#expiryspan {
     font-size: smaller;
     margin-bottom: 20px;
     padding-left: 2px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
 }
 
-span#expiryspan > input#expiry {
-    width: 2.5em;
-    border-style: none;
-    outline: none;
-    font-family: 'Serif';
+span#expirycontrols {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding: 0.85em 1em;
+    border-radius: 10px;
+    background-color: #F0F8FF;
+    box-shadow: 0 0 0px 1000px #F0F8FF inset;
 }
+
+span#expirycontrols > span {
+    font-weight: 500;
+}
+
+span#expirycontrols > input#expiry_value {
+    width: 4.2em;
+    border: 1px solid rgba(71, 136, 199, 0.28);
+    border-radius: 10px;
+    outline: none;
+    background: #ffffff;
+    box-sizing: border-box;
+    height: 2rem;
+    padding-left: 0.5rem;
+}
+
+span#expirycontrols > select#expiry_unit {
+    border: 1px solid rgba(71, 136, 199, 0.28);
+    border-radius: 10px;
+    outline: none;
+    background: #ffffff;
+    cursor: pointer;
+    padding: 0em 0.2em;
+    min-width: 7.5em;
+    box-sizing: border-box;
+    height: 2rem;
+}
+
+@media (max-width: 900px) {body {width: auto}}
 
 span#copied {
     text-align: center;
@@ -63,6 +100,16 @@ span#copied {
         selector.querySelector('span#copied').style.opacity=1;
         setTimeout(_=>selector.querySelector('span#copied').style.opacity=0, 1300);" src="{{dialogpath}}/img/copy.svg">
 </span>
-<span id="expiryspan">Share for <input id="expiry" type="number" value="{{shareDuration}}" min="1" onkeyup="if (this.value<0) this.value=this.value*-1;"> days</span>
+<span id="expiryspan">
+    <span id="expirycontrols">
+        <span>{{i18n.SharedFileDialog_Prompt}}</span>
+        <input id="expiry_value" type="number" value="{{shareDuration}}" min="1" step="1" inputmode="numeric" oninput="if (this.value && this.value < 1) this.value = 1;">
+        <select id="expiry_unit">
+        <option value="minutes" {{minutesSelected}}>{{i18n.SharedFileDialog_Minutes}}</option>
+        <option value="hours"   {{hoursSelected}}>{{i18n.SharedFileDialog_Hours}}</option>
+        <option value="days"    {{daysSelected}}>{{i18n.SharedFileDialog_Days}}</option>
+        </select>
+    </span>
+</span>
 <span id="copied">{{i18n.Copied}}</span>
 </div>

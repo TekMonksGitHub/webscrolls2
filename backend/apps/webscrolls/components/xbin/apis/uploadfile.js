@@ -20,11 +20,9 @@ exports.doService = async (jsonReq, _servObject, headers, _url) => {
 	if (!validateRequest(jsonReq)) {LOG.error("Validation failure."); return CONSTANTS.FALSE_RESULT;}
 	
 	LOG.debug("Got uploadfile request for path: " + jsonReq.path);
-	const headersOrLoginIDAndOrg = jsonReq.id && jsonReq.org ? 
-		{xbin_id: jsonReq.id, xbin_org: jsonReq.org, headers} : headers;
-	const fullpath = await cms.getFullPath(headersOrLoginIDAndOrg, jsonReq.path, jsonReq.extraInfo),
+	const fullpath = await cms.getFullPath(headers, jsonReq.path, jsonReq.extraInfo),
 		transferID = jsonReq.transfer_id || _md5Hash(`${fullpath}.${Date.now()}`);
-	if (!await cms.isSecure(headersOrLoginIDAndOrg, fullpath, jsonReq.extraInfo)) {LOG.error(`Path security validation failure: ${jsonReq.path}`); return CONSTANTS.FALSE_RESULT;}
+	if (!await cms.isSecure(headers, fullpath, jsonReq.extraInfo)) {LOG.error(`Path security validation failure: ${jsonReq.path}`); return CONSTANTS.FALSE_RESULT;}
 	
 	LOG.debug(`Resolved full path for upload file: ${fullpath}. Transfer ID is ${transferID}`);
 
@@ -38,10 +36,10 @@ exports.doService = async (jsonReq, _servObject, headers, _url) => {
 			}
 			bufferToWrite = Buffer.from(matches[1], "base64");
 		} else bufferToWrite = Buffer.from(jsonReq.data, "utf8");
-		if (!(await quotas.checkQuota(headersOrLoginIDAndOrg, jsonReq.extraInfo, bufferToWrite.length)).result) 
+		if (!(await quotas.checkQuota(headers, jsonReq.extraInfo, bufferToWrite.length)).result)
 			{LOG.error(`Quota is full write failed for path ${fullpath}.`); return {...CONSTANTS.TRUE_RESULT, error: "Quota is full."};}
-		
-		await exports.writeChunk(headersOrLoginIDAndOrg, transferID, fullpath, bufferToWrite, 
+
+		await exports.writeChunk(headers, transferID, fullpath, bufferToWrite, 
 			jsonReq.startOfFile, jsonReq.endOfFile, jsonReq.comment, jsonReq.extraInfo);
 
 		return {...CONSTANTS.TRUE_RESULT, transfer_id: transferID};
@@ -165,9 +163,9 @@ exports.updateFileStats = async function (fullpathOrRequestHeaders, remotepath, 
 	if (commentin) clusterMemory.files_stats[fullpath].comment = commentin;
 
 	if (transferFinished) {
-		if (!clusterMemory.files_stats[fullpath].birthtimeMs) {	// refresh stats if empty
+		if (!clusterMemory.files_stats[fullpath].birthtimeMs || dataLengthWritten !== undefined) {
 			const stats = await fspromises.stat(fullpath), oldstats = clusterMemory.files_stats[fullpath];
-			clusterMemory.files_stats[fullpath] = {...stats, ...oldstats, disk_size: stats.size};	
+        	clusterMemory.files_stats[fullpath] = {...oldstats, ...stats, disk_size: stats.size};
 		}
 		await fspromises.writeFile(metaPath, JSON.stringify(clusterMemory.files_stats[fullpath]));
 		if (dataLengthWritten) clusterMemory.files_stats[fullpath].byteswritten = 0; 	// we updated due to a write and have finished uploading

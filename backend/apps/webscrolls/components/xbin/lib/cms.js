@@ -4,6 +4,7 @@
  */
 const fs = require("fs");
 const path = require("path");
+const utils = require(`${CONSTANTS.LIBDIR}/utils.js`);
 const fspromises = fs.promises;
 
 let login;
@@ -31,7 +32,7 @@ exports.getCMSRoot = async function(headersOrLoginIDAndOrg, extraInfo) {
 	const org = headersOrLoginIDAndOrgIsHeaders ? (login.getOrg(headersOrLoginIDAndOrg)||"unknown") : headersOrLoginIDAndOrg.xbin_org;
 	let cmsRootToReturn = _getPathForIDAndOrg(loginID, org);
 	LOG.debug(`CMS raw root located at ${cmsRootToReturn} for ID ${loginID}.`);
-	if (CMSPATH_MODIFIERS.length) for (cmsPathModifier of CMSPATH_MODIFIERS) 
+	if (CMSPATH_MODIFIERS.length) for (const cmsPathModifier of CMSPATH_MODIFIERS) 
 		cmsRootToReturn = await cmsPathModifier(cmsRootToReturn, loginID, org, extraInfo);
 	cmsRootToReturn = path.resolve(cmsRootToReturn);
 	LOG.debug(`Located final CMS home as ${cmsRootToReturn} for id ${loginID} of org ${org}.`);
@@ -90,7 +91,9 @@ exports.getOrg = headersOrLoginIDAndOrg => headersOrLoginIDAndOrg.xbin_org || lo
 exports.isSecure = async (headersOrHeadersAndOrg, path, extraInfo) => {	// add domain check here to ensure ID and org domains are ok
 	const isKeySecure = headersOrHeadersAndOrg.xbin_org && headersOrHeadersAndOrg.headers && login.isAPIKeySecure ? 
 		await login.isAPIKeySecure(headersOrHeadersAndOrg.headers, headersOrHeadersAndOrg.xbin_org) : true;
-	return isKeySecure && XBIN_CONSTANTS.isSubdirectory(path, await this.getCMSRoot(headersOrHeadersAndOrg, extraInfo));
+	const isXbinPathSecure = XBIN_CONSTANTS.isSubdirectory(path, await this.getCMSRoot(headersOrHeadersAndOrg, extraInfo));
+	
+	return isKeySecure && isXbinPathSecure;
 }
 
 /**
@@ -127,8 +130,8 @@ const _convertToPathFriendlyString = (s, maxPathLength=DEFAULT_MAX_PATH_LENGTH) 
 	if (tentativeFilepath.endsWith(".")) tentativeFilepath = tentativeFilepath.substring(0,finalPath.length-1)+"%2E";
 		
 	if (tentativeFilepath.length > maxPathLength) {
-		tentativeFilepath = tentativeFilepath + "." + Date.now();
-		tentativeFilepath = tentativeFilepath.substring(tentativeFilepath.length-maxPathLength);
+		const hash = utils.hashObject(tentativeFilepath).substring(0, 12);
+		tentativeFilepath = tentativeFilepath.substring(0, maxPathLength-hash.length-1) + "." + hash;
 	}
 	
 	return tentativeFilepath;
