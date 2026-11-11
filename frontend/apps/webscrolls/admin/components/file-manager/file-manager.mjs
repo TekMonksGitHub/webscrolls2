@@ -63,7 +63,7 @@ const screenFocusUnfocus = (host, unfocus) => {
 
 const IO_CHUNK_SIZE = 10485760, INITIAL_UPLOAD_BUFFER_SIZE = 40960, MAX_UPLOAD_WAIT_TIME_SECONDS = 5, 
    MAX_EDIT_SIZE = 26214400, MAX_UPLOAD_BUFFER_SIZE = 10485760, SERVER_ID_HEADER = "x_monkshu_serverid",
-   APIMAN_RETRIES = 3;
+   APIMAN_RETRIES = 3, MIN_UPLOAD_BUFFER_SIZE = 262144, BASE64_ENCODE_BLOCK = 0x8000;
 
 async function elementConnected(host) {
    menuOpen = false; user = host.getAttribute("user"); 
@@ -309,16 +309,22 @@ async function _uploadAFile(element, file) {
 async function _uploadChunkAtOptimumSpeed(element, data, remotePath, chunkNumber, isLastChunk, totalSize, hostID, transfer_id) {  // adjusts upload buffers dynamically based on network speed
    if (!currentWriteBufferSize) currentWriteBufferSize = INITIAL_UPLOAD_BUFFER_SIZE;
 
-   const _bufferToBase64URL = buffer => "data:;base64,"+btoa(new Uint8Array(buffer).reduce((acc, i) => acc += String.fromCharCode.apply(null, [i]), ''));
+   const _bufferToBase64URL = buffer => {  // native encoder where available, else block-wise (old per-byte reduce was ~10x slower and froze the UI)
+      const bytes = new Uint8Array(buffer); if (typeof bytes.toBase64 === "function") return "data:;base64,"+bytes.toBase64();
+      const parts = []; for (let i = 0; i < bytes.length; i += BASE64_ENCODE_BLOCK)
+         parts.push(String.fromCharCode.apply(null, bytes.subarray(i, i+BASE64_ENCODE_BLOCK)));
+      return "data:;base64,"+btoa(parts.join(""));
+   }
 
    let bytesWritten = 0, lastResp, subchunknumber = 0, transferID = transfer_id; while (bytesWritten < data.byteLength) {  // TODO: Send 4 streams here concurrently to increase speed, recombine on backend
       const bytesToSend = bytesWritten + currentWriteBufferSize > data.byteLength ? data.byteLength - bytesWritten : currentWriteBufferSize;
       const dataToSend = data.slice(bytesWritten, bytesWritten+bytesToSend), isLastSubChunk = isLastChunk && 
          (bytesWritten+bytesToSend == data.byteLength), isFirstSubChunk = chunkNumber == 0 && bytesWritten == 0;
       LOG.info(`Starting upload of subchunk ${subchunknumber} of chunk ${chunkNumber} to path ${remotePath} with length ${bytesToSend} with transfer ID ${transferID}.`);
+      const encodedData = _bufferToBase64URL(dataToSend);   // encode BEFORE timing so CPU time is not mistaken for network time
       const startTime = Date.now(), headers = {}; if (SERVER_ID_CACHE[transferID]) headers[SERVER_ID_HEADER] = SERVER_ID_CACHE[transferID];
       const fullResponse = await apiman.rest({url: API_UPLOADFILE(), type: "POST", req: {..._addExtraInfo(
-         {data: _bufferToBase64URL(dataToSend), element, path: remotePath, user, startOfFile: isFirstSubChunk, 
+         {data: encodedData, element, path: remotePath, user, startOfFile: isFirstSubChunk, 
             endOfFile: isLastSubChunk, transfer_id: transferID}, element)}, sendToken:true, headers, 
             provideHeaders: true, retries: APIMAN_RETRIES}); lastResp = fullResponse?.response;
       const timeTakenToPost = Date.now() - startTime; 
@@ -328,8 +334,9 @@ async function _uploadChunkAtOptimumSpeed(element, data, remotePath, chunkNumber
       }
       transferID = lastResp.transfer_id; bytesWritten += bytesToSend; SERVER_ID_CACHE[transferID] = fullResponse.headers[SERVER_ID_HEADER]; 
       LOG.info(`Ended upload of ${subchunknumber} of chunk ${chunkNumber} to path ${remotePath} transfer ID ${transferID}, with length ${bytesToSend}, time taken = ${timeTakenToPost/1000} seconds.`);
-      const netSpeedBytesPerSecond = bytesToSend / (timeTakenToPost/1000);
-      currentWriteBufferSize = Math.min(MAX_UPLOAD_BUFFER_SIZE, Math.round(netSpeedBytesPerSecond * MAX_UPLOAD_WAIT_TIME_SECONDS));  // max wait should not execeed this
+      const netSpeedBytesPerSecond = bytesToSend / (Math.max(timeTakenToPost, 1)/1000);
+      currentWriteBufferSize = Math.max(MIN_UPLOAD_BUFFER_SIZE, Math.min(MAX_UPLOAD_BUFFER_SIZE,
+         Math.round(netSpeedBytesPerSecond * MAX_UPLOAD_WAIT_TIME_SECONDS)));  // max wait should not exceed this, floor stops latency-driven collapse
       LOG.info(`Current upload speed, for path ${remotePath}, in Mbps is ${netSpeedBytesPerSecond/(1024*1024)}, adjusted upload buffer size in MB is ${currentWriteBufferSize/(1024*1024)} or ${currentWriteBufferSize} bytes.`);
       _updateProgress(hostID, (chunkNumber*IO_CHUNK_SIZE)+bytesWritten, totalSize, remotePath, UPLOAD_ICON);  // except last chunk all chunks will be of IO_CHUNK_SIZE so this works
       subchunknumber++;
@@ -430,7 +437,7 @@ async function editFile(element) {
 
    if (selectedElement.id == "paste") {paste(selectedElement); return;}
 
-   if (!selectedElement.dataset.stats) _showErrordialog();  // not a file, not sure 
+   if (!selectedElement.dataset.stats) _showErrorDialog();  // not a file, not sure 
    else if (JSON.parse(selectedElement.dataset.stats).size < MAX_EDIT_SIZE) editFileLoadData(element);  // now it can only be a file 
    else _showErrorDialog(null, await i18n.get("FileTooBigToEdit"));  // too big to edit inline - download and edit
 }
@@ -438,7 +445,7 @@ async function editFile(element) {
 async function editFileLoadData(element) {
    const resp = await apiman.rest(API_OPERATEFILE(), "POST", _addExtraInfo({path: selectedPath, op: "readbinary"}, element), true);
    screenFocusUnfocus(file_manager.getHostElement(element));
-   if (!resp?.result) {_showErrordialog(); return;}
+   if (!resp?.result) {_showErrorDialog(); return;}
 
    // opens the file viewer dialog and closes it later
    const objectURL = URL.createObjectURL(util.base64ToBlob(resp.data)), filename = selectedPath.substring(selectedPath.lastIndexOf("/")+1);
@@ -474,7 +481,7 @@ async function downloadFile(element) {
    const paths = selectedPath.split("/"), file = paths[paths.length-1], reqid = _getReqIDForDownloading(selectedPath);
    const link = document.createElement("a"), securid = await apiman.rest(API_DOWNLOADFILE_GETSECURID(), "GET", 
       _addExtraInfo({path: selectedPath, reqid}, element), true, false);
-   if (!securid.result) {_showErrordialog(); return;}; const auth = apiman.getJWTToken(API_DOWNLOADFILE());
+   if (!securid.result) {_showErrorDialog(); return;}; const auth = apiman.getJWTToken(API_DOWNLOADFILE());
    link.download = file; link.href = `${API_DOWNLOADFILE()}?path=${selectedPath}&reqid=${reqid}&securid=${securid.id}&auth=${auth}`; link.click(); 
 
    _showDownloadProgress(element, selectedPath, reqid);

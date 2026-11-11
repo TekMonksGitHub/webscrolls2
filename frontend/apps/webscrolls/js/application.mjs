@@ -33,7 +33,7 @@ const main = async urlRequested => {
 	let {url, posturl, isadmin, module, theme, page, postid} = _getURLAndPostToRouteTo(urlRequested);
 	let pushstate = new URL(url, window.location.href).href != window.location.href;
 
-	let postdata = {}; try {
+	let postdata = {}, pageModule; try {
 		const {post} = await import("./../admin/js/post.mjs");
 		if (posturl) postdata = await post.getPostData(theme, page, postid);
 		if (isadmin) {
@@ -41,14 +41,16 @@ const main = async urlRequested => {
 				session.set(WEBSCROLLS_CONSTANTS.POST_LOGIN_URL_KEY, url);
 				url = WEBSCROLLS_CONSTANTS.LOGIN_HTML; postdata = {}; pushstate = true;
 			} else {
-				const pageModule = (await import(`./../${theme}/js/${module}.mjs`))[module];
+				pageModule = (await import(`./../${theme}/js/${module}.mjs`))[module];
 				postdata = await pageModule.createdata();
 			}
 		}
 	} catch (err) {WEBSCROLLS_LOG.error(`Bad post, ${posturl}, error fetching: ${err}`);}
 
-	try {await router.loadPage(url, {WEBSCROLLS_CONSTANTS, ...postdata}, true, pushstate);} catch (error) { 
-		router.loadPage(WEBSCROLLS_CONSTANTS.ERROR_HTML, {WEBSCROLLS_CONSTANTS, error, stack: error.stack || new Error().stack}); }
+	try {
+		await router.loadPage(url, {WEBSCROLLS_CONSTANTS, ...postdata}, true, pushstate); 
+		if (pageModule?.pageLoaded) pageModule.pageLoaded(postdata); 
+	} catch (error) { router.loadPage(WEBSCROLLS_CONSTANTS.ERROR_HTML, {WEBSCROLLS_CONSTANTS, error, stack: error.stack || new Error().stack}); }
 }
 
 const getRelativeURL = (theme, posttype, postid) => `/apps/${WEBSCROLLS_CONSTANTS.APP_NAME}/themes/${theme}/${posttype}.html?p=${postid}`;

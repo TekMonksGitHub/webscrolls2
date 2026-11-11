@@ -313,6 +313,7 @@ span.themeicon {
 }
 span.posttypeicon {border: 0.0625rem solid #D5D5D5;}
 
+div#permissionstable {min-width: 40rem;}
 div.tablerow {
     padding: 1rem;
     border-bottom: 0.0625rem solid var(--panel);
@@ -539,19 +540,19 @@ span.summaryruleclosure {
         </span>
         <span class="tablecell">
             <button type="button" class="checkbox" data-path="site" data-perm="read" title="Read themes" data-checked="false"
-                    onclick="this.classList.toggle('checked'); this.dataset.checked = (!(this.dataset.checked === 'true')).toString(); selectOrUnselectNeighbors(this, this.dataset.checked === 'true'); renderSummaryRules();">
+                    onclick="this.classList.toggle('checked'); this.dataset.checked = (!(this.dataset.checked === 'true')).toString(); selectOrUnselectNeighbors(this, this.dataset.checked === 'true'); renderSummaryAndUpdateRules();">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"></path></svg>
             </button>
         </span>
         <span class="tablecell">
             <button type="button" class="checkbox" data-path="site" data-perm="write" title="Create and edit themes" data-checked="false"
-                    onclick="this.classList.toggle('checked'); this.dataset.checked = (!(this.dataset.checked === 'true')).toString(); selectOrUnselectNeighbors(this, this.dataset.checked === 'true'); renderSummaryRules();">
+                    onclick="this.classList.toggle('checked'); this.dataset.checked = (!(this.dataset.checked === 'true')).toString(); selectOrUnselectNeighbors(this, this.dataset.checked === 'true'); renderSummaryAndUpdateRules();">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"></path></svg>
             </button>
         </span>
         <span class="tablecell">
             <button type="button" class="checkbox" data-path="site" data-perm="delete" title="Delete themes" data-checked="false"
-                    onclick="this.classList.toggle('checked'); this.dataset.checked = (!(this.dataset.checked === 'true')).toString(); selectOrUnselectNeighbors(this, this.dataset.checked === 'true'); renderSummaryRules();">
+                    onclick="this.classList.toggle('checked'); this.dataset.checked = (!(this.dataset.checked === 'true')).toString(); selectOrUnselectNeighbors(this, this.dataset.checked === 'true'); renderSummaryAndUpdateRules();">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"></path></svg>
             </button>
         </span>
@@ -574,20 +575,20 @@ span.summaryruleclosure {
             </div>
         </span>
         <span class="tablecell">
-            <button type="button" class="checkbox" data-path="site/Corporate Site" data-perm="read" title="Read post types in Corporate Site" data-checked="false"
-                    onclick="this.classList.toggle('checked'); this.dataset.checked = (!(this.dataset.checked === 'true')).toString(); selectOrUnselectNeighbors(this, this.dataset.checked === 'true'); renderSummaryRules();">
+            <button type="button" class="checkbox" data-path="site/{{{name}}}" data-perm="read" title="Read post types in Corporate Site" data-checked="false"
+                    onclick="this.classList.toggle('checked'); this.dataset.checked = (!(this.dataset.checked === 'true')).toString(); selectOrUnselectNeighbors(this, this.dataset.checked === 'true'); renderSummaryAndUpdateRules();">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"></path></svg>
             </button>
         </span>
         <span class="tablecell">
-            <button type="button" class="checkbox" data-path="site/Corporate Site" data-perm="write" title="Create and edit post types in Corporate Site" data-checked="false"
-                    onclick="this.classList.toggle('checked'); this.dataset.checked = (!(this.dataset.checked === 'true')).toString(); selectOrUnselectNeighbors(this, this.dataset.checked === 'true'); renderSummaryRules();">
+            <button type="button" class="checkbox" data-path="site/{{{name}}}" data-perm="write" title="Create and edit post types in Corporate Site" data-checked="false"
+                    onclick="this.classList.toggle('checked'); this.dataset.checked = (!(this.dataset.checked === 'true')).toString(); selectOrUnselectNeighbors(this, this.dataset.checked === 'true'); renderSummaryAndUpdateRules();">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"></path></svg>
             </button>
         </span>
         <span class="tablecell">
-            <button type="button" class="checkbox" data-path="site/Corporate Site" data-perm="delete" title="Delete post types in Corporate Site" data-checked="false"
-                    onclick="this.classList.toggle('checked'); this.dataset.checked = (!(this.dataset.checked === 'true')).toString(); selectOrUnselectNeighbors(this, this.dataset.checked === 'true'); renderSummaryRules();">
+            <button type="button" class="checkbox" data-path="site/{{{name}}}" data-perm="delete" title="Delete post types in Corporate Site" data-checked="false"
+                    onclick="this.classList.toggle('checked'); this.dataset.checked = (!(this.dataset.checked === 'true')).toString(); selectOrUnselectNeighbors(this, this.dataset.checked === 'true'); renderSummaryAndUpdateRules();">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"></path></svg>
             </button>
         </span>
@@ -603,20 +604,20 @@ span.summaryruleclosure {
             </div>
         </span>
         <span class="tablecell">
-            <button type="button" class="checkbox" data-path="site/Corporate Site/Blog" data-perm="read" title="Read Blog posts in Corporate Site" data-checked="false"
-                    onclick="this.classList.toggle('checked'); this.dataset.checked = (!(this.dataset.checked === 'true')).toString(); selectOrUnselectNeighbors(this, this.dataset.checked === 'true'); renderSummaryRules();">
+            <button type="button" class="checkbox" data-path="{{{path}}}" data-perm="read" title="Read Blog posts in Corporate Site" data-checked="false"
+                    onclick="this.classList.toggle('checked'); this.dataset.checked = (!(this.dataset.checked === 'true')).toString(); selectOrUnselectNeighbors(this, this.dataset.checked === 'true'); renderSummaryAndUpdateRules();">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"></path></svg>
             </button>
         </span>
         <span class="tablecell">
-            <button type="button" class="checkbox" data-path="site/Corporate Site/Blog" data-perm="write" title="Create and edit Blog posts in Corporate Site" data-checked="false"
-                    onclick="this.classList.toggle('checked'); this.dataset.checked = (!(this.dataset.checked === 'true')).toString(); selectOrUnselectNeighbors(this, this.dataset.checked === 'true'); renderSummaryRules();">
+            <button type="button" class="checkbox" data-path="{{{path}}}" data-perm="write" title="Create and edit Blog posts in Corporate Site" data-checked="false"
+                    onclick="this.classList.toggle('checked'); this.dataset.checked = (!(this.dataset.checked === 'true')).toString(); selectOrUnselectNeighbors(this, this.dataset.checked === 'true'); renderSummaryAndUpdateRules();">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"></path></svg>
             </button>
         </span>
         <span class="tablecell">
-            <button type="button" class="checkbox" data-path="site/Corporate Site/Blog" data-perm="delete" title="Delete Blog posts in Corporate Site" data-checked="false"
-                    onclick="this.classList.toggle('checked'); this.dataset.checked = (!(this.dataset.checked === 'true')).toString(); selectOrUnselectNeighbors(this, this.dataset.checked === 'true'); renderSummaryRules();">
+            <button type="button" class="checkbox" data-path="{{{path}}}" data-perm="delete" title="Delete Blog posts in Corporate Site" data-checked="false"
+                    onclick="this.classList.toggle('checked'); this.dataset.checked = (!(this.dataset.checked === 'true')).toString(); selectOrUnselectNeighbors(this, this.dataset.checked === 'true'); renderSummaryAndUpdateRules();">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"></path></svg>
             </button>
         </span>
@@ -643,23 +644,24 @@ span.summaryruleclosure {
         </div>
 
         <template id="permissionssummaryrulesite">
-        <span class="resourcetag summary"><strong class="summaryresource">Read</strong><section>themes</section><span class="summaryruleclosure" onclick="uncheckRule(this.dataset.path, this.dataset.perm)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></span></span>
+        <span class="resourcetag summary"><strong class="summaryresource">Read</strong><section>themes</section><span class="summaryruleclosure" onclick="uncheckCheckedRule(this.dataset.path, this.dataset.perm)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></span></span>
         </template>
         <template id="permissionssummaryruletheme">
-        <span class="resourcetag theme summary"><strong class="summaryresource">Read</strong><section>post types in Corporate site</section><span class="summaryruleclosure" onclick="uncheckRule(this.dataset.path, this.dataset.perm)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></span></span>
+        <span class="resourcetag theme summary"><strong class="summaryresource">Read</strong><section>post types in Corporate site</section><span class="summaryruleclosure" onclick="uncheckCheckedRule(this.dataset.path, this.dataset.perm)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></span></span>
         </template>
         <template id="permissionssummaryrulepost">
-        <span class="resourcetag post summary"><strong class="summaryresource">Create and edit</strong><section>posts in Corporate site</section><span class="summaryruleclosure" onclick="uncheckRule(this.dataset.path, this.dataset.perm)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></span></span>
+        <span class="resourcetag post summary"><strong class="summaryresource">Create and edit</strong><section>posts in Corporate site</section><span class="summaryruleclosure" onclick="uncheckCheckedRule(this.dataset.path, this.dataset.perm)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></span></span>
         </template>
     </div>
 
     </div>
 
     <script>
-    function renderSummaryRules() {
+    function renderSummaryAndUpdateRules() {
         document.querySelector('div#permissionssummarylist').innerHTML = "";    // empty it
-        const rules = document.querySelectorAll('button.checkbox');
+        const rules = document.querySelectorAll('button.checkbox'), permissionsArray = [];
         for (const rule of rules) if (rule.dataset.checked.trim() == 'true') {
+            permissionsArray.push(`${rule.dataset.path}|${rule.dataset.perm}`);
             const paths = rule.dataset.path.split("/").filter(e => e.trim().length > 0);
             const type = paths.length == 1 ? "site" : paths.length == 2 ? "theme" : "post";
             const permText = rule.dataset.perm == "read" ? "Read" : rule.dataset.perm == "write" ? "Create and edit" : "Delete";
@@ -672,17 +674,17 @@ span.summaryruleclosure {
             nodesToInsert.querySelector('span.summaryruleclosure').dataset.perm = rule.dataset.perm; 
             document.querySelector('div#permissionssummarylist').appendChild(nodesToInsert);
         }
-        countRules();
+        countRules(); permissions.updateSelectedUsersRules(permissionsArray);
     }
 
     function selectOrUnselectNeighbors(checkbox, checked) {
         const findSiteReadPermissionsCheckbox = _ => document.querySelector('span.tablecell span.permissionslegendicon.siteicon').parentNode.parentNode.querySelector('button.checkbox');
-        const isThemeCheckbox = checkbox => checkbox.parentNode.parentNode.querySelector('span.expandablesection') != null;
+        const isThemeCheckbox = checkbox => checkbox.dataset.path.split("/").length == 2;
         const areAnyThemesReadPermissionsOn = _ => {
             const allPermissionsCheckboxes = document.querySelectorAll('span.tablecell button.checkbox');
             for (const permissionsCheckBox of allPermissionsCheckboxes) 
-                if (isThemeCheckbox(permissionsCheckBox) && permissionsCheckBox.dataset.perm == "read" && 
-                    permissionsCheckBox.dataset.checked == 'true') return true;
+                if (isThemeCheckbox(permissionsCheckBox) && (permissionsCheckBox.dataset.perm == "read") && 
+                    (permissionsCheckBox.dataset.checked == 'true')) return true;
             return false;
         }
         const allSiblings = Array.from(checkbox.parentNode.parentNode.querySelectorAll('button'));
@@ -693,7 +695,7 @@ span.summaryruleclosure {
         if (areAnyThemesReadPermissionsOn()) {findSiteReadPermissionsCheckbox().classList.add('checked'); findSiteReadPermissionsCheckbox().dataset.checked = 'true';}
     }
 
-    function uncheckRule(path, perm) {
+    function uncheckCheckedRule(path, perm) {
         const rules = document.querySelectorAll('button.checkbox');
         for (const rule of rules) if (rule.dataset.path == path && rule.dataset.perm == perm) {rule.click(); break;}
     }
@@ -715,7 +717,7 @@ span.summaryruleclosure {
             if (usercontainer == usercontainerClicked) usercontainer.classList.add('selected'); 
             else usercontainer.classList.remove('selected'); 
         }
-        permissions.userSelected(usercontainerClicked, usercontainerClicked.querySelector('span.useremail').innerText);
+        permissions.userSelected(usercontainerClicked.querySelector('span.useremail').innerText);
     }
 
     function filterRules(text) {
@@ -740,7 +742,33 @@ span.summaryruleclosure {
         if (rulesShown == 0) document.querySelector('section#emptyfilter').classList.remove('displaynone');
     }
 
-    countRules();
+    function isChecked(checkbox) {checkbox.dataset.checked == 'true';}
+    
+    function clearAllRules() {
+        for (const checkbox of document.querySelectorAll('button.checkbox')) {
+           checkbox.dataset.checked = "false"; checkbox.classList.remove("checked"); }
+    }
+
+    function loadPermissions(user, rulesThisUser=[]) {
+        clearAllRules(); for (const rule of rulesThisUser) {
+            const separatorIndex = rule.lastIndexOf('|'); if (separatorIndex == -1) {WEBSCROLLS_LOG.warn(`Bad permission rule "${rule}" for ${user}, skipping.`); continue;}
+            const path = rule.substring(0, separatorIndex).trim(), perm = rule.substring(separatorIndex+1).trim().toLowerCase();
+            const checkbox = document.querySelector(`button.checkbox[data-path="${CSS.escape(path)}"][data-perm="${CSS.escape(perm)}"]`);
+            if (!checkbox) {WEBSCROLLS_LOG.warn(`Permission rule "${rule}" for ${user} has no matching row in the grid, skipping.`); continue;}
+            if (!isChecked(checkbox)) checkbox.click();   // an earlier click may already have checked it through the neighbours
+        }
+    }
+    </script>
+    <script type="module">
+    async function init() {
+        if (window.WEBSCROLLS_CONSTANTS) {
+            if (!window.permissions) window.permissions = (await import ("./js/permissions.mjs")).permissions;
+            permissions.pagefunctions.add("countRules", countRules);
+            permissions.pagefunctions.add("loadPermissions", loadPermissions);
+            permissions.pageRendered(); permissions.userSelected();
+        }
+    }
+    init();
     </script>
 </body>
 </html>
