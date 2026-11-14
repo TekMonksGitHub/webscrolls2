@@ -53,13 +53,13 @@ const API_USERCONTROL = `${WEBSCROLLS_CONSTANTS.API_PATH}/usercontrol`;
 let currentdata;
 
 async function createdata() {
-    let users; try {users = await apiman.rest(API_USERCONTROL, "POST", {op: "getusers"}, true)} catch (err) {_logBackendAPIError(err);};
-    let permissions; try{permissions = await apiman.rest(API_USERCONTROL, "POST", {op: "getpermissions"}, true);} catch (err) {_logBackendAPIError(err);};
+    let users; try {users = (await apiman.rest(API_USERCONTROL, "POST", {op: "getusers"}, true))?.users||[]} catch (err) {_logBackendAPIError(err);};
+    let permissions; try{permissions = (await apiman.rest(API_USERCONTROL, "POST", {op: "getpermissions"}, true))?.permissions||[];} catch (err) {_logBackendAPIError(err);};
     const themes = await theme.getthemes();
+    const currentUserID = session.get(WEBSCROLLS_CONSTANTS.USERID).toString();
     if (!users?.length) {
-        if (!session.get(WEBSCROLLS_CONSTANTS.LOGGEDIN_USEROLE).toString() == "admin") return {};  // nothing allowed
-        users = [{userid: session.get(WEBSCROLLS_CONSTANTS.USERID).toString(), name: session.get(WEBSCROLLS_CONSTANTS.USERNAME).toString()}];
-        permissions = [{userid: session.get(WEBSCROLLS_CONSTANTS.USERID).toString(), permissions:["site|read", "site|write", "site|delete"]}];
+        if (!isCurrentUserAdmin()) return false;  // not allowed
+        users = [{userid: currentUserID, name: session.get(WEBSCROLLS_CONSTANTS.USERNAME).toString()}];
     }
 
     const _mappedPermissions = {}; for (const permission of permissions) _mappedPermissions[permission.userid] = permission.permissions;
@@ -77,6 +77,15 @@ async function createdata() {
         first: user.userid == users[0].userid ? true : undefined
     }});
 
+    if (isCurrentUserAdmin()) {
+        const adminPermissions = ["site|read","site|write", "site|delete"];
+        for (const theme of _mappedThemes) {
+            adminPermissions.push(...[`site/${theme.name}|read`, `site/${theme.name}|write`, `site/${theme.name}|delete`]);
+            for (const posttype of theme.posttypes) adminPermissions.push(...[`site/${theme.name}/${posttype.name}|read`, `site/${theme.name}/${posttype.name}|write`, `site/${theme.name}/${posttype.name}|delete`]);
+        }
+        _mappedPermissions[currentUserID] = adminPermissions;
+    }
+
     currentdata = {
         site: {theme_count: themes.length, user_count: users.length},
         themes: _mappedThemes,
@@ -91,6 +100,8 @@ async function createdata() {
 function pageRendered() {
     permissions.pagefunctions.countRules();
 }
+
+const isCurrentUserAdmin = _ => session.get(WEBSCROLLS_CONSTANTS.LOGGEDIN_USEROLE).toString() == "admin"; 
 
 function userSelected(email) {
     if (!email) if (!currentdata?.selected_user) return; else email = currentdata.selected_user.email;
@@ -113,19 +124,19 @@ function addUser(name, email) {
     return true;
 }
 
-async function savePermissions() {
+async function saveAllUsersAndPermissions() {
     const _mappedUsers = currentdata.users.map(user => {return {userid: user.email, name: user.name}});
-    if (!await apiman.rest(API_USERCONTROL, "POST", {op: "setusers", permissions: _mappedUsers}, true))
-        return false;
+    try {if (!(await apiman.rest(API_USERCONTROL, "POST", {op: "setusers", permissions: _mappedUsers}, true))) return false;}
+    catch (err) {_logBackendAPIError(err); return false;}
 
     const _mappedPermissions = []; for (const [userid, permissions] of Object.entries(currentdata.permissions)) 
         _mappedPermissions.push({userid, permissions});
     try {return await apiman.rest(API_USERCONTROL, "POST", {op: "setpermissions", permissions: _mappedPermissions}, true);}
-    catch (err) {_logBackendAPIError(err);}
+    catch (err) {_logBackendAPIError(err); return false;}
 }
 
 const _logBackendAPIError = err => WEBSCROLLS_LOG.error(`Backend API error calling user control. The error is: ${err}`);
 
 export const permissions = {createdata, logout: loginmanager.logout, userSelected, addUser, pageRendered, 
-    updateSelectedUsersRules, savePermissions, 
+    updateSelectedUsersRules, savePermissions: saveAllUsersAndPermissions, isCurrentUserAdmin,
     pagefunctions: {add: function (name, functionPointer) {this[name] = functionPointer}}}

@@ -25,6 +25,7 @@ exports.doService = async jsonReq => {
         const permissions = await db.getPermissions(jsonReq.userid);
         return {permissions, result: permissions.length?true:false};
     } 
+    else if (jsonReq.op == "setusers") return {result: await db.setUsers(jsonReq.users)};
     else if (jsonReq.op == "setpermissions") return {result: await db.setPermissions(jsonReq.permissions)};
     else return CONSTANTS.FALSE_RESULT;
 }

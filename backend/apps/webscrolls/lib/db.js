@@ -42,6 +42,18 @@ exports.setPermissions = async function(permissions_object=[]) {
     return transactionResult;
 }
 
+exports.setUsers = async function(users=[]) {
+    const transactions = ["DELETE FROM users"];    // empty it
+    for (const user of users) {
+        if (!user.userid) {LOG.error(`Bad user, missing user ID in ${JSON.stringify(user)}`); continue;}
+        transactions.push({
+            cmd: "INSERT INTO users (userid, name) VALUES (?,?)",
+            params: [user.userid, user.name] });
+    }
+    const transactionResult = transactions.length ? await db.runTransaction(transactions) : true;
+    return transactionResult;
+}
+
 exports.addUser = async function (userid, name) {
     if (!userid) return false;
     return await db.runCmd("REPLACE INTO users (userid, name) VALUES (?,?)", [userid, name]);
