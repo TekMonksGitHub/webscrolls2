@@ -12,8 +12,7 @@
 
 const serverutils = require(`${CONSTANTS.LIBDIR}/utils.js`);
 const httpClient = require(`${CONSTANTS.LIBDIR}/httpClient.js`);
-const conf = require(`${WEBSCROLLS_CONSTANTS.CONF_DIR}/webscrolls.json`);
-const API_JWT_VALIDATION = `${conf.TEKMONKS_LOGIN_BACKEND}/apps/loginapp/validatejwt`;
+const API_JWT_VALIDATION = `${WEBSCROLLS_CONSTANTS.CONF.TEKMONKS_LOGIN_BACKEND}/apps/loginapp/validatejwt`;
 
 exports.doService = async jsonReq => {
 	if (!validateRequest(jsonReq)) {LOG.error("Validation failure."); return CONSTANTS.FALSE_RESULT;}

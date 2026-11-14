@@ -1,0 +1,9 @@
+[
+    "BEGIN TRANSACTION",
+
+    "CREATE TABLE IF NOT EXISTS users (userid TEXT NOT NULL PRIMARY KEY, name TEXT NOT NULL)",
+    
+    "CREATE TABLE IF NOT EXISTS permissions (userid TEXT NOT NULL PRIMARY KEY, permissions JSON NOT NULL DEFAULT '[]')",
+    
+    "COMMIT TRANSACTION"
+]

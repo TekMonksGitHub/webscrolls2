@@ -25,9 +25,10 @@ const FILE_MANAGER = _ => monkshu_env.components["file-manager"];
 
 let old_posttype, dragging_to_resize=false, currentResizer, can_not_repaint, current_theme, current_posttype, current_theme_post_types;
 
+const getthemes = async _ => await _readObjectFileOrDefaultObjectOnError(`${WEBSCROLLS_CONSTANTS.APP_PATH}/themes/themes.json`, []);
+
 async function createdata() {
-    const themes = [CREATE_NEW, ...(await _readObjectFileOrDefaultObjectOnError(
-        `${WEBSCROLLS_CONSTANTS.APP_PATH}/themes/themes.json`, []))];
+    const themes = [CREATE_NEW, ...(await getthemes())];
     const posttypes = [CREATE_NEW];
     const extrainfo = util.stringToBase64(JSON.stringify({apppath: `/apps/${WEBSCROLLS_CONSTANTS.APP_NAME}`, cmstype: "cms"}));
     const apipath = `${WEBSCROLLS_CONSTANTS.BACKEND}/apps/${WEBSCROLLS_CONSTANTS.APP_NAME}`;
@@ -38,7 +39,7 @@ async function createdata() {
 async function themeselected(_element, theme) {
     try {
         if (theme !== CREATE_NEW) {
-            current_theme_post_types = await $$.requireJSON(`${WEBSCROLLS_CONSTANTS.APP_PATH}/themes/${theme}/schemas/posttypes.json`);
+            current_theme_post_types = await post.getPostTypes(theme);
             current_theme = theme;
             const posttypes = [CREATE_NEW, ...current_theme_post_types];
             const selectPostTypes = document.querySelector("select#posttypes");
@@ -248,4 +249,5 @@ const _readObjectFileOrDefaultObjectOnError = async (url, defaultObject) => {
 }
 
 export const theme = {createdata, themeselected, posttypeselected, dragstart, callai, logout,
-    dragged, dragstop, panelSelect, rerender, scaleIframe, publishThemeFile, deleteThemeFile, getThemeTemplate};
+    dragged, dragstop, panelSelect, rerender, scaleIframe, publishThemeFile, deleteThemeFile, 
+    getThemeTemplate, getthemes};

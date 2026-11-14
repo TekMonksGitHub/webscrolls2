@@ -704,12 +704,13 @@ span.summaryruleclosure {
         const rules = document.querySelectorAll('button.checkbox');
         let count = 0; for (const rule of rules) if (rule.dataset.checked.trim() == 'true') count++;
         document.querySelector('span#summaryrulecount').innerText = `${count} rules`;
-        document.querySelector('span.usercontainer.selected span.rulecount').innerText = `${count} rules`;
+        if (document.querySelector('span.usercontainer.selected span.rulecount')) 
+            document.querySelector('span.usercontainer.selected span.rulecount').innerText = `${count} rules`;
     }
 
     function addUserClicked() {
         const usernameinput = document.querySelector('input#addusername'), useremailinput = document.querySelector('input#adduseremail');
-        permissions.addUser(usernameinput.value, useremailinput.value);
+        if (!permissions.addUser(usernameinput.value, useremailinput.value)) alert("Error: The user already exists");
     }
 
     function userselected(usercontainerClicked) {

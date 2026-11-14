@@ -1,14 +1,13 @@
 {
     "/apps/{{app}}/login" : "/apis/login.js?get=true&&needsToken=false&addsToken=sub:{{{role}}},tokenflag:{{{result}}},id:{{{id}}},org:{{{org}}}",
     "/apps/{{app}}/ai" : "/apis/ai.js?respondviasse=true&keys=reeiwu83409oesnf9823ydwejidw492053ldmqogelr02479&needsToken=user,admin",
-    "/apps/{{app}}/publish" : "/apis/publish.js?keys=reeiwu83409oesnf9823ydwejidw492053ldmqogelr02479&needsToken=user,admin",
-    "/apps/{{app}}/delete" : "/apis/delete.js?keys=reeiwu83409oesnf9823ydwejidw492053ldmqogelr02479&needsToken=user,admin",
     "/apps/{{app}}/addasset" : "/apis/addasset.js?keys=reeiwu83409oesnf9823ydwejidw492053ldmqogelr02479&needsToken=user,admin",
     "/apps/{{app}}/deleteasset" : "/apis/deleteasset.js?keys=reeiwu83409oesnf9823ydwejidw492053ldmqogelr02479&needsToken=user,admin",
     "/apps/{{app}}/publishthemefile" : "/apis/publishthemefile.js?keys=reeiwu83409oesnf9823ydwejidw492053ldmqogelr02479&needsToken=admin",
     "/apps/{{app}}/deletethemefile" : "/apis/deletethemefile.js?keys=reeiwu83409oesnf9823ydwejidw492053ldmqogelr02479&needsToken=admin",
     "/apps/{{app}}/appevents" : "/{{server_apis}}/appevents.js?get=true&sse=true&sseint=2000",
     
+    "/apps/{{app}}/usercontrol" : "/apis/usercontrol.js?keys=reeiwu83409oesnf9823ydwejidw492053ldmqogelr02479&needsToken=admin",
     "/apps/{{app}}/settingseditor" : "/components/settings-editor/apis/settings-editor.js?keys=reeiwu83409oesnf9823ydwejidw492053ldmqogelr02479&needsToken=admin",
 
     "/apps/{{app}}/getfiles" : "/components/xbin/apis/getfiles.js?get=true&keys=reeiwu83409oesnf9823ydwejidw492053ldmqogelr02479&needsToken=user,admin",

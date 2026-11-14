@@ -9,6 +9,8 @@ exports.initSync = function(_app, approot) {
     const APP_LIBDIR = `${approot}/lib`;
     global.WEBSCROLLS_CONSTANTS = require(`${APP_LIBDIR}/constants.js`);
 
+    WEBSCROLLS_CONSTANTS.CONF = require(`${WEBSCROLLS_CONSTANTS.CONF_DIR}/webscrolls.json`);
+
     const xbin = require(`${WEBSCROLLS_CONSTANTS.APP_ROOT}/components/xbin/lib/xbin_init.js`)
     xbin.initSync();
 

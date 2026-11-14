@@ -48,6 +48,7 @@ const main = async urlRequested => {
 	} catch (err) {WEBSCROLLS_LOG.error(`Bad post, ${posturl}, error fetching: ${err}`);}
 
 	try {
+		if (postdata === false) {alert(`Bad page, going back`); window.history.back();}
 		await router.loadPage(url, {WEBSCROLLS_CONSTANTS, ...postdata}, true, pushstate); 
 		if (pageModule?.pageLoaded) pageModule.pageLoaded(postdata); 
 	} catch (error) { router.loadPage(WEBSCROLLS_CONSTANTS.ERROR_HTML, {WEBSCROLLS_CONSTANTS, error, stack: error.stack || new Error().stack}); }

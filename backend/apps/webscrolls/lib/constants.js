@@ -7,6 +7,7 @@ const path = require("path");
 
 exports.APP_ROOT = `${path.resolve(`${__dirname}/../`)}`;
 
+exports.DB_DIR = `${exports.APP_ROOT}/db`;
 exports.LIB_DIR = `${exports.APP_ROOT}/lib`;
 exports.API_DIR = `${exports.APP_ROOT}/apis`;
 exports.CONF_DIR = `${exports.APP_ROOT}/conf`;

@@ -25,13 +25,13 @@ let old_posttype, old_post, current_post_schema, dragging_to_resize=false, curre
 
 async function createdata(dontAddBlanks=false, addPosts=false) {
     const themes = await $$.requireJSON(`${WEBSCROLLS_CONSTANTS.APP_PATH}/themes/themes.json`);
-    let posttypes = [...(await $$.requireJSON(`${WEBSCROLLS_CONSTANTS.APP_PATH}/themes/${themes[0]}/schemas/posttypes.json`))];
+    let posttypes = [...(await getPostTypes(themes[0]))];
     const firstPostType = posttypes[0]; if (!dontAddBlanks) posttypes = ["---", ...posttypes];
     const extrainfo = util.stringToBase64(JSON.stringify({apppath: `/apps/${WEBSCROLLS_CONSTANTS.APP_NAME}`, cmstype: "cms"}));
     const apipath = `${WEBSCROLLS_CONSTANTS.BACKEND}/apps/${WEBSCROLLS_CONSTANTS.APP_NAME}`;
     const appath = `${WEBSCROLLS_CONSTANTS.FRONTEND}/apps/${WEBSCROLLS_CONSTANTS.APP_NAME}`;
     let posts = dontAddBlanks ? [] : [CREATE_NEW_POST]; 
-    try {if (firstPostType) posts = [...posts, ...(await _getPostsForPostType(themes[0], firstPostType))];} 
+    try {if (firstPostType) posts = [...posts, ...(await getPostsForPostType(themes[0], firstPostType))];} 
     catch (err) {}; // no posts found for this post type, silent issue
     return addPosts ? {themes, posttypes, extrainfo, apipath, appath, posts} : {themes, posttypes, extrainfo, apipath, appath};
 }
@@ -47,8 +47,7 @@ async function getRenderedPost(theme, posttype, postid) {
 
 async function getPostData(theme, posttype, postid, postobject) {
     const lang = session.get($$.MONKSHU_CONSTANTS.LANG_ID);
-    const theme_post_types = theme ? 
-        await $$.requireJSON(`${WEBSCROLLS_CONSTANTS.APP_PATH}/themes/${theme}/schemas/posttypes.json`) : [];
+    const theme_post_types = theme ? await getPostTypes(theme) : [];
     const skipPageTopSideBars = _isReservedPostType(posttype);
     
     const header = (!skipPageTopSideBars) && theme_post_types.includes("header") ? await getRenderedPost(theme, "header", "default") : undefined;
@@ -65,9 +64,12 @@ async function getPostData(theme, posttype, postid, postobject) {
     return {header, footer, leftbar, rightbar, ...finalPostData};
 }
 
+const getPostTypes = theme => _readObjectFileOrDefaultObjectOnError(
+    `${WEBSCROLLS_CONSTANTS.APP_PATH}/themes/${theme}/schemas/posttypes.json`, []);
+
 async function themeselected(_element, theme) {
     try {
-        const posttypes = ["---", ...(await $$.requireJSON(`${WEBSCROLLS_CONSTANTS.APP_PATH}/themes/${theme}/schemas/posttypes.json`))];
+        const posttypes = ["---", ...(await getPostTypes(theme))];
         const selectPostTypes = document.querySelector("select#posttypes");
         let optionsHTML = ""; for (const posttype of posttypes) optionsHTML += `<option value="${posttype}">${posttype}</option>\n`;
         selectPostTypes.innerHTML = optionsHTML;
@@ -90,7 +92,7 @@ async function posttypeselected(_element, posttype) {
         }
 
         let posts = []; 
-        try {posts = await _getPostsForPostType(themeSelected, posttype);} 
+        try {posts = await getPostsForPostType(themeSelected, posttype);} 
         catch (err) {}; // no posts found for this post type, silent issue
         
         const selectPosts = document.querySelector("select#posts");
@@ -157,7 +159,7 @@ async function publishPost(button) {
     const postname = document.querySelector("input#postname").value.trim(); if (!postname) {alert("Missing post name."); return;}
     const lang = session.get($$.MONKSHU_CONSTANTS.LANG_ID);
     const selectThemes = document.querySelector("select#themeselector"), themeSelected = selectThemes.value;
-    const posts = await _getPostsForPostType(themeSelected, old_posttype);
+    const posts = await getPostsForPostType(themeSelected, old_posttype);
     const addToPostSelector = posts.includes(postname) ? false : true;
 
     if (await publishPostExternalCall(post, themeSelected, old_posttype, postname, lang)) {
@@ -175,7 +177,7 @@ async function publishPostExternalCall(postYamlText, theme, posttype, postname, 
     const themeSelected = document.querySelector("select#themeselector").value;
     const posturl = `/${themeSelected}/${posttype}/${postname}.${lang}.yaml`;    
     if ((await (filemanager||FILE_MANAGER()).operateFileExternal(filemanager_id||FILE_MANAGER_COMPONENT_ID, posturl, "write", postYamlText))?.result) {    // write the post
-        const posts = await _getPostsForPostType(theme, old_posttype);
+        const posts = await getPostsForPostType(theme, old_posttype);
         if (!posts.includes(postname)) {
             posts.push(postname);
             if (await _setPostsForPostType(theme, old_posttype, posts)) return true; // update the list of posts
@@ -191,7 +193,7 @@ async function deletePost(button) {
 
     const postname = document.querySelector("input#postname").value.trim(); if (!postname) {alert("Missing post name."); return;}
     const selectThemes = document.querySelector("select#themeselector"), themeSelected = selectThemes.value;
-    const posts = await _getPostsForPostType(themeSelected, old_posttype);
+    const posts = await getPostsForPostType(themeSelected, old_posttype);
     if (posts.indexOf(postname) != -1) {    // post needs to be removed from posts.json
         posts.splice(posts.indexOf(postname), 1); 
         if (!await _setPostsForPostType(themeSelected, old_posttype, posts)) {alert("Deletion failed."); return;}
@@ -349,7 +351,7 @@ async function linkselectionchanged(element, value, type) {
     const shadowRoot = monkshu_env.components['dialog-box'].getShadowRootByContainedElement(element);
     const theme = shadowRoot.querySelector("select#themeselector").value;
     if (type == "theme") {
-        const posttypes = [...(await $$.requireJSON(`${WEBSCROLLS_CONSTANTS.APP_PATH}/themes/${value}/schemas/posttypes.json`))];
+        const posttypes = [...(await getPostTypes(value))];
         const selectPostTypes = shadowRoot.querySelector("select#posttypes");
         let optionsHTML = ""; for (const posttype of posttypes) if (!_isReservedPostType(posttype)) 
             optionsHTML += `<option value="${posttype}">${posttype}</option>\n`;
@@ -357,7 +359,7 @@ async function linkselectionchanged(element, value, type) {
         linkselectionchanged(element, posttypes[0], "posttype");
     } else if (type == "posttype") {
         let posts = []; 
-        try {posts = await _getPostsForPostType(theme);} 
+        try {posts = await getPostsForPostType(theme);} 
         catch (err) {}; // no posts found for this post type, silent issue
         const selectPosts = shadowRoot.querySelector("select#posts");
         let optionsHTML = ""; for (const post of posts) optionsHTML += `<option value="${post}">${post}</option>\n`;
@@ -389,6 +391,17 @@ async function saveCMSFile(filepath, data, expectedExtension, callback) {
     else {if (callback) callback(false, filepath); return false;}
 }
 
+async function getPostsForPostType(theme, posttype) {
+    const filemanager = await FILE_MANAGER();
+    const postsJSONText = filemanager ? (await FILE_MANAGER().operateFileExternal(FILE_MANAGER_COMPONENT_ID, 
+        `/${theme}/${posttype}/posts.json`, "read"))?.data : 
+        JSON.stringify(await _readObjectFileOrDefaultObjectOnError(
+            `${WEBSCROLLS_CONSTANTS.APP_PATH}/cms/${theme}/${posttype}/posts.json`, []));
+    if (!postsJSONText) return []; else try {return JSON.parse(postsJSONText);} catch (err) {
+        alert(`Post index file is bad for ${posttype}, all posts lost.`); return [];
+    }
+}
+
 const logout = _ => loginmanager.logout();
 
 const _isReservedPostType = posttype => ["header", "footer", "leftbar", "rightbar"].includes(posttype);
@@ -415,13 +428,6 @@ function _getPostObject(rawYaml, forceFromFields) {
     return post;
 }
 
-async function _getPostsForPostType(theme, posttype) {
-    const postsJSONText = (await FILE_MANAGER().operateFileExternal(FILE_MANAGER_COMPONENT_ID, 
-        `/${theme}/${posttype}/posts.json`, "read"))?.data;
-    if (!postsJSONText) return []; else try {return JSON.parse(postsJSONText);} catch (err) {
-        alert(`Post index file is bad for ${posttype}, all posts lost.`); return [];
-    }
-}
 const _setPostsForPostType = async (theme, posttype, posts) => ( await FILE_MANAGER().operateFileExternal(
     FILE_MANAGER_COMPONENT_ID, `/${theme}/${posttype}/posts.json`, 
     "write", JSON.stringify(posts)) )?.result;
@@ -535,8 +541,12 @@ function _parseSchemaIntoTemplateData(pageSchema, idprefix) {
     return templatedata;
 }
 
-export const post = {createdata, getPostData, getRenderedPost, themeselected, posttypeselected, 
+const _readObjectFileOrDefaultObjectOnError = async (url, defaultObject) => {
+    try {return await $$.requireJSON(url);} catch (err) {return defaultObject;}
+}
+
+export const post = {createdata, getPostData, getRenderedPost, getPostTypes, themeselected, posttypeselected, 
     postselected, panelSelect, scaleIframe, addToArray, deleteFromArray, publishPost, deletePost, 
     logout, publishPostExternalCall, dragstart, dragged, dragstop, isDragging, rerender, callaiForPostGeneration, 
     callaiForImageGeneration, showLinkGenerator, linkselectionchanged, closeDialog, showImageGenerator, 
-    saveCMSFile};
+    saveCMSFile, getPostsForPostType};
