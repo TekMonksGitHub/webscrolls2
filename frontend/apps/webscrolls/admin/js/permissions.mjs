@@ -44,20 +44,21 @@
 
 import {post} from "./post.mjs";
 import {theme} from "./theme.mjs";
+import {util} from "/framework/js/util.mjs";
 import {session} from "/framework/js/session.mjs";
 import {loginmanager} from "../../js/loginmanager.mjs";
 import {apimanager as apiman} from "/framework/js/apimanager.mjs";
 
 const API_USERCONTROL = `${WEBSCROLLS_CONSTANTS.API_PATH}/usercontrol`;
 
-let currentdata;
+let currentdata, lastsaveddata;
 
 async function createdata() {
     let users; try {users = (await apiman.rest(API_USERCONTROL, "POST", {op: "getusers"}, true))?.users||[]} catch (err) {_logBackendAPIError(err);};
     let permissions; try{permissions = (await apiman.rest(API_USERCONTROL, "POST", {op: "getpermissions"}, true))?.permissions||[];} catch (err) {_logBackendAPIError(err);};
     const themes = await theme.getthemes();
     const currentUserID = session.get(WEBSCROLLS_CONSTANTS.USERID).toString();
-    if (!users?.length) {
+    const usersWereAdded = !(users.length); if (!users?.length) {
         if (!isCurrentUserAdmin()) return false;  // not allowed
         users = [{userid: currentUserID, name: session.get(WEBSCROLLS_CONSTANTS.USERNAME).toString()}];
     }
@@ -93,6 +94,8 @@ async function createdata() {
         permissions: _mappedPermissions,
         selected_user: users.length?{name: users[0].name, email: users[0].userid}:undefined
     }
+    lastsaveddata = util.clone(currentdata); if (usersWereAdded) {  // last saved data is empty in this case
+        lastsaveddata.site.user_count = 0; lastsaveddata.users = []; lastsaveddata.permissions = []; lastsaveddata.selected_user = undefined; }
 
     return currentdata;
 }
@@ -101,7 +104,12 @@ function pageRendered() {
     permissions.pagefunctions.countRules();
 }
 
-const isCurrentUserAdmin = _ => session.get(WEBSCROLLS_CONSTANTS.LOGGEDIN_USEROLE).toString() == "admin"; 
+const isCurrentUserAdmin = _ => 
+    session.get(WEBSCROLLS_CONSTANTS.LOGGEDIN_USEROLE).toString() == "admin"; 
+
+const isSelectedUserAdmin = _ => 
+    session.get(WEBSCROLLS_CONSTANTS.LOGGEDIN_USEROLE).toString() == "admin" &&
+    currentdata.selected_user.email == session.get(WEBSCROLLS_CONSTANTS.USERID).toString();
 
 function userSelected(email) {
     if (!email) if (!currentdata?.selected_user) return; else email = currentdata.selected_user.email;
@@ -111,32 +119,39 @@ function userSelected(email) {
     permissions.pagefunctions.loadPermissions(email, userpermissions);
 }
 
-const updateSelectedUsersRules = (permissions) => currentdata.permissions[currentdata.selected_user.email] = permissions;
+const updateSelectedUsersRules = permissions => currentdata.permissions[currentdata.selected_user.email] = permissions;
 
 function addUser(name, email) {
     if (currentdata.permissions[email]) return false;   // user already exists
 
+    currentdata.site.user_count++;
     const icon = name.trim().includes(" ") ? name.trim().split(/\s+/).at(0)[0] + name.trim().split(/\s+/).at(-1)[0] : name.trim().slice(0, 2);
-    currentdata.users.push({icon, name, email, rule_count: 0});
+   
+    const userObject = {icon, name, email, rule_count: 0, user_count: currentdata.site.user_count};
+    currentdata.users.push(userObject);
     currentdata.selected_user = {name, email};
     currentdata.permissions[email] = [];
-    userSelected(email);
-    return true;
+    return userObject;
 }
 
 async function saveAllUsersAndPermissions() {
+    if (util.areObjectsEqual(lastsaveddata, currentdata)) return true;  // nothing to save
+
     const _mappedUsers = currentdata.users.map(user => {return {userid: user.email, name: user.name}});
-    try {if (!(await apiman.rest(API_USERCONTROL, "POST", {op: "setusers", permissions: _mappedUsers}, true))) return false;}
+    try {if (!(await apiman.rest(API_USERCONTROL, "POST", {op: "setusers", users: _mappedUsers}, true))) return false;}
     catch (err) {_logBackendAPIError(err); return false;}
 
     const _mappedPermissions = []; for (const [userid, permissions] of Object.entries(currentdata.permissions)) 
         _mappedPermissions.push({userid, permissions});
-    try {return await apiman.rest(API_USERCONTROL, "POST", {op: "setpermissions", permissions: _mappedPermissions}, true);}
-    catch (err) {_logBackendAPIError(err); return false;}
+    try {
+        if (await apiman.rest(API_USERCONTROL, "POST", {op: "setpermissions", permissions: _mappedPermissions}, true)) {
+            lastsaveddata = util.clone(currentdata); return true;
+        } else return false;
+    } catch (err) {_logBackendAPIError(err); return false;}
 }
 
 const _logBackendAPIError = err => WEBSCROLLS_LOG.error(`Backend API error calling user control. The error is: ${err}`);
 
 export const permissions = {createdata, logout: loginmanager.logout, userSelected, addUser, pageRendered, 
-    updateSelectedUsersRules, savePermissions: saveAllUsersAndPermissions, isCurrentUserAdmin,
+    updateSelectedUsersRules, saveAllUsersAndPermissions, isSelectedUserAdmin,
     pagefunctions: {add: function (name, functionPointer) {this[name] = functionPointer}}}

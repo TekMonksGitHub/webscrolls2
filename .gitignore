@@ -3,3 +3,4 @@ frontend/**/webbundle/*
 **/*.DS_Store
 frontend/**/cms/*
 frontend/**/themes/*
+backend/apps/webscrolls/db/webscrolls.db

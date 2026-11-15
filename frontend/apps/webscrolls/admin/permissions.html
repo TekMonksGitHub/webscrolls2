@@ -447,7 +447,7 @@ span.summaryruleclosure {
         <span id="title">Settings / Access control</span>
     </div>
     <div id="topright">
-        <span class="headerbutton">Publish</span>
+        <span class="headerbutton" onclick="publishAllUsersAndPermissions()">Publish</span>
         <img class="headericon" src="./img/logout.svg" onclick="permissions.logout(this)">
     </div>
     </div>
@@ -467,20 +467,20 @@ span.summaryruleclosure {
             <input id="adduseremail" class="adduserinput" placeholder="name@company.com" required type="email" pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" title="Enter a valid email address.">
             <span class="muted">They start with no permissions. Set them in the grid, then save.</span>
             <span id="adduserbuttons">
-                <button type="button" class="formbutton" onclick="document.querySelector('form#adduserform').classList.add('displaynone')">Cancel</button>
-                <button type="submit" class="formbutton adduser" onclick="addUserClicked()">Add user</button>
+                <button id="addusercancel" type="button" class="formbutton" onclick="document.querySelector('form#adduserform').classList.add('displaynone')">Cancel</button>
+                <button id="addusersubmit" type="submit" class="formbutton adduser">Add user</button>
             </span>
         </form>
 
-        <div class="users">
+        <div id="users">
             {{#users}}
             <span class="usercontainer {{#first}}selected{{/first}}" onclick="userselected(this)">
-            <span class="userinitial">{{icon}}</span>
-            <div class="usernameandemail">
-                <span class="ellipsis"><strong class="usercontainername">{{name}}</strong></span>
-                <span class="useremail ellipsis">{{email}}</span>
-            </div>
-            <span class="rulecount">{{rule_count}} rules</span>
+                <span class="userinitial">{{icon}}</span>
+                <div class="usernameandemail">
+                    <span class="ellipsis"><strong class="usercontainername">{{name}}</strong></span>
+                    <span class="useremail ellipsis">{{email}}</span>
+                </div>
+                <span class="rulecount">{{rule_count}} rules</span>
             </span>
             {{/users}}
         </div>
@@ -678,7 +678,7 @@ span.summaryruleclosure {
     }
 
     function selectOrUnselectNeighbors(checkbox, checked) {
-        if (permissions.isCurrentUserAdmin() && (!checked)) {checkbox.classList.add('checked'); checkbox.dataset.checked = "true"; alert("Admin always has all the permissions"); return;} // admin always has all the permissions
+        if (permissions.isSelectedUserAdmin() && (!checked)) {checkbox.classList.add('checked'); checkbox.dataset.checked = "true"; alert("Admin always has all the permissions"); return;} // admin always has all the permissions
         const findSiteReadPermissionsCheckbox = _ => document.querySelector('span.tablecell span.permissionslegendicon.siteicon').parentNode.parentNode.querySelector('button.checkbox');
         const isThemeCheckbox = checkbox => checkbox.dataset.path.split("/").length == 2;
         const areAnyThemesReadPermissionsOn = _ => {
@@ -711,7 +711,17 @@ span.summaryruleclosure {
 
     function addUserClicked() {
         const usernameinput = document.querySelector('input#addusername'), useremailinput = document.querySelector('input#adduseremail');
-        if (!permissions.addUser(usernameinput.value, useremailinput.value)) alert("Error: The user already exists");
+        const userObject = permissions.addUser(usernameinput.value, useremailinput.value);
+        if (!userObject) {alert("Error: The user already exists"); return;}
+        const usercontainerNew = document.querySelector("span.usercontainer").cloneNode(true);
+        usercontainerNew.querySelector("span.userinitial").innerText = userObject.icon;
+        usercontainerNew.querySelector("strong.usercontainername").innerText = userObject.name;
+        usercontainerNew.querySelector("span.useremail").innerText = userObject.email;
+        usercontainerNew.querySelector("span.rulecount").innerText = `${userObject.rule_count} rules`;
+        document.querySelector("div#users").appendChild(usercontainerNew);
+        document.querySelector("span#userscount").innerText = `${userObject.user_count} people`;
+        document.querySelector("button#addusercancel").click();
+        userselected(usercontainerNew);
     }
 
     function userselected(usercontainerClicked) {
@@ -720,6 +730,7 @@ span.summaryruleclosure {
             else usercontainer.classList.remove('selected'); 
         }
         permissions.userSelected(usercontainerClicked.querySelector('span.useremail').innerText);
+        renderSummaryAndUpdateRules();  // show rules summary for the new user
     }
 
     function filterRules(text) {
@@ -759,6 +770,11 @@ span.summaryruleclosure {
             if (!checkbox) {WEBSCROLLS_LOG.warn(`Permission rule "${rule}" for ${user} has no matching row in the grid, skipping.`); continue;}
             if (!isChecked(checkbox)) checkbox.click();   // an earlier click may already have checked it through the neighbours
         }
+    }
+
+    async function publishAllUsersAndPermissions() {
+        if (!(await permissions.saveAllUsersAndPermissions())) alert("Failed to save users and permissions");
+        else alert("Saved");
     }
     </script>
     <script type="module">
