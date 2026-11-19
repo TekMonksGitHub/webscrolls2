@@ -7,11 +7,12 @@
 import {router} from "/framework/js/router.mjs";
 import {session} from "/framework/js/session.mjs";
 import {securityguard} from "/framework/js/securityguard.mjs";
+
 import {apimanager as apiman} from "/framework/js/apimanager.mjs";
 
 let logoutListeners = [];
 
-function handleLoginResult(fetchResponse) {
+async function handleLoginResult(fetchResponse) {
     logoutListeners = [];   // reset listeners on sign in
 
     const apiURL = fetchResponse.url, headers = fetchResponse.headers, jsonResponseObject = fetchResponse.response;
@@ -21,7 +22,12 @@ function handleLoginResult(fetchResponse) {
         session.set(WEBSCROLLS_CONSTANTS.USERNAME, jsonResponseObject.name);
         session.set(WEBSCROLLS_CONSTANTS.USERORG, jsonResponseObject.org);
         session.set(WEBSCROLLS_CONSTANTS.LOGGEDIN_USEROLE, jsonResponseObject.role);
+        const permissions = (await import("./../admin/js/permissions.mjs")).permissions;
+        const userpermissions = await permissions.normalizeCurrentUserPermissions(jsonResponseObject.permissions);
+        session.set(WEBSCROLLS_CONSTANTS.LOGGEDIN_USERPERMISSIONS, userpermissions);
         securityguard.setCurrentRole(WEBSCROLLS_CONSTANTS.USER_ROLE);  // we only have user and guest at this level 
+        
+        if ((!userpermissions) || (!userpermissions.length)) {alert("Administration not allowed."); router.loadPage(`${WEBSCROLLS_CONSTANTS.LOGIN_HTML}?_error=true`); return;}
         const postloginurl = session.get(WEBSCROLLS_CONSTANTS.POST_LOGIN_URL_KEY, WEBSCROLLS_CONSTANTS.ADMIN_MAIN_HTML);
         window.monkshu_env.apps[WEBSCROLLS_CONSTANTS.APP_NAME].main(new URL(postloginurl, window.location.href));
     } else {LOG.error(`Login failed.`); router.loadPage(`${WEBSCROLLS_CONSTANTS.LOGIN_HTML}?_error=true`);}

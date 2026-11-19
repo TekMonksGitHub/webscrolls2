@@ -93,35 +93,45 @@ span.actiondescription {
     <span id="subheading">Pick one of the following actions</span>
 </div>
 <div id="maincontent">
+    {{#showposts}}
 	<div class="action" onclick="window.location='./post.html'">
         <img class="actionicon" src="./img/posts.svg">
         <span class="actionname">Posts</span>
         <span class="actiondescription">Create or Edit</span>
     </div>
+    {{/showposts}}
 
+    {{#showthemes}}
     <div class="action" onclick="window.location='./theme.html'">
         <img class="actionicon" src="./img/themes.svg">
         <span class="actionname">Themes</span>
         <span class="actiondescription">Create or Edit</span>
     </div>
+    {{/showthemes}}
 
+    {{#showcms}}
     <div class="action" onclick="window.location='./cms.html'">
         <img class="actionicon" src="./img/files.svg">
         <span class="actionname">Files</span>
         <span class="actiondescription">Upload or Delete</span>
     </div>
+    {{/showcms}}
 
+    {{#showpermissions}}
     <div class="action" onclick="window.location='./permissions.html'">
         <img class="actionicon" src="./img/permissions.svg">
         <span class="actionname">Permissions</span>
         <span class="actiondescription">Users and Access</span>
     </div>
+    {{/showpermissions}}
 
+    {{#showsettings}}
     <div class="action" onclick="window.location='./settings.html'">
         <img class="actionicon" src="./img/settings.svg">
         <span class="actionname">Settings</span>
         <span class="actiondescription">Tweaks or Changes</span>
     </div>
+    {{/showsettings}}
 
     <div class="action" onclick="window.loginmanager.logout()">
         <img class="actionicon" src="./img/exit.svg">

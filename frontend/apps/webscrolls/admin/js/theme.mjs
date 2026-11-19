@@ -25,15 +25,31 @@ const FILE_MANAGER = _ => monkshu_env.components["file-manager"];
 
 let old_posttype, dragging_to_resize=false, currentResizer, can_not_repaint, current_theme, current_posttype, current_theme_post_types;
 
-const getthemes = async _ => await _readObjectFileOrDefaultObjectOnError(`${WEBSCROLLS_CONSTANTS.APP_PATH}/themes/themes.json`, []);
+const getthemes = async _ => {  // returns the themes the currently logged in user is allowed to access
+    const allThemes = await _readObjectFileOrDefaultObjectOnError(`${WEBSCROLLS_CONSTANTS.APP_PATH}/themes/themes.json`, []);
+    const userpermissions = Array.from(session.get(WEBSCROLLS_CONSTANTS.LOGGEDIN_USERPERMISSIONS)||[]);
+    const themesUserIsAllowed = []; for (const permission of userpermissions) 
+        if (permission.split("/").length-1 == 1) themesUserIsAllowed.push(permission.split("/")[1].split("|")[0]);
+    const finalThemes = allThemes.filter(theme => themesUserIsAllowed.includes(theme));
+    return finalThemes;
+}
+
+const canCurrentUserCreateThemes = _ => Array.from(session.get(WEBSCROLLS_CONSTANTS.LOGGEDIN_USERPERMISSIONS)||[]).includes("site|write");
 
 async function createdata() {
-    const themes = [CREATE_NEW, ...(await getthemes())];
-    const posttypes = [CREATE_NEW];
+    const themes = [...(await getthemes())];
+    if (canCurrentUserCreateThemes()) themes.unshift(CREATE_NEW);
+    const posttypes = [canCurrentUserCreateThemes()?CREATE_NEW:undefined];
     const extrainfo = util.stringToBase64(JSON.stringify({apppath: `/apps/${WEBSCROLLS_CONSTANTS.APP_NAME}`, cmstype: "cms"}));
     const apipath = `${WEBSCROLLS_CONSTANTS.BACKEND}/apps/${WEBSCROLLS_CONSTANTS.APP_NAME}`;
     const appath = `${WEBSCROLLS_CONSTANTS.FRONTEND}/apps/${WEBSCROLLS_CONSTANTS.APP_NAME}`;
     return {themes, posttypes, extrainfo, apipath, appath};
+}
+
+async function pageLoaded() {
+    if (!canCurrentUserCreateThemes()) {    // load the first theme as they can't see optiont to create new
+        const themesAllowed = await getthemes(); if (themesAllowed.length) themeselected(undefined, themesAllowed[0]);    
+    }
 }
 
 async function themeselected(_element, theme) {
@@ -250,4 +266,4 @@ const _readObjectFileOrDefaultObjectOnError = async (url, defaultObject) => {
 
 export const theme = {createdata, themeselected, posttypeselected, dragstart, callai, logout,
     dragged, dragstop, panelSelect, rerender, scaleIframe, publishThemeFile, deleteThemeFile, 
-    getThemeTemplate, getthemes};
+    getThemeTemplate, getthemes, pageLoaded};

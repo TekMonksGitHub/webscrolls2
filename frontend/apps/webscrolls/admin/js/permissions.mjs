@@ -100,6 +100,27 @@ async function createdata() {
     return currentdata;
 }
 
+async function normalizeCurrentUserPermissions(permissions) {
+    if (isCurrentUserAdmin()) {
+        const themes = await theme.getthemes();
+        const _mappedThemes = []; for (const theme of themes) {
+            const posttypes = await post.getPostTypes(theme);
+            const objectToPush = {name: theme, 
+                posttypes: await Promise.all(posttypes.map(async posttype => {return {name: posttype, posts_count: (await post.getPostsForPostType(theme, posttype))?.length||0, theme}})),
+                posttypes_count: posttypes.length
+            };
+            _mappedThemes.push(objectToPush);
+        }
+
+        const adminPermissions = ["site|read","site|write", "site|delete"];
+        for (const theme of _mappedThemes) {
+            adminPermissions.push(...[`site/${theme.name}|read`, `site/${theme.name}|write`, `site/${theme.name}|delete`]);
+            for (const posttype of theme.posttypes) adminPermissions.push(...[`site/${theme.name}/${posttype.name}|read`, `site/${theme.name}/${posttype.name}|write`, `site/${theme.name}/${posttype.name}|delete`]);
+        }
+        return adminPermissions;
+    } else return permissions;
+}
+
 function pageRendered() {
     permissions.pagefunctions.countRules();
 }
@@ -150,8 +171,33 @@ async function saveAllUsersAndPermissions() {
     } catch (err) {_logBackendAPIError(err); return false;}
 }
 
+function getCurrentUsersBroadPermissions() {
+    const userpermissions = Array.from(session.get(WEBSCROLLS_CONSTANTS.LOGGEDIN_USERPERMISSIONS)||[]);
+    if (!userpermissions.length) return {}; // user has no permissions
+
+    const retObject = {};
+    if (session.get(WEBSCROLLS_CONSTANTS.LOGGEDIN_USEROLE) == "admin") {
+        retObject.hasPostPermissions = true; retObject.hasThemePermissions = true; retObject.hasSitePermissions = true;
+        retObject.hasCMSPermissions = true; retObject.hasSitePermissionsModificationPermissions = true;
+        retObject.hasSiteSettingsPermissions = true; return retObject;
+    }
+
+    const siteRegex = /^site\|(read|write|delete)$/;
+    const themeRegex = /^site\/[^\/|]+\|(read|write|delete)$/;
+    const postRegex = /^site\/[^\/|]+\/[^\/|]+\|(read|write|delete)$/;
+    const permissionsMatchRegexArray = regex => userpermissions.some(role => regex.test(role));
+
+    if (permissionsMatchRegexArray(siteRegex)) retObject.hasSitePermissions = true;
+    if (permissionsMatchRegexArray(themeRegex)) retObject.hasThemePermissions = true;
+    if (permissionsMatchRegexArray(postRegex)) retObject.hasPostPermissions = true;
+    if (retObject.hasThemePermissions || retObject.hasPostPermissions) retObject.hasCMSPermissions = true;
+
+    return retObject;
+}
+
 const _logBackendAPIError = err => WEBSCROLLS_LOG.error(`Backend API error calling user control. The error is: ${err}`);
 
 export const permissions = {createdata, logout: loginmanager.logout, userSelected, addUser, pageRendered, 
-    updateSelectedUsersRules, saveAllUsersAndPermissions, isSelectedUserAdmin,
+    updateSelectedUsersRules, saveAllUsersAndPermissions, isSelectedUserAdmin, normalizeCurrentUserPermissions,
+    getCurrentUsersBroadPermissions, 
     pagefunctions: {add: function (name, functionPointer) {this[name] = functionPointer}}}

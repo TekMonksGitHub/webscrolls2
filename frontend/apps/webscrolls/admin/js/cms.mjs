@@ -7,6 +7,7 @@
  */
 
 import {util} from "/framework/js/util.mjs";
+import {permissions} from "./permissions.mjs";
 import {session} from "/framework/js/session.mjs";
 import {loginmanager} from "../../js/loginmanager.mjs";
 
@@ -16,12 +17,12 @@ const current_cms_type = session.get(CMSTYPE_KEY, "cms");
 function createdata() {
     const extraInfo = {apppath: `/apps/${WEBSCROLLS_CONSTANTS.APP_NAME}`, cmstype: current_cms_type};
     const extraInfoEncoded = util.stringToBase64(JSON.stringify(extraInfo));
+    const cmstypes = [{name: "CMS", type: "cms", selected: current_cms_type == "cms" ? true : undefined}];  // if CMS is shown at all, post is implied
+    if (permissions.getCurrentUsersBroadPermissions().hasThemePermissions) cmstypes.push(
+        {name: "Themes", type: "themes", selected: current_cms_type == "themes" ? true : undefined});
+    
     return {
-        cmstypes: [
-            {name: "CMS", type: "cms", selected: current_cms_type == "cms" ? true : undefined}, 
-            {name: "Themes", type: "themes", selected: current_cms_type == "themes" ? true : undefined}, 
-        ],
-        apipath: `${WEBSCROLLS_CONSTANTS.BACKEND}/apps/${WEBSCROLLS_CONSTANTS.APP_NAME}`,
+        cmstypes, apipath: `${WEBSCROLLS_CONSTANTS.BACKEND}/apps/${WEBSCROLLS_CONSTANTS.APP_NAME}`,
         appath: `${WEBSCROLLS_CONSTANTS.FRONTEND}/apps/${WEBSCROLLS_CONSTANTS.APP_NAME}`,
         extrainfo: extraInfoEncoded
     };

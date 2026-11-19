@@ -25,6 +25,7 @@ export const WEBSCROLLS_CONSTANTS = {
     USERNAME: "username",
     USERORG: "userorg",
     LOGGEDIN_USEROLE: "userrole",
+    LOGGEDIN_USERPERMISSIONS: "userpermissions",
     POST_LOGIN_URL_KEY: "_webscrolls_post_login_url",
 
     TKMLOGIN_LIB: `${APP_PATH}/3p/tkmlogin.mjs`,

@@ -11,6 +11,7 @@
  */
 
 const serverutils = require(`${CONSTANTS.LIBDIR}/utils.js`);
+const db = require(`${WEBSCROLLS_CONSTANTS.LIB_DIR}/db.js`);
 const httpClient = require(`${CONSTANTS.LIBDIR}/httpClient.js`);
 const API_JWT_VALIDATION = `${WEBSCROLLS_CONSTANTS.CONF.TEKMONKS_LOGIN_BACKEND}/apps/loginapp/validatejwt`;
 
@@ -57,7 +58,8 @@ async function _verifyJWT(jsonReq) {
     try {
         const _decodeBase64 = string => Buffer.from(string, "base64").toString("utf8");
         const jwtClaims = JSON.parse(_decodeBase64(jsonReq.jwt.split(".")[1]));
-        const finalResult = {...jwtClaims , role: jwtClaims.role, ...CONSTANTS.TRUE_RESULT};
+        const permissions = await db.getPermissions(jwtClaims.id);
+        const finalResult = {...jwtClaims , role: jwtClaims.role, permissions, ...CONSTANTS.TRUE_RESULT};
         return finalResult;
     } catch (err) {
         LOG.error(`Bad JWT token passwed for login ${jsonReq.jwt}, JWT validation succeeded but JWT claims decode failed. Error is ${err}`);
