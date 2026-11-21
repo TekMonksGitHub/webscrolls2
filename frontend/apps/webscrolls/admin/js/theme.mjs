@@ -25,16 +25,20 @@ const FILE_MANAGER = _ => monkshu_env.components["file-manager"];
 
 let old_posttype, dragging_to_resize=false, currentResizer, can_not_repaint, current_theme, current_posttype, current_theme_post_types;
 
-const getthemes = async _ => {  // returns the themes the currently logged in user is allowed to access
+const getUserPermissions = _ => Array.from(session.get(WEBSCROLLS_CONSTANTS.LOGGEDIN_USERPERMISSIONS)||[]);
+
+const getthemes = async returnAll => {  // returns the themes the currently logged in user is allowed to access
     const allThemes = await _readObjectFileOrDefaultObjectOnError(`${WEBSCROLLS_CONSTANTS.APP_PATH}/themes/themes.json`, []);
-    const userpermissions = Array.from(session.get(WEBSCROLLS_CONSTANTS.LOGGEDIN_USERPERMISSIONS)||[]);
-    const themesUserIsAllowed = []; for (const permission of userpermissions) 
+    if (returnAll) return allThemes;
+    const themesUserIsAllowed = []; for (const permission of getUserPermissions()) 
         if (permission.split("/").length-1 == 1) themesUserIsAllowed.push(permission.split("/")[1].split("|")[0]);
     const finalThemes = allThemes.filter(theme => themesUserIsAllowed.includes(theme));
     return finalThemes;
 }
 
-const canCurrentUserCreateThemes = _ => Array.from(session.get(WEBSCROLLS_CONSTANTS.LOGGEDIN_USERPERMISSIONS)||[]).includes("site|write");
+const canCurrentUserCreateThemes = _ => getUserPermissions().includes("site|write");
+const canUserCreatePostTypes = theme => getUserPermissions().includes(`site/${theme}|write`);
+const canUserDeletePostTypes = theme => getUserPermissions().includes(`site/${theme}|delete`);
 
 async function createdata() {
     const themes = [...(await getthemes())];
@@ -57,13 +61,20 @@ async function themeselected(_element, theme) {
         if (theme !== CREATE_NEW) {
             current_theme_post_types = await post.getPostTypes(theme);
             current_theme = theme;
-            const posttypes = [CREATE_NEW, ...current_theme_post_types];
+            const posttypes = [...current_theme_post_types];
+            if (canUserCreatePostTypes(theme)) posttypes.unshift(CREATE_NEW);
             const selectPostTypes = document.querySelector("select#posttypes");
             let optionsHTML = ""; for (const posttype of posttypes) optionsHTML += `<option value="${posttype}">${posttype}</option>\n`;
             selectPostTypes.innerHTML = optionsHTML; 
             const themename =  document.querySelector("input#themename"); themename.classList.add("headerinputdisabled"); themename.value = theme;
-            _resetHeaderUI(false, false, false);
-        } else _resetHeaderUI(false);
+            _resetHeaderUI(false, false, false); 
+        } else {
+            const posttypes = [CREATE_NEW]; 
+            const selectPostTypes = document.querySelector("select#posttypes");
+            let optionsHTML = ""; for (const posttype of posttypes) optionsHTML += `<option value="${posttype}">${posttype}</option>\n`;
+            selectPostTypes.innerHTML = optionsHTML; current_theme_post_types = undefined; current_theme = undefined;
+            _resetHeaderUI(false); 
+        }
     } catch (err) {alert("Bad theme" + err); WEBSCROLLS_LOG.error(`Bad theme: ${theme}`); _resetHeaderUI(false, false);}
 }
 
@@ -71,7 +82,7 @@ async function posttypeselected(_element, posttype) {
     if (posttype == old_posttype) return; else old_posttype = posttype;
 
     if ((posttype == CREATE_NEW)) {
-        _resetHeaderUI(false, false, false);
+        _resetHeaderUI(false, false, false); rerender(true);
     } else {
         const posttypename =  document.querySelector("input#posttypename"); posttypename.classList.add("headerinputdisabled"); posttypename.value = posttype;
         current_posttype = posttype;
@@ -84,9 +95,9 @@ async function posttypeselected(_element, posttype) {
         const schemaJSONTextArea = document.querySelector('textarea#schemaitem');
         const testpostitemTextArea = document.querySelector('textarea#testpostitem');
         htmlTemplateTextArea.value = html; schemaJSONTextArea.value = schema; testpostitemTextArea.value = "{}";
-        _enableDeleteButton();
+        if (canUserDeletePostTypes(current_theme)) _enableDeleteButton(); else _disableDeleteButton();
+        rerender();
     }
-    rerender();
 }
 
 function dragstart(event, element) {
@@ -145,7 +156,15 @@ function panelSelect(sender, panel) {
     }
 }
 
-async function rerender() {
+async function rerender(clear=false) {
+    if (clear) {
+        document.querySelector('textarea#htmlitem').value = "";
+        document.querySelector('textarea#schemaitem').value = "";
+        document.querySelector('textarea#testpostitem').value = "{}";
+        (document.querySelector('iframe#previewitem').contentDocument || 
+            document.querySelector('iframe#previewitem').contentWindow.document).body.innerHTML = '';
+    }
+
     const htmlTemplate = document.querySelector('textarea#htmlitem').value, 
         postYAML = document.querySelector('textarea#testpostitem').value || "{}",
         previewIframe = document.querySelector('iframe#previewitem'),
@@ -159,6 +178,7 @@ async function rerender() {
 }
 
 async function publishThemeFile() {
+    if (!canUserCreatePostTypes(current_theme)) {alert("Permissions don't allow this action."); return;}
     const htmlTemplate = document.querySelector("textarea#htmlitem").value, 
         schemaJSON = document.querySelector("textarea#schemaitem").value, 
         theme = document.querySelector("input#themename").value,
@@ -193,6 +213,7 @@ async function publishThemeFile() {
 }
 
 async function deleteThemeFile() {
+    if (!canUserDeletePostTypes(current_theme)) {alert("Permissions don't allow this action."); return;}
     const theme = document.querySelector("input#themename").value,
         posttype = document.querySelector("input#posttypename").value;
     if ((!theme.trim()) || (!posttype.trim())) {
@@ -243,19 +264,25 @@ const getThemeTemplate = (theme, posttype) => $$.requireText(`${WEBSCROLLS_CONST
 const logout = _ => loginmanager.logout();
 const _disableDeleteButton = _ => document.querySelector("span#deletebutton").classList.add("headerbuttondisableddelete");
 const _enableDeleteButton = _ => document.querySelector("span#deletebutton").classList.remove("headerbuttondisableddelete");
+const _disablePublishButton = _ => document.querySelector("span#publishbutton").classList.add("headerbuttondisabledpublish");
+const _enablePublishButton = _ => document.querySelector("span#publishbutton").classList.remove("headerbuttondisabledpublish");
 
-function _resetHeaderUI(theme=true, themenameinput=true, posttype=true, postnameinput=true, deletebtn=true) {
+function _resetHeaderUI(theme=true, themenameinput=true, posttype=true, postnameinput=true, deletebtn=true, publishbtn=true) {
     const themeSelect = document.querySelector("select#themeselector"), posttypeSelect = document.querySelector("select#posttypes");
     const themename = document.querySelector("input#themename"), postname = document.querySelector("input#posttypename");
     const resetSelectedIndexToZero = select => {
         select.options.length = 1; select.selectedIndex = 0;
         const changeEvent = new Event('change', { bubbles: true }); select.dispatchEvent(changeEvent);
     }
-    if (theme) themeSelect.selectedIndex = 0;
-    if (posttype) resetSelectedIndexToZero(posttypeSelect);
+    if (theme) resetSelectedIndexToZero(themeSelect);
     if (themenameinput) {themename.classList.remove("headerinputdisabled"); themename.value = "";}
     if (postnameinput) {postname.classList.remove("headerinputdisabled"); postname.value = "";}
+    if (posttype) resetSelectedIndexToZero(posttypeSelect); else {const changeEvent = new Event('change', { bubbles: true }); posttypeSelect.dispatchEvent(changeEvent);}
     if (deletebtn) _disableDeleteButton();
+    if (publishbtn) {
+        _disablePublishButton();
+        if (canUserCreatePostTypes() || canCurrentUserCreateThemes()) _enablePublishButton();
+    }
 
     return;
 }

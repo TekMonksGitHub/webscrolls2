@@ -10,9 +10,11 @@
 	const {router} = (await import ("/framework/js/router.mjs"));
 	const {loginmanager} = (await import ("./js/loginmanager.mjs")); 
  
-    const verifyResponse = await tkmlogin.verify("{{{WEBSCROLLS_CONSTANTS.API_LOGIN}}}?op=verify&x-api-key={{{LOGIN_API_KEY}}}", 
-		router.decodeURL(window.location.href));
-	loginmanager.handleLoginResult(verifyResponse);
+    try {
+		const verifyResponse = await tkmlogin.verify("{{{WEBSCROLLS_CONSTANTS.API_LOGIN}}}?op=verify&x-api-key={{{LOGIN_API_KEY}}}", 
+			router.decodeURL(window.location.href));
+		loginmanager.handleLoginResult(verifyResponse);
+	} catch (err) {router.navigate(`${WEBSCROLLS_CONSTANTS.LOGIN_HTML}?_error=true`, true);}
 }
 </script>
 <title>{{i18n.Admin_Login}}</title>

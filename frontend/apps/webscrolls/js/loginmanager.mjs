@@ -27,10 +27,10 @@ async function handleLoginResult(fetchResponse) {
         session.set(WEBSCROLLS_CONSTANTS.LOGGEDIN_USERPERMISSIONS, userpermissions);
         securityguard.setCurrentRole(WEBSCROLLS_CONSTANTS.USER_ROLE);  // we only have user and guest at this level 
         
-        if ((!userpermissions) || (!userpermissions.length)) {alert("Administration not allowed."); router.loadPage(`${WEBSCROLLS_CONSTANTS.LOGIN_HTML}?_error=true`); return;}
+        if ((!userpermissions) || (!userpermissions.length)) {alert("Administration not allowed."); router.navigate(`${WEBSCROLLS_CONSTANTS.LOGIN_HTML}?_error=true`, true); return;}
         const postloginurl = session.get(WEBSCROLLS_CONSTANTS.POST_LOGIN_URL_KEY, WEBSCROLLS_CONSTANTS.ADMIN_MAIN_HTML);
         window.monkshu_env.apps[WEBSCROLLS_CONSTANTS.APP_NAME].main(new URL(postloginurl, window.location.href));
-    } else {LOG.error(`Login failed.`); router.loadPage(`${WEBSCROLLS_CONSTANTS.LOGIN_HTML}?_error=true`);}
+    } else {LOG.error(`Login failed.`); router.navigate(`${WEBSCROLLS_CONSTANTS.LOGIN_HTML}?_error=true`, true);}
 }
 
 const isUserLoggedIn = _ => securityguard.getCurrentRole() == WEBSCROLLS_CONSTANTS.USER_ROLE;

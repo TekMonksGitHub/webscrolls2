@@ -56,7 +56,7 @@ let currentdata, lastsaveddata;
 async function createdata() {
     let users; try {users = (await apiman.rest(API_USERCONTROL, "POST", {op: "getusers"}, true))?.users||[]} catch (err) {_logBackendAPIError(err);};
     let permissions; try{permissions = (await apiman.rest(API_USERCONTROL, "POST", {op: "getpermissions"}, true))?.permissions||[];} catch (err) {_logBackendAPIError(err);};
-    const themes = await theme.getthemes();
+    const themes = await theme.getthemes(true);
     const currentUserID = session.get(WEBSCROLLS_CONSTANTS.USERID).toString();
     const usersWereAdded = !(users.length); if (!users?.length) {
         if (!isCurrentUserAdmin()) return false;  // not allowed
@@ -102,7 +102,7 @@ async function createdata() {
 
 async function normalizeCurrentUserPermissions(permissions) {
     if (isCurrentUserAdmin()) {
-        const themes = await theme.getthemes();
+        const themes = await theme.getthemes(true);
         const _mappedThemes = []; for (const theme of themes) {
             const posttypes = await post.getPostTypes(theme);
             const objectToPush = {name: theme, 
@@ -126,7 +126,7 @@ function pageRendered() {
 }
 
 const isCurrentUserAdmin = _ => 
-    session.get(WEBSCROLLS_CONSTANTS.LOGGEDIN_USEROLE).toString() == "admin"; 
+    (session.get(WEBSCROLLS_CONSTANTS.LOGGEDIN_USEROLE)||"").toString() == "admin"; 
 
 const isSelectedUserAdmin = _ => 
     session.get(WEBSCROLLS_CONSTANTS.LOGGEDIN_USEROLE).toString() == "admin" &&
@@ -199,5 +199,5 @@ const _logBackendAPIError = err => WEBSCROLLS_LOG.error(`Backend API error calli
 
 export const permissions = {createdata, logout: loginmanager.logout, userSelected, addUser, pageRendered, 
     updateSelectedUsersRules, saveAllUsersAndPermissions, isSelectedUserAdmin, normalizeCurrentUserPermissions,
-    getCurrentUsersBroadPermissions, 
+    getCurrentUsersBroadPermissions, isCurrentUserAdmin,
     pagefunctions: {add: function (name, functionPointer) {this[name] = functionPointer}}}
