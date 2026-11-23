@@ -106,6 +106,11 @@ select.header {
     outline: none;
     background-color: #D9D9D9;
 }
+select.header.headerselectdisabled {
+    background-color: #8F8F8F;
+    pointer-events: none;
+    color: #565656;
+}
 
 span.headerinputspan {
     display: flex;
@@ -125,7 +130,7 @@ input.headerinputdisabled {
     pointer-events: none;
     color: #565656;
 }
-label#postlabel.disabled {color: #8F8F8F;}
+label.disabled {color: #8F8F8F;}
 
 span.headerbutton {
     padding: 0.5rem 2rem;
@@ -401,7 +406,7 @@ span.arraycarddelete {
 
         <span>
         <label for="themeselector">Theme</label>
-        <select name="theme" id="themeselector" class="header" onchange="post.themeselected(this, this.value)">
+        <select name="theme" id="themeselector" class="header" onchange="post.themeselected(this, this.value)" {{#nothemes}}disabled{{/nothemes}}>
             {{#themes}}
             <option value="{{.}}">{{.}}</option>
             {{/themes}}
@@ -410,7 +415,7 @@ span.arraycarddelete {
 
         <span>
         <label for="posttypes">Post type</label>
-        <select name="posttype" id="posttypes" class="header" onchange="post.posttypeselected(this, this.value)">
+        <select name="posttype" id="posttypes" class="header" onchange="post.posttypeselected(this, this.value)" {{#noposttypes}}disabled{{/noposttypes}}>
             {{#posttypes}}
             <option value="{{.}}">{{.}}</option>
             {{/posttypes}}
@@ -418,8 +423,8 @@ span.arraycarddelete {
         </span>
 
         <span>
-        <label for="posts">Create or Edit</label>
-        <select name="posts" id="posts" class="header" onchange="post.postselected(this, this.value)">
+        <label for="posts" id="postslabel" class="disabled">Create or Edit</label>
+        <select name="posts" id="posts" class="header headerselectdisabled" onchange="post.postselected(this, this.value)">
             {{#posts}}
             <option value="{{.}}">{{.}}</option>
             {{/posts}}
@@ -427,8 +432,8 @@ span.arraycarddelete {
         </span>
 
         <span class="headerinputspan">
-        <label for="postname" id="postlabel">Name</label>
-        <input name="postname" id="postname" class="header"/>
+        <label for="postname" id="postlabel" class="disabled">Name</label>
+        <input name="postname" id="postname" class="header headerinputdisabled"/>
         </span>
     </div>
 

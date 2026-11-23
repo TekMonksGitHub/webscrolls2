@@ -31,7 +31,8 @@ const getthemes = async returnAll => {  // returns the themes the currently logg
     const allThemes = await _readObjectFileOrDefaultObjectOnError(`${WEBSCROLLS_CONSTANTS.APP_PATH}/themes/themes.json`, []);
     if (returnAll) return allThemes;
     const themesUserIsAllowed = []; for (const permission of getUserPermissions()) 
-        if (permission.split("/").length-1 == 1) themesUserIsAllowed.push(permission.split("/")[1].split("|")[0]);
+        if ((permission.split("/").length-1 == 1) && (permission.split("/")[1].split("|")[1] == "read")) 
+            themesUserIsAllowed.push(permission.split("/")[1].split("|")[0]);
     const finalThemes = allThemes.filter(theme => themesUserIsAllowed.includes(theme));
     return finalThemes;
 }

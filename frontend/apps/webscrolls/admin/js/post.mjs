@@ -23,9 +23,25 @@ const FILE_MANAGER = _ => monkshu_env.components["file-manager"];
 
 let old_posttype, old_post, current_post_schema, dragging_to_resize=false, currentResizer, active_panel_id, current_post_type_rendered_html; 
 
+const getUserPermissions = _ => Array.from(session.get(WEBSCROLLS_CONSTANTS.LOGGEDIN_USERPERMISSIONS)||[]);
+
+async function getPostTypes(theme, returnAll) {    // returns the post types the currently logged in user is allowed to access
+    const allPostTypes = await _readObjectFileOrDefaultObjectOnError(
+        `${WEBSCROLLS_CONSTANTS.APP_PATH}/themes/${theme}/schemas/posttypes.json`, []);
+    if (returnAll) return allPostTypes;
+    const postTypesUserIsAllowed = []; for (const permission of getUserPermissions()) 
+        if ((permission.split("/").length-1 == 2) && (permission.split("/")[1] == theme) && (permission.split("/")[2].split("|")[1] == "read"))
+            postTypesUserIsAllowed.push(permission.split("/")[2].split("|")[0]);
+    const finalPostTypes = allPostTypes.filter(postTypeThis => postTypesUserIsAllowed.includes(postTypeThis));
+    return finalPostTypes;
+}
+
 async function createdata(dontAddBlanks=false, addPosts=false) {
     const themes = await $$.requireJSON(`${WEBSCROLLS_CONSTANTS.APP_PATH}/themes/themes.json`);
-    let posttypes = [...(await getPostTypes(themes[0]))];
+    let posttypes = []; while ((!posttypes.length) && themes.length) {
+        posttypes = [...(await getPostTypes(themes[0]))]; if (!posttypes.length) themes.splice(0,1); }
+    let nothemes = undefined; if (!themes.length) nothemes = true;
+    let noposttypes = undefined; if (!posttypes.length) noposttypes = true;
     const firstPostType = posttypes[0]; if (!dontAddBlanks) posttypes = ["---", ...posttypes];
     const extrainfo = util.stringToBase64(JSON.stringify({apppath: `/apps/${WEBSCROLLS_CONSTANTS.APP_NAME}`, cmstype: "cms"}));
     const apipath = `${WEBSCROLLS_CONSTANTS.BACKEND}/apps/${WEBSCROLLS_CONSTANTS.APP_NAME}`;
@@ -33,7 +49,8 @@ async function createdata(dontAddBlanks=false, addPosts=false) {
     let posts = dontAddBlanks ? [] : [CREATE_NEW_POST]; 
     try {if (firstPostType) posts = [...posts, ...(await getPostsForPostType(themes[0], firstPostType))];} 
     catch (err) {}; // no posts found for this post type, silent issue
-    return addPosts ? {themes, posttypes, extrainfo, apipath, appath, posts} : {themes, posttypes, extrainfo, apipath, appath};
+    return addPosts ? {themes, posttypes, extrainfo, apipath, appath, posts, nothemes, noposttypes} : 
+        {themes, posttypes, extrainfo, apipath, appath, nothemes, noposttypes};
 }
 
 async function getRenderedPost(theme, posttype, postid) {
@@ -64,10 +81,8 @@ async function getPostData(theme, posttype, postid, postobject) {
     return {header, footer, leftbar, rightbar, ...finalPostData};
 }
 
-const getPostTypes = theme => _readObjectFileOrDefaultObjectOnError(
-    `${WEBSCROLLS_CONSTANTS.APP_PATH}/themes/${theme}/schemas/posttypes.json`, []);
-
 async function themeselected(_element, theme) {
+    current_theme = theme;
     try {
         const posttypes = ["---", ...(await getPostTypes(theme))];
         const selectPostTypes = document.querySelector("select#posttypes");
@@ -99,7 +114,7 @@ async function posttypeselected(_element, posttype) {
         let optionsHTML = isPostTypeReserved ? `<option value="${DEFAULT_POST}">${DEFAULT_POST}</option>\n` :
             `<option value="${CREATE_NEW_POST}">${CREATE_NEW_POST}</option>\n`; 
         if (!isPostTypeReserved) for (const post of posts) optionsHTML += `<option value="${post}">${post}</option>\n`;
-        selectPosts.innerHTML = optionsHTML; _setPostName(Date.now());
+        selectPosts.innerHTML = optionsHTML; _setPostName(Date.now()); _enableSelectPosts();
     } 
 
     const templatedata = _parseSchemaIntoTemplateData(pageSchema);
@@ -109,17 +124,18 @@ async function posttypeselected(_element, posttype) {
     current_post_type_rendered_html = MUSTACHE.render(templateHTML, templatedata, partials);
     _reinitPostFields();
     if ((posttype == "---") || schemaError) {
-        _disableDeleteButton(); _disablePublishButton(); _resetHeaderUI(false);
-    } else {_enablePublishButton(); rerender();}
-    postselected(_element, isPostTypeReserved ? DEFAULT_POST : CREATE_NEW_POST, true); // reset post selected
+        _disableDeleteButton(); _disablePublishButton(); _disablePostNameHeaderInput(); _disableSelectPosts(); _resetHeaderUI(false);
+    } else {_enablePublishButton(posttype); rerender();}
+    postselected(_element, isPostTypeReserved ? DEFAULT_POST : posttype == "---" ? "" : CREATE_NEW_POST, true); // reset post selected
 }
 
 async function postselected(_element, post, reset) {
     if ((!reset) && post == old_post) return; else old_post = post;
 
     _reinitPostFields(); rerender();    // blank out everything first
-    if (post !== CREATE_NEW_POST) {_enableDeleteButton(); _disablePostNameHeaderInput(); _setPostName(post);}
-    else { _disableDeleteButton(); _enablePostNameHeaderInput(); _setPostName(Date.now()); return; }
+    if ((post !== CREATE_NEW_POST) && (post !== "")) {_enableDeleteButton(old_posttype); _disablePostNameHeaderInput(); _setPostName(post);}
+    else if (post === CREATE_NEW_POST) { _disableDeleteButton(); _enablePostNameHeaderInput(); _setPostName(Date.now()); return; }
+    else if (post === "") {_disableDeleteButton(); _disablePostNameHeaderInput(); _setPostName(""); return;}
 
     const lang = session.get($$.MONKSHU_CONSTANTS.LANG_ID);
     const themeSelected = document.querySelector("select#themeselector").value;
@@ -494,10 +510,15 @@ function _extractFieldValue(divPostField) {
     const retObject = {}; retObject[key] = value; return retObject;
 }
 
+const _currentUserHasPermissionsToPost = (posttype, permission) => {
+    const permissions = getUserPermissions(), selectThemes = document.querySelector("select#themeselector");
+    const themeSelected = selectThemes.value;
+    return permissions.includes(`site/${themeSelected}/${posttype}|${permission}`);
+}
 const _disablePublishButton = _ => document.querySelector("span#publishbutton").classList.add("headerbuttondisabledpublish");
-const _enablePublishButton = _ => document.querySelector("span#publishbutton").classList.remove("headerbuttondisabledpublish");
+const _enablePublishButton = posttype => {if (_currentUserHasPermissionsToPost(posttype, "write")) document.querySelector("span#publishbutton").classList.remove("headerbuttondisabledpublish");}
 const _disableDeleteButton = _ => document.querySelector("span#deletebutton").classList.add("headerbuttondisableddelete");
-const _enableDeleteButton = _ => document.querySelector("span#deletebutton").classList.remove("headerbuttondisableddelete");
+const _enableDeleteButton = posttype => {if (_currentUserHasPermissionsToPost(posttype, "delete")) document.querySelector("span#deletebutton").classList.remove("headerbuttondisableddelete");}
 const _disablePostNameHeaderInput = _ => {
     document.querySelector("input#postname").classList.add("headerinputdisabled");
     document.querySelector("label#postlabel").classList.add("disabled");
@@ -505,6 +526,14 @@ const _disablePostNameHeaderInput = _ => {
 const _enablePostNameHeaderInput = _ => {
     document.querySelector("input#postname").classList.remove("headerinputdisabled");
     document.querySelector("label#postlabel").classList.remove("disabled");
+}
+const _disableSelectPosts = _ => {
+    document.querySelector("select#posts").classList.add("headerselectdisabled");
+    document.querySelector("label#postslabel").classList.add("disabled");
+}
+const _enableSelectPosts = _ => {
+    document.querySelector("select#posts").classList.remove("headerselectdisabled");
+    document.querySelector("label#postslabel").classList.remove("disabled");
 }
 const _setPostName = name => document.querySelector("input#postname").value = name;
 const _emptyFieldValues = rootNode => {

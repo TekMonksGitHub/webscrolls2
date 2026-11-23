@@ -104,7 +104,7 @@ async function normalizeCurrentUserPermissions(permissions) {
     if (isCurrentUserAdmin()) {
         const themes = await theme.getthemes(true);
         const _mappedThemes = []; for (const theme of themes) {
-            const posttypes = await post.getPostTypes(theme);
+            const posttypes = await post.getPostTypes(theme, true);
             const objectToPush = {name: theme, 
                 posttypes: await Promise.all(posttypes.map(async posttype => {return {name: posttype, posts_count: (await post.getPostsForPostType(theme, posttype))?.length||0, theme}})),
                 posttypes_count: posttypes.length
