@@ -52,6 +52,11 @@ body {
     margin: 0;
 }
 
+.disabled {
+    color: #a5a5a5;
+    pointer-events: none;
+}
+
 div#postselector {
     margin: 0rem 0.5rem;
     display: flex;
@@ -96,6 +101,9 @@ div#toolsdiv {
     align-items: center;
     margin-right: 1rem;
     user-select: none;
+}
+div#toolsdiv.disabled span-with-menu {
+    filter: brightness(0.70);
 }
 
 select.header {
@@ -437,7 +445,7 @@ span.arraycarddelete {
         </span>
     </div>
 
-    <div id="toolsdiv">
+    <div id="toolsdiv" class="disabled">
         <span-with-menu styleBody="html,body {height: 3.12rem;} div.menuitem {color: #4c4c4c; padding-right: 1.2rem !important;} div.menuitem:hover {background-color: #4c4c4c !important;} span#content {cursor: pointer !important; display: flex; height: 100%; align-items: center; padding: 0rem 1rem;}">
             <span id="toolstext" style="height:1rem; display:flex; margin-right:0.4rem;">
                 <img style="height:100%; margin-top:0.1rem;" src="img/tools.svg">&nbsp;Tools

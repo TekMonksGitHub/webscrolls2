@@ -195,9 +195,14 @@ function getCurrentUsersBroadPermissions() {
     return retObject;
 }
 
+function checkPermission(asset, permission) {
+    const currentPermissions = Array.from(session.get(WEBSCROLLS_CONSTANTS.LOGGEDIN_USERPERMISSIONS)||[]);
+    return currentPermissions.includes(`${asset}|${permission.toLowerCase()}`);
+} 
+
 const _logBackendAPIError = err => WEBSCROLLS_LOG.error(`Backend API error calling user control. The error is: ${err}`);
 
 export const permissions = {createdata, logout: loginmanager.logout, userSelected, addUser, pageRendered, 
     updateSelectedUsersRules, saveAllUsersAndPermissions, isSelectedUserAdmin, normalizeCurrentUserPermissions,
-    getCurrentUsersBroadPermissions, isCurrentUserAdmin,
-    pagefunctions: {add: function (name, functionPointer) {this[name] = functionPointer}}}
+    getCurrentUsersBroadPermissions, isCurrentUserAdmin, read: "read", write: "write", delete: "delete",
+    checkPermission, pagefunctions: {add: function (name, functionPointer) {this[name] = functionPointer}}}

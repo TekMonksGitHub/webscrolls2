@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="#FFFFFF">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="#D9D9D9">
   <defs>
     <mask id="wrench-mask" maskUnits="userSpaceOnUse" x="-10" y="-10" width="84" height="84">
       <rect x="-10" y="-10" width="84" height="84" fill="#fff"/>

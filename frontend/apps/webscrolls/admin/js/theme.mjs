@@ -8,6 +8,7 @@
 
 import {post} from "./post.mjs";
 import {util} from "/framework/js/util.mjs";
+import {permissions} from "./permissions.mjs";
 import {router} from "/framework/js/router.mjs";
 import {session} from "/framework/js/session.mjs";
 import {default as jsYaml} from "../../3p/js-yaml.mjs";
@@ -25,21 +26,17 @@ const FILE_MANAGER = _ => monkshu_env.components["file-manager"];
 
 let old_posttype, dragging_to_resize=false, currentResizer, can_not_repaint, current_theme, current_posttype, current_theme_post_types;
 
-const getUserPermissions = _ => Array.from(session.get(WEBSCROLLS_CONSTANTS.LOGGEDIN_USERPERMISSIONS)||[]);
-
 const getthemes = async returnAll => {  // returns the themes the currently logged in user is allowed to access
     const allThemes = await _readObjectFileOrDefaultObjectOnError(`${WEBSCROLLS_CONSTANTS.APP_PATH}/themes/themes.json`, []);
     if (returnAll) return allThemes;
-    const themesUserIsAllowed = []; for (const permission of getUserPermissions()) 
-        if ((permission.split("/").length-1 == 1) && (permission.split("/")[1].split("|")[1] == "read")) 
-            themesUserIsAllowed.push(permission.split("/")[1].split("|")[0]);
-    const finalThemes = allThemes.filter(theme => themesUserIsAllowed.includes(theme));
-    return finalThemes;
+    const themesUserIsAllowed = []; for (const theme of allThemes) 
+        if (permissions.checkPermission(`site/${theme}`, permissions.read)) themesUserIsAllowed.push(theme);
+    return themesUserIsAllowed;
 }
 
-const canCurrentUserCreateThemes = _ => getUserPermissions().includes("site|write");
-const canUserCreatePostTypes = theme => getUserPermissions().includes(`site/${theme}|write`);
-const canUserDeletePostTypes = theme => getUserPermissions().includes(`site/${theme}|delete`);
+const canCurrentUserCreateThemes = _ => permissions.checkPermission("site", permissions.write);
+const canUserCreatePostTypes = theme => permissions.checkPermission(`site/${theme}`,permissions.write);
+const canUserDeletePostTypes = theme => permissions.checkPermission(`site/${theme}`,permissions.delete);
 
 async function createdata() {
     const themes = [...(await getthemes())];

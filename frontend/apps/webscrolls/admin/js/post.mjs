@@ -7,6 +7,7 @@
  */
 
 import {util} from "/framework/js/util.mjs";
+import {permissions} from "./permissions.mjs";
 import {router} from "/framework/js/router.mjs";
 import {session} from "/framework/js/session.mjs";
 import {default as jsYaml} from "../../3p/js-yaml.mjs";
@@ -23,17 +24,13 @@ const FILE_MANAGER = _ => monkshu_env.components["file-manager"];
 
 let old_posttype, old_post, current_post_schema, dragging_to_resize=false, currentResizer, active_panel_id, current_post_type_rendered_html; 
 
-const getUserPermissions = _ => Array.from(session.get(WEBSCROLLS_CONSTANTS.LOGGEDIN_USERPERMISSIONS)||[]);
-
 async function getPostTypes(theme, returnAll) {    // returns the post types the currently logged in user is allowed to access
     const allPostTypes = await _readObjectFileOrDefaultObjectOnError(
         `${WEBSCROLLS_CONSTANTS.APP_PATH}/themes/${theme}/schemas/posttypes.json`, []);
     if (returnAll) return allPostTypes;
-    const postTypesUserIsAllowed = []; for (const permission of getUserPermissions()) 
-        if ((permission.split("/").length-1 == 2) && (permission.split("/")[1] == theme) && (permission.split("/")[2].split("|")[1] == "read"))
-            postTypesUserIsAllowed.push(permission.split("/")[2].split("|")[0]);
-    const finalPostTypes = allPostTypes.filter(postTypeThis => postTypesUserIsAllowed.includes(postTypeThis));
-    return finalPostTypes;
+    const postTypesUserIsAllowed = []; for (const postType of allPostTypes) 
+        if (permissions.checkPermission(`site/${theme}/${postType}`, permissions.read)) postTypesUserIsAllowed.push(postType);
+    return postTypesUserIsAllowed;
 }
 
 async function createdata(dontAddBlanks=false, addPosts=false) {
@@ -97,6 +94,7 @@ async function posttypeselected(_element, posttype) {
     const selectThemes = document.querySelector("select#themeselector"), themeSelected = selectThemes.value;
     let pageSchema = {}, schemaError = false; 
     const isPostTypeReserved = _isReservedPostType(posttype);
+    let firstPost = "";
     if (posttype !== "---") {   // this means no post is selected
         try {
             pageSchema = await $$.requireJSON(`${WEBSCROLLS_CONSTANTS.APP_PATH}/themes/${themeSelected}/schemas/${posttype}.json`);
@@ -112,9 +110,11 @@ async function posttypeselected(_element, posttype) {
         
         const selectPosts = document.querySelector("select#posts");
         let optionsHTML = isPostTypeReserved ? `<option value="${DEFAULT_POST}">${DEFAULT_POST}</option>\n` :
-            `<option value="${CREATE_NEW_POST}">${CREATE_NEW_POST}</option>\n`; 
+            _currentUserHasPermissionsToPost(posttype, permissions.write) ? 
+                `<option value="${CREATE_NEW_POST}">${CREATE_NEW_POST}</option>\n` : "";
         if (!isPostTypeReserved) for (const post of posts) optionsHTML += `<option value="${post}">${post}</option>\n`;
         selectPosts.innerHTML = optionsHTML; _setPostName(Date.now()); _enableSelectPosts();
+        firstPost = selectPosts.value;
     } 
 
     const templatedata = _parseSchemaIntoTemplateData(pageSchema);
@@ -126,7 +126,7 @@ async function posttypeselected(_element, posttype) {
     if ((posttype == "---") || schemaError) {
         _disableDeleteButton(); _disablePublishButton(); _disablePostNameHeaderInput(); _disableSelectPosts(); _resetHeaderUI(false);
     } else {_enablePublishButton(posttype); rerender();}
-    postselected(_element, isPostTypeReserved ? DEFAULT_POST : posttype == "---" ? "" : CREATE_NEW_POST, true); // reset post selected
+    postselected(_element, isPostTypeReserved ? DEFAULT_POST : firstPost, true); // reset post selected
 }
 
 async function postselected(_element, post, reset) {
@@ -511,14 +511,22 @@ function _extractFieldValue(divPostField) {
 }
 
 const _currentUserHasPermissionsToPost = (posttype, permission) => {
-    const permissions = getUserPermissions(), selectThemes = document.querySelector("select#themeselector");
-    const themeSelected = selectThemes.value;
-    return permissions.includes(`site/${themeSelected}/${posttype}|${permission}`);
+    const selectThemes = document.querySelector("select#themeselector"), themeSelected = selectThemes.value;
+    return permissions.checkPermission(`site/${themeSelected}/${posttype}`, permission);
 }
-const _disablePublishButton = _ => document.querySelector("span#publishbutton").classList.add("headerbuttondisabledpublish");
-const _enablePublishButton = posttype => {if (_currentUserHasPermissionsToPost(posttype, "write")) document.querySelector("span#publishbutton").classList.remove("headerbuttondisabledpublish");}
+const _disablePublishButton = _ => {
+    document.querySelector("span#publishbutton").classList.add("headerbuttondisabledpublish");
+    document.querySelector("div#toolsdiv").classList.add("disabled");
+}
+const _enablePublishButton = posttype => {
+    if ((!posttype) || _currentUserHasPermissionsToPost(posttype, permissions.write)) {
+        document.querySelector("span#publishbutton").classList.remove("headerbuttondisabledpublish");
+        document.querySelector("div#toolsdiv").classList.remove("disabled");
+    }
+}
 const _disableDeleteButton = _ => document.querySelector("span#deletebutton").classList.add("headerbuttondisableddelete");
-const _enableDeleteButton = posttype => {if (_currentUserHasPermissionsToPost(posttype, "delete")) document.querySelector("span#deletebutton").classList.remove("headerbuttondisableddelete");}
+const _enableDeleteButton = posttype => {if ((!posttype) || _currentUserHasPermissionsToPost(posttype, permissions.delete)) 
+    document.querySelector("span#deletebutton").classList.remove("headerbuttondisableddelete");}
 const _disablePostNameHeaderInput = _ => {
     document.querySelector("input#postname").classList.add("headerinputdisabled");
     document.querySelector("label#postlabel").classList.add("disabled");
