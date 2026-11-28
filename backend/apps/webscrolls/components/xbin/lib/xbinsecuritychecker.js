@@ -18,12 +18,12 @@ function initSync() {
 
 /**
  * Called by API registry to check security
- * @param {*} apiregentry Reg entry
- * @param {*} _url URL of API
- * @param {*} req Request object
- * @param {*} headers Headers
- * @param {*} _servObject Server object
- * @param {*} reason reason
+ * @param {object} apiregentry Reg entry
+ * @param {string} _url URL of API
+ * @param {object} req Request object
+ * @param {object} headers Headers
+ * @param {object} _servObject Server object
+ * @param {=object} reason reason
  * @returns true if secure else false
  */
 async function checkSecurity(apiregentry, url, req, headers, servObject, reason) {
@@ -70,7 +70,15 @@ const removeXBinSecurityModifier = modifier => CMSSECURITY_MODIFIERS.indexOf(mod
  * anything - as long as permissions being set, match those which are being checked in the APIs. Out of
  * the box XBin APIs use read, write and delete as the set, but it can be adjusted in the API registry.
  * @param {string} userid The user ID
- * @param {object} pathsAndPermissions The object of paths and permissions - {"path" -> "permission"}
+ * @param {object} pathsAndPermissions The object of paths and permissions - {"path" -> ["permissions"]}
+ *                                      eg {
+ *                                          "/root/path1": ["read","write"],
+ *                                          "/root/path2": ["read","write","delete"]
+ *                                      }
+ *                                      or
+ *                                      eg {"*": ["read","write"]}
+ *                                      or
+ *                                      eg {"*": ["*"]}
  * @param {object} extraInfo The extra info object
  * @returns true on success, and false on error
  */

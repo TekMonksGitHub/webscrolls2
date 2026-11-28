@@ -16,6 +16,7 @@ exports.initSync = function(_app, approot) {
 
     const cms = require(`${WEBSCROLLS_CONSTANTS.APP_ROOT}/components/xbin/lib/cms.js`)
     cms.addCMSPathModifier(async (_cmsroot, _id, _org, extraInfo) => { 
+        if (!extraInfo) extraInfo = {cmstype: "cms"};   // default to the CMS
         let finalPath; 
         if (extraInfo.cmstype == "cms") finalPath = path.resolve(`${WEBSCROLLS_CONSTANTS.FRONTEND_ROOT}/${extraInfo.apppath}/cms`);
         else if (extraInfo.cmstype == "themes") finalPath = path.resolve(`${WEBSCROLLS_CONSTANTS.FRONTEND_ROOT}/${extraInfo.apppath}/themes`);
@@ -23,3 +24,7 @@ exports.initSync = function(_app, approot) {
         return finalPath;
     });
 }
+
+exports.getExtraInfo = type => {type == "cms" ? {cmstype: "cms"} : {cmstype: "themes"}}
+
+exports.cmstypes = {cms: "cms", themes: "themes"};

@@ -11,6 +11,7 @@ exports.DB_DIR = `${exports.APP_ROOT}/db`;
 exports.LIB_DIR = `${exports.APP_ROOT}/lib`;
 exports.API_DIR = `${exports.APP_ROOT}/apis`;
 exports.CONF_DIR = `${exports.APP_ROOT}/conf`;
+exports.COMPONENTS_DIR = `${exports.APP_ROOT}/components`;
 exports.FRONTEND_ROOT = `${path.resolve(`${exports.APP_ROOT}/../../../frontend/`)}`;
 
 exports.MEM_KEY = "_org_webscrolls_memory_key_";

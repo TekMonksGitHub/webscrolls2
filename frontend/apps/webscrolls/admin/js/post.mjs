@@ -40,7 +40,7 @@ async function createdata(dontAddBlanks=false, addPosts=false) {
     let nothemes = undefined; if (!themes.length) nothemes = true;
     let noposttypes = undefined; if (!posttypes.length) noposttypes = true;
     const firstPostType = posttypes[0]; if (!dontAddBlanks) posttypes = ["---", ...posttypes];
-    const extrainfo = util.stringToBase64(JSON.stringify({apppath: `/apps/${WEBSCROLLS_CONSTANTS.APP_NAME}`, cmstype: "cms"}));
+    const extrainfo = _getOurExtraInfo();
     const apipath = `${WEBSCROLLS_CONSTANTS.BACKEND}/apps/${WEBSCROLLS_CONSTANTS.APP_NAME}`;
     const appath = `${WEBSCROLLS_CONSTANTS.FRONTEND}/apps/${WEBSCROLLS_CONSTANTS.APP_NAME}`;
     let posts = dontAddBlanks ? [] : [CREATE_NEW_POST]; 
@@ -190,14 +190,16 @@ async function publishPost(button) {
 
 async function publishPostExternalCall(postYamlText, theme, posttype, postname, lang, filemanager, filemanager_id) {
     if (_isReservedPostType(posttype)) postname = DEFAULT_POST; // override the name if the post type is reserved
-    const themeSelected = document.querySelector("select#themeselector").value;
-    const posturl = `/${themeSelected}/${posttype}/${postname}.${lang}.yaml`;    
-    if ((await (filemanager||FILE_MANAGER()).operateFileExternal(filemanager_id||FILE_MANAGER_COMPONENT_ID, posturl, "write", postYamlText))?.result) {    // write the post
-        const posts = await getPostsForPostType(theme, old_posttype);
+    const posturl = `/${theme}/${posttype}/${postname}.${lang}.yaml`;  
+    if ((await (filemanager||FILE_MANAGER()).operateFileExternal(filemanager_id||FILE_MANAGER_COMPONENT_ID, 
+            posturl, "write", postYamlText, undefined, _getOurExtraInfo()))?.result) {    // write the post
+
+        const posts = await getPostsForPostType(theme, posttype, filemanager, filemanager_id, _getOurExtraInfo());
         if (!posts.includes(postname)) {
             posts.push(postname);
-            if (await _setPostsForPostType(theme, old_posttype, posts)) return true; // update the list of posts
-            else {(filemanager||FILE_MANAGER()).operateFileExternal(filemanager_id||FILE_MANAGER_COMPONENT_ID, posturl, "delete"); return false;}
+            if (await _setPostsForPostType(theme, posttype, posts, filemanager, filemanager_id)) return true; // update the list of posts
+            else {(filemanager||FILE_MANAGER()).operateFileExternal(filemanager_id||FILE_MANAGER_COMPONENT_ID, 
+                posturl, "delete", undefined, undefined, _getOurExtraInfo()); return false;}
         } else return true;
     } else return false;
 }
@@ -307,7 +309,7 @@ function dragged(event) {
     updateUI();
 }
 
-async function callaiForPostGeneration(prompt) {
+async function callAIForPostGeneration(prompt) {
     if (!prompt) {alert("Nothing to do"); return;}
     if (!current_post_schema) {alert("Please select a post type first."); return;}
     const post_result = await _callAIInternal({prompt, postschema: current_post_schema, type: "post"});
@@ -320,7 +322,7 @@ async function callaiForPostGeneration(prompt) {
     } else alert("AI call failed, please retry with a new or same prompt.");
 }
 
-async function callaiForImageGeneration(prompt, element) {
+async function callAIForImageGeneration(prompt, element) {
     const shadowRoot = monkshu_env.components['dialog-box'].getShadowRootByContainedElement(element);
     if (!prompt) {alert("Nothing to do"); return;}
     const image_result = await _callAIInternal({prompt: prompt.trim(), type: "svg"}, shadowRoot);
@@ -408,17 +410,20 @@ async function saveCMSFile(filepath, data, expectedExtension, callback) {
 }
 
 async function getPostsForPostType(theme, posttype) {
-    const filemanager = await FILE_MANAGER();
-    const postsJSONText = filemanager ? (await FILE_MANAGER().operateFileExternal(FILE_MANAGER_COMPONENT_ID, 
-        `/${theme}/${posttype}/posts.json`, "read"))?.data : 
-        JSON.stringify(await _readObjectFileOrDefaultObjectOnError(
-            `${WEBSCROLLS_CONSTANTS.APP_PATH}/cms/${theme}/${posttype}/posts.json`, []));
+    const postsJSONText = JSON.stringify(await _readObjectFileOrDefaultObjectOnError(
+        `${WEBSCROLLS_CONSTANTS.APP_PATH}/cms/${theme}/${posttype}/posts.json`, []));
     if (!postsJSONText) return []; else try {return JSON.parse(postsJSONText);} catch (err) {
         alert(`Post index file is bad for ${posttype}, all posts lost.`); return [];
     }
 }
 
 const logout = _ => loginmanager.logout();
+
+const _getOurExtraInfo = _ => util.stringToBase64(JSON.stringify({apppath: `/apps/${WEBSCROLLS_CONSTANTS.APP_NAME}`, cmstype: "cms"}));
+
+const _setPostsForPostType = async (theme, posttype, posts, filemanager, filemanager_id) => ( 
+    await (filemanager||FILE_MANAGER()).operateFileExternal((filemanager_id||FILE_MANAGER_COMPONENT_ID), 
+        `/${theme}/${posttype}/posts.json`, "write", JSON.stringify(posts), undefined, _getOurExtraInfo()) )?.result;
 
 const _isReservedPostType = posttype => ["header", "footer", "leftbar", "rightbar"].includes(posttype);
 
@@ -443,10 +448,6 @@ function _getPostObject(rawYaml, forceFromFields) {
     }
     return post;
 }
-
-const _setPostsForPostType = async (theme, posttype, posts) => ( await FILE_MANAGER().operateFileExternal(
-    FILE_MANAGER_COMPONENT_ID, `/${theme}/${posttype}/posts.json`, 
-    "write", JSON.stringify(posts)) )?.result;
 
 function _reinitPostFields() {
     document.querySelector("div#postcreator").innerHTML = current_post_type_rendered_html;
@@ -584,6 +585,6 @@ const _readObjectFileOrDefaultObjectOnError = async (url, defaultObject) => {
 
 export const post = {createdata, getPostData, getRenderedPost, getPostTypes, themeselected, posttypeselected, 
     postselected, panelSelect, scaleIframe, addToArray, deleteFromArray, publishPost, deletePost, 
-    logout, publishPostExternalCall, dragstart, dragged, dragstop, isDragging, rerender, callaiForPostGeneration, 
-    callaiForImageGeneration, showLinkGenerator, linkselectionchanged, closeDialog, showImageGenerator, 
+    logout, publishPostExternalCall, dragstart, dragged, dragstop, isDragging, rerender, callAIForPostGeneration, 
+    callAIForImageGeneration, showLinkGenerator, linkselectionchanged, closeDialog, showImageGenerator, 
     saveCMSFile, getPostsForPostType};

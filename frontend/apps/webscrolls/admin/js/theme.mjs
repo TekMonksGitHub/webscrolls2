@@ -18,8 +18,6 @@ import {apimanager as apiman} from "/framework/js/apimanager.mjs";
 const API_AI = `${WEBSCROLLS_CONSTANTS.API_PATH}/ai`;
 const SSE_URL_FOR_APIS = `${WEBSCROLLS_CONSTANTS.API_PATH}/appevents`;
 const CREATE_NEW = "--- create", MUSTACHE = await router.getMustache();
-const API_DELETE_THEME_FILE = `${WEBSCROLLS_CONSTANTS.API_PATH}/deletethemefile`;
-const API_PUBLISH_THEME_FILE = `${WEBSCROLLS_CONSTANTS.API_PATH}/publishthemefile`;
 
 const FILE_MANAGER_COMPONENT_ID = "fmtheme";
 const FILE_MANAGER = _ => monkshu_env.components["file-manager"];
@@ -42,23 +40,23 @@ async function createdata() {
     const themes = [...(await getthemes())];
     if (canCurrentUserCreateThemes()) themes.unshift(CREATE_NEW);
     const posttypes = [canCurrentUserCreateThemes()?CREATE_NEW:undefined];
-    const extrainfo = util.stringToBase64(JSON.stringify({apppath: `/apps/${WEBSCROLLS_CONSTANTS.APP_NAME}`, cmstype: "cms"}));
+    const extrainfo = util.stringToBase64(JSON.stringify({apppath: `/apps/${WEBSCROLLS_CONSTANTS.APP_NAME}`, cmstype: "themes"}));
     const apipath = `${WEBSCROLLS_CONSTANTS.BACKEND}/apps/${WEBSCROLLS_CONSTANTS.APP_NAME}`;
     const appath = `${WEBSCROLLS_CONSTANTS.FRONTEND}/apps/${WEBSCROLLS_CONSTANTS.APP_NAME}`;
     return {themes, posttypes, extrainfo, apipath, appath};
 }
 
 async function pageLoaded() {
-    if (!canCurrentUserCreateThemes()) {    // load the first theme as they can't see optiont to create new
+    if (!canCurrentUserCreateThemes()) {    // load the first theme as they can't see option to create new
         const themesAllowed = await getthemes(); if (themesAllowed.length) themeselected(undefined, themesAllowed[0]);    
-    }
+    } else themeselected(undefined, CREATE_NEW);
 }
 
 async function themeselected(_element, theme) {
+    current_theme = theme;
     try {
         if (theme !== CREATE_NEW) {
             current_theme_post_types = await post.getPostTypes(theme);
-            current_theme = theme;
             const posttypes = [...current_theme_post_types];
             if (canUserCreatePostTypes(theme)) posttypes.unshift(CREATE_NEW);
             const selectPostTypes = document.querySelector("select#posttypes");
@@ -70,7 +68,7 @@ async function themeselected(_element, theme) {
             const posttypes = [CREATE_NEW]; 
             const selectPostTypes = document.querySelector("select#posttypes");
             let optionsHTML = ""; for (const posttype of posttypes) optionsHTML += `<option value="${posttype}">${posttype}</option>\n`;
-            selectPostTypes.innerHTML = optionsHTML; current_theme_post_types = undefined; current_theme = undefined;
+            selectPostTypes.innerHTML = optionsHTML; current_theme_post_types = undefined; 
             _resetHeaderUI(false); 
         }
     } catch (err) {alert("Bad theme" + err); WEBSCROLLS_LOG.error(`Bad theme: ${theme}`); _resetHeaderUI(false, false);}
@@ -176,7 +174,9 @@ async function rerender(clear=false) {
 }
 
 async function publishThemeFile() {
-    if (!canUserCreatePostTypes(current_theme)) {alert("Permissions don't allow this action."); return;}
+    if ((current_theme == CREATE_NEW && (!canCurrentUserCreateThemes())) ||
+            ((current_theme != CREATE_NEW) && (!canUserCreatePostTypes(current_theme))))
+        {alert("Permissions don't allow this action."); return;}
     const htmlTemplate = document.querySelector("textarea#htmlitem").value, 
         schemaJSON = document.querySelector("textarea#schemaitem").value, 
         theme = document.querySelector("input#themename").value,
@@ -189,9 +189,8 @@ async function publishThemeFile() {
         return; // can't publish
     }
     
-    const themeurl = `${WEBSCROLLS_CONSTANTS.APP_PATH}/themes/${theme}/${posttype}${posttype.endsWith(".html")?"":".html"}`;
-    if ((await apiman.rest(API_PUBLISH_THEME_FILE, "POST", {themeurl, 
-            template: htmlTemplate, schemaJSON}, true)).result) {
+    const themeRelativeURL = `/${theme}/${posttype}${posttype.endsWith(".html")?"":".html"}`;
+    if (await publishThemeFileViaFilemanager(themeRelativeURL, htmlTemplate, schemaJSON)) {
         const publishTestPostResult = publishtestpost ? (await post.publishPostExternalCall(
             testpost, theme, posttype, testpostname, session.get($$.MONKSHU_CONSTANTS.LANG_ID), FILE_MANAGER(), FILE_MANAGER_COMPONENT_ID)) : true;
         alert(publishTestPostResult?"Published":"Theme template published but test post publishing failed"); 
@@ -219,8 +218,8 @@ async function deleteThemeFile() {
         return; // can't publish
     }
     
-    const themeurl = `${WEBSCROLLS_CONSTANTS.APP_PATH}/themes/${theme}/${posttype}${posttype.endsWith(".html")?"":".html"}`;
-    if ((await apiman.rest(API_DELETE_THEME_FILE, "POST", {themeurl}, true)).result) {alert("Deleted"); _resetHeaderUI(false, false);}
+    const themeRelativeURL = `/${theme}/${posttype}${posttype.endsWith(".html")?"":".html"}`;
+    if (await deleteThemeFileViaFilemanager(themeRelativeURL)) {alert("Deleted"); _resetHeaderUI(false, false);}
     else alert("Deletion failed!");
 
 }
@@ -279,10 +278,66 @@ function _resetHeaderUI(theme=true, themenameinput=true, posttype=true, postname
     if (deletebtn) _disableDeleteButton();
     if (publishbtn) {
         _disablePublishButton();
-        if (canUserCreatePostTypes() || canCurrentUserCreateThemes()) _enablePublishButton();
+        if (canUserCreatePostTypes(current_theme) || canCurrentUserCreateThemes()) _enablePublishButton();
     }
 
     return;
+}
+const _parseJSONArray = s => {try {const v = JSON.parse(s); return Array.isArray(v) ? v : null;} catch {return null;}};
+
+async function publishThemeFileViaFilemanager(themeurl, htmlTemplate, schemaJSON) {
+    const finalPath = themeurl;
+    const themePath = finalPath.split("/").slice(0,-1).join("/");
+    const parentThemeDir = themePath.split("/").slice(0,-1).join("/");
+    const themefilename = finalPath.split("/").at(-1).replace(/\.html$/, "");
+    const themename = themeurl.split("/").at(-2);
+    const postTypesResult = await FILE_MANAGER().operateFileExternal(FILE_MANAGER_COMPONENT_ID, `${themePath}/schemas/posttypes.json`, "read");
+    if (!postTypesResult) return false; // network or other backend issue
+    if ((!postTypesResult.result) && await FILE_MANAGER().checkFileExists(
+      `${themePath}/schemas/posttypes.json`, FILE_MANAGER_COMPONENT_ID)) return false;  // network or other backend issue
+    let posttypes = postTypesResult.result ? _parseJSONArray(postTypesResult.data) : [];
+    if (!posttypes) {alert(`Post types is corrupt. ${themePath}/schemas/posttypes.json`); return false;}   // corrupted JSON
+    posttypes = [...(new Set(posttypes).add(themefilename))];	// remove duplicates in case of edits to an existing theme file
+    const posttypesJSON = JSON.stringify(posttypes, null, 2);
+    const themesResult = await FILE_MANAGER().operateFileExternal(FILE_MANAGER_COMPONENT_ID, `${parentThemeDir}/themes.json`, "read");
+    if (!themesResult) return false;    // network or other backend issue
+    if ((!themesResult.result) && await FILE_MANAGER().checkFileExists(
+      `${parentThemeDir}/themes.json`, FILE_MANAGER_COMPONENT_ID)) return false;  // network or other backend issue
+    let themes = themesResult.result ? _parseJSONArray(themesResult.data) : [];
+    if (!themes) {alert(`Themes JSON is corrupt. ${parentThemeDir}/themes.json`); return false;}
+    themes = [...(new Set(themes).add(themename))];	// remove duplicates in case of edits to an existing theme file
+    const themesJSON = JSON.stringify(themes, null, 2);
+
+    if (!(await FILE_MANAGER().operateFileExternal(FILE_MANAGER_COMPONENT_ID, 
+        finalPath, "write", htmlTemplate))?.result) return false; 
+    if (!(await FILE_MANAGER().operateFileExternal(FILE_MANAGER_COMPONENT_ID, 
+        `${themePath}/schemas/${themefilename}.json`, "write", schemaJSON))?.result) return false; 
+    if (!(await FILE_MANAGER().operateFileExternal(FILE_MANAGER_COMPONENT_ID, 
+        `${themePath}/schemas/posttypes.json`, "write", posttypesJSON))?.result) return false; 
+    if (!(await FILE_MANAGER().operateFileExternal(FILE_MANAGER_COMPONENT_ID, 
+        `${parentThemeDir}/themes.json`, "write", themesJSON))?.result) return false; 
+    return true;
+}
+
+async function deleteThemeFileViaFilemanager(themeurl) {
+    const finalPath = themeurl;
+    const themePath = finalPath.split("/").slice(0,-1).join("/");
+    const themefilename = finalPath.split("/").at(-1).replace(/\.html$/, "");    
+    const postTypesResult = await FILE_MANAGER().operateFileExternal(FILE_MANAGER_COMPONENT_ID, `${themePath}/schemas/posttypes.json`, "read");
+    if (!postTypesResult) return false; // network or other backend issue
+    if ((!postTypesResult.result) && await FILE_MANAGER().checkFileExists(
+        `${themePath}/schemas/posttypes.json`, FILE_MANAGER_COMPONENT_ID)) return false;    // network or other backend issue
+    let posttypes = postTypesResult.result ? _parseJSONArray(postTypesResult.data) : [];
+    if (!posttypes) {alert(`Post types is corrupt. ${themePath}/schemas/posttypes.json`); return false;}   // corrupted JSON
+    posttypes = posttypes.filter(p => p !== themefilename);
+    const posttypesJSON = JSON.stringify(posttypes, null, 2);
+
+    if (!(await FILE_MANAGER().operateFileExternal(FILE_MANAGER_COMPONENT_ID, 
+        `${themePath}/schemas/posttypes.json`, "write", posttypesJSON))?.result) return false; 
+    if (!(await FILE_MANAGER().operateFileExternal(FILE_MANAGER_COMPONENT_ID, 
+        finalPath, "delete"))?.result) return false;
+    await FILE_MANAGER().operateFileExternal(FILE_MANAGER_COMPONENT_ID, `${themePath}/schemas/${themefilename}.json`, "delete");
+    return true;
 }
 
 const _readObjectFileOrDefaultObjectOnError = async (url, defaultObject) => {
@@ -292,3 +347,4 @@ const _readObjectFileOrDefaultObjectOnError = async (url, defaultObject) => {
 export const theme = {createdata, themeselected, posttypeselected, dragstart, callai, logout,
     dragged, dragstop, panelSelect, rerender, scaleIframe, publishThemeFile, deleteThemeFile, 
     getThemeTemplate, getthemes, pageLoaded};
+window.theme = theme;   // needed to avoid race in theme.html as pageLoaded fires onchange event due to header UI reset which causes HTML's select boxes to look for theme variable

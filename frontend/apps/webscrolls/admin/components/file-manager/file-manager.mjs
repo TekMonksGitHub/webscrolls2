@@ -17,7 +17,7 @@ import {monkshu_component} from "/framework/js/monkshu_component.mjs";
 
 let user, mouseX, mouseY, menuOpen, timer, selectedPath, currentlyActiveFolder, selectedIsDirectory, 
    selectedElement, selectedCutPath, selectedCopyPath, selectedCutCopyElement, SHARE_DURATION, 
-   showNotification, currentWriteBufferSize, MIMES, API_PATH, APP_PATH;
+   showNotification, currentWriteBufferSize, extraInfo, MIMES, API_PATH, APP_PATH;
 
 const FILES_AND_PERCENTS = {}, UPLOAD_TRANSFER_IDs = {}, SERVER_ID_CACHE = {};
 
@@ -456,11 +456,14 @@ async function editFileLoadData(element) {
    });
 }
 
-async function operateFileExternal(hostID, path, op, data, comment) {
-   const hostElement = file_manager.getHostElementByID(hostID);
-   if (["read","write","updatecomment"].includes(op)) return await apiman.rest(API_OPERATEFILE(), "POST", 
-      _addExtraInfo({path: _normalizedPath(path), op, data, comment}, hostElement), true);
-   else if (op == "delete") return deleteFile(hostElement, path);
+async function operateFileExternal(hostID, path, op, data, comment, extraInfo) {
+   const hostElementOrExtraInfo = extraInfo||file_manager.getHostElementByID(hostID);
+   try {
+      if (["read","write","updatecomment"].includes(op)) return await apiman.rest(API_OPERATEFILE(), "POST", 
+         _addExtraInfo({path: _normalizedPath(path), op, data, comment}, hostElementOrExtraInfo), true);
+      else if (op == "delete") return await apiman.rest(API_DELETEFILE(), "GET", 
+         _addExtraInfo({path: _normalizedPath(path)}, hostElementOrExtraInfo), true);
+   } catch (err) {return null;}
 }
 
 function editFileVisible() {
@@ -703,11 +706,12 @@ const _updateQuotaBars = async (element, quotabarIDs) => {
    for (const quotabarID of quotabarIDs) progress_bar.setValue(quotabarID, {value: percentUsed, quotaGB});
 }
 
-const _addExtraInfo = (req, hostOrElement) => {
-   const incomingExtraInfo = _getHostAttribute(hostOrElement, "extrainfo"); if (!incomingExtraInfo) return req; 
-   try{req.extraInfo = JSON.parse(util.base64ToString(incomingExtraInfo));} catch (err) {
-      LOG.error(`Extrainfo ${incomingExtraInfo} is not proper.`); 
-   }
+const _addExtraInfo = (req, hostOrElementOrExtraInfo) => {
+   const incomingExtraInfo = hostOrElementOrExtraInfo instanceof HTMLElement ?
+      _getHostAttribute(hostOrElementOrExtraInfo, "extrainfo") : hostOrElementOrExtraInfo;
+   if (!incomingExtraInfo) return req; else try {
+      req.extraInfo = JSON.parse(util.base64ToString(incomingExtraInfo));
+   } catch (err) {LOG.error(`Extrainfo ${incomingExtraInfo} is not proper.`);}
    return req;
 }
 

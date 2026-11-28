@@ -784,9 +784,18 @@ span.summaryruleclosure {
             permissions.pagefunctions.add("countRules", countRules);
             permissions.pagefunctions.add("loadPermissions", loadPermissions);
             permissions.pageRendered(); permissions.userSelected();
+            await import( "./components/file-manager/file-manager.mjs");
         }
     }
     init();
     </script>
+
+    <file-manager id="fmpermissions" nomenu="true" zindex-fullscreen="51" folderops="false"
+        user="{{#_org_monkshu_session}}id{{/_org_monkshu_session}}" genStats="true" 
+        extrainfo="{{{extrainfo}}}"
+        encodeurls="false" apipath="{{{apipath}}}" apppath="{{{apppath}}}"
+        {{#fmpath}}path="/"{{/fmpath}}
+        style="display:none">   <!-- Used exclusively for CMS file operations, not display -->
+    </file-manager>
 </body>
 </html>
